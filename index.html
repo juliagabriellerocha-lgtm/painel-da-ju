@@ -3783,10 +3783,10 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
     document.body.classList.remove("ju-legacy");
     document.querySelectorAll(".ju-view").forEach(function(s){ s.hidden = s.dataset.view !== view; });
     document.querySelectorAll(".ju-nav button").forEach(function(b){
-      var main = JU_MAIN.indexOf(view)>-1 ? view : ({financas:"inicio", sono:"tracker", tarefas:"plano", compras:"inicio"})[view];
+      var main = JU_MAIN.indexOf(view)>-1 ? view : ({financas:"inicio", sono:"tracker", tarefas:"plano", compras:"inicio", estudos:"plano"})[view];
       if(b.dataset.go===main) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current");
     });
-    var titles = {inicio:"Hoje", plano:"Meu plano", tracker:"Tracker", bemestar:"Bem-estar", eu:"Você", financas:"Finanças", sono:"Sono", tarefas:"Tarefas", compras:"Compras do mês"};
+    var titles = {inicio:"Hoje", plano:"Meu plano", tracker:"Tracker", bemestar:"Bem-estar", eu:"Você", financas:"Finanças", sono:"Sono", tarefas:"Tarefas", compras:"Compras do mês", estudos:"Estudos"};
     document.getElementById("juTitle").textContent = titles[view] || "Painel da Ju";
     try{ localStorage.setItem("painelJuView", view); }catch(e){}
     renderView(view);
@@ -3815,7 +3815,7 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
 
     return ''+
     '<div class="ju-chips" role="navigation" aria-label="Atalhos">'+
-      chip("plano","Agenda","cal","agenda")+chip("tarefas","Tarefas","tasks","tarefas")+chip("compras","Compras","bag","habitos")+chip("financas","Finanças","coin","financas")+'<button class="ju-chip" data-legacy="progresso" style="'+tone("habitos")+'"><i>'+ico("trend")+'</i><span>Evolução</span></button>'+
+      chip("plano","Agenda","cal","agenda")+chip("estudos","Estudos","cap","sono")+chip("tarefas","Tarefas","tasks","tarefas")+chip("compras","Compras","bag","habitos")+chip("financas","Finanças","coin","financas")+'<button class="ju-chip" data-legacy="progresso" style="'+tone("habitos")+'"><i>'+ico("trend")+'</i><span>Evolução</span></button>'+
       chip("sono","Sono","moon","sono")+chip("bemestar","Bem-estar","heart","bemestar")+chip("tracker","Hábitos","leaf","habitos")+
     '</div>'+
     '<div class="ju-hello"><div><h2>'+greet+', Ju!</h2><p>'+esc(helloLine())+'</p></div>'+
@@ -4111,6 +4111,67 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
     return html;
   }
 
+  // ---------- Estudos: Faculdade Sebrae, TripleTen e concursos ----------
+  var JU_STUDY_SEED = [{"id": "s1", "curso": "sebrae", "titulo": "Entregar atividade de Introdução à Gestão (grupo de estudos)", "tipo": "entrega", "data": "2026-11-10", "feito": false, "nota": "Prazo exato a confirmar no grupo"}, {"id": "s2", "curso": "sebrae", "titulo": "Revisar as matérias do período para o AVA II", "tipo": "revisao", "data": "2026-11-23", "feito": false, "fim": "2026-11-29"}, {"id": "s3", "curso": "sebrae", "titulo": "AVA II — avaliação online", "tipo": "prova", "data": "2026-11-30", "feito": false, "fim": "2026-12-05"}, {"id": "s4", "curso": "sebrae", "titulo": "Revisar para a prova presencial", "tipo": "revisao", "data": "2026-12-01", "feito": false, "fim": "2026-12-06"}, {"id": "s5", "curso": "sebrae", "titulo": "Prova presencial no polo", "tipo": "prova", "data": "2026-12-07", "feito": false, "fim": "2026-12-12"}, {"id": "s6", "curso": "sebrae", "titulo": "Término do período letivo 2026.2", "tipo": "marco", "data": "2026-12-16", "feito": false}, {"id": "s7", "curso": "sebrae", "titulo": "Exame final (se precisar)", "tipo": "prova", "data": "2026-12-17", "feito": false, "fim": "2026-12-18"}, {"id": "s8", "curso": "tripleten", "titulo": "Sprint 4 — Análise Estatística de Dados", "tipo": "sprint", "data": "2026-11-09", "feito": false, "fim": "2026-11-15", "nota": "Oficial: até 24/11"}, {"id": "s9", "curso": "tripleten", "titulo": "Sprint 5 — Ferramentas de Desenvolvimento de Software", "tipo": "sprint", "data": "2026-11-16", "feito": false, "fim": "2026-11-29", "nota": "Oficial: 25/11 a 15/12"}, {"id": "s10", "curso": "tripleten", "titulo": "Sprint 6 — Projeto Integrado 1", "tipo": "sprint", "data": "2026-11-30", "feito": false, "fim": "2026-12-06", "nota": "Oficial: 16 a 22/12 · semana das provas Sebrae: ritmo leve"}, {"id": "s11", "curso": "tripleten", "titulo": "Sprint 7 — Coleta e Armazenamento de Dados (SQL)", "tipo": "sprint", "data": "2026-12-07", "feito": false, "fim": "2026-12-20", "nota": "Oficial: 13 a 26/01"}, {"id": "s12", "curso": "tripleten", "titulo": "Sprint 8 — Análise de Negócio", "tipo": "sprint", "data": "2026-12-21", "feito": false, "fim": "2027-01-03", "nota": "Oficial: 27/01 a 09/02 · usar o recesso de fim de ano"}, {"id": "s13", "curso": "tripleten", "titulo": "Sprint 9 — Decisões de Negócio Baseadas em Dados", "tipo": "sprint", "data": "2027-01-04", "feito": false, "fim": "2027-01-12", "nota": "Oficial: 10 a 23/02"}, {"id": "s14", "curso": "tripleten", "titulo": "Sprint 10 — Como Relatar uma História Usando Dados", "tipo": "sprint", "data": "2027-01-13", "feito": false, "fim": "2027-01-19", "nota": "Oficial: 24/02 a 09/03"}, {"id": "s15", "curso": "tripleten", "titulo": "Sprint 11 — Projeto Integrado 2", "tipo": "sprint", "data": "2027-01-20", "feito": false, "fim": "2027-01-24", "nota": "Oficial: 10 a 16/03"}, {"id": "s16", "curso": "tripleten", "titulo": "Sprint 12 — Automação", "tipo": "sprint", "data": "2027-01-25", "feito": false, "fim": "2027-01-31", "nota": "Oficial: 24/03 a 06/04"}, {"id": "s17", "curso": "tripleten", "titulo": "Sprint 13 — Previsões e Predições", "tipo": "sprint", "data": "2027-02-01", "feito": false, "fim": "2027-02-03", "nota": "Oficial: 07 a 13/04"}, {"id": "s18", "curso": "tripleten", "titulo": "Sprint 14 — Projeto Final", "tipo": "sprint", "data": "2027-02-04", "feito": false, "fim": "2027-02-12", "nota": "Oficial: a partir de 14/04/2027 · meta: entregar até 12/02"}, {"id": "s19", "curso": "tripleten", "titulo": "Confirmar com o tutor se a plataforma libera os sprints antes da data da turma DA41", "tipo": "estudo", "data": "2026-11-10", "feito": false}, {"id": "s20", "curso": "concurso", "titulo": "Escolher UM dos dois TJSP (Escrevente ou Oficial de Justiça): as provas são no mesmo dia e horário", "tipo": "decisao", "data": "2026-11-12", "feito": false, "nota": "Edital, item 3.6: inscrições simultâneas não têm devolução da taxa"}, {"id": "s21", "curso": "concurso", "titulo": "TRF3: conferir se você cumpre o requisito (Técnico exige ensino superior completo) e decidir a inscrição", "tipo": "decisao", "data": "2026-11-12", "feito": false, "nota": "Inscrições até 23/11 · Técnico R$ 100 · Analista R$ 160"}, {"id": "s22", "curso": "concurso", "titulo": "TRF3: último dia para se inscrever", "tipo": "prazo", "data": "2026-11-23", "feito": false}, {"id": "s23", "curso": "concurso", "titulo": "TRF3: pagar a inscrição (até 21h59)", "tipo": "pagamento", "data": "2026-11-24", "feito": false}, {"id": "s24", "curso": "concurso", "titulo": "TJSP: último dia de inscrição", "tipo": "prazo", "data": "2026-12-10", "feito": false}, {"id": "s25", "curso": "concurso", "titulo": "TJSP: pagar o boleto da inscrição", "tipo": "pagamento", "data": "2026-12-11", "feito": false}, {"id": "s26", "curso": "concurso", "titulo": "TRF3: convocação para a prova (local e horário)", "tipo": "marco", "data": "2027-01-21", "feito": false}, {"id": "s27", "curso": "concurso", "titulo": "TRF3: prova objetiva + discursiva (estudo de caso e redação)", "tipo": "prova", "data": "2027-01-31", "feito": false}, {"id": "s28", "curso": "concurso", "titulo": "Semana 1 — Português + Direito Penal (CP arts. 293–359 do edital)", "tipo": "estudo", "data": "2026-11-16", "feito": false, "fim": "2026-11-22"}, {"id": "s29", "curso": "concurso", "titulo": "Semana 2 — Português + Direito Processual Penal (CPP + Lei 9.099, arts. 60–89)", "tipo": "estudo", "data": "2026-11-23", "feito": false, "fim": "2026-11-29"}, {"id": "s30", "curso": "concurso", "titulo": "Semana 3 — Português + Processual Civil I (CPC arts. 144–275; 294–311)", "tipo": "estudo", "data": "2026-11-30", "feito": false, "fim": "2026-12-06"}, {"id": "s31", "curso": "concurso", "titulo": "Semana 4 — Português + Processual Civil II (CPC 318–538; 994–1026; Leis 9.099 e 12.153)", "tipo": "estudo", "data": "2026-12-07", "feito": false, "fim": "2026-12-13"}, {"id": "s32", "curso": "concurso", "titulo": "Semana 5 — Português + Direito Constitucional (Título II e Poder Judiciário, art. 92)", "tipo": "estudo", "data": "2026-12-14", "feito": false, "fim": "2026-12-20"}, {"id": "s33", "curso": "concurso", "titulo": "Semana 6 — Português + Direito Administrativo (Lei 10.261/68 + Improbidade 8.429/92)", "tipo": "estudo", "data": "2026-12-21", "feito": false, "fim": "2026-12-27"}, {"id": "s34", "curso": "concurso", "titulo": "Semana 7 — Português + Legislação interna (Res. 850/2021, Res. 963/2025, LC 1.111/2010, Regimento Interno)", "tipo": "estudo", "data": "2026-12-28", "feito": false, "fim": "2027-01-03"}, {"id": "s35", "curso": "concurso", "titulo": "Semana 8 — Português + Normas da Corregedoria (NSCGJ — tomos do edital)", "tipo": "estudo", "data": "2027-01-04", "feito": false, "fim": "2027-01-10"}, {"id": "s36", "curso": "concurso", "titulo": "Semana 9 — Português + Matemática + Raciocínio Lógico", "tipo": "estudo", "data": "2027-01-11", "feito": false, "fim": "2027-01-17"}, {"id": "s37", "curso": "concurso", "titulo": "Semana 10 — Português + Informática + Atualidades", "tipo": "estudo", "data": "2027-01-18", "feito": false, "fim": "2027-01-24"}, {"id": "s38", "curso": "concurso", "titulo": "Semana 11 — Português + 2ª volta: Penal + Processual Penal", "tipo": "estudo", "data": "2027-01-25", "feito": false, "fim": "2027-01-31"}, {"id": "s39", "curso": "concurso", "titulo": "Semana 12 — Português + 2ª volta: Processual Civil", "tipo": "estudo", "data": "2027-02-01", "feito": false, "fim": "2027-02-07"}, {"id": "s40", "curso": "concurso", "titulo": "Semana 13 — Português + 2ª volta: Constitucional + Administrativo", "tipo": "estudo", "data": "2027-02-08", "feito": false, "fim": "2027-02-14"}, {"id": "s41", "curso": "concurso", "titulo": "Semana 14 — Português + 2ª volta: Legislação interna + NSCGJ", "tipo": "estudo", "data": "2027-02-15", "feito": false, "fim": "2027-02-21"}, {"id": "s42", "curso": "concurso", "titulo": "Semana 15 — Português + Redação (prova discursiva) + questões VUNESP", "tipo": "estudo", "data": "2027-02-22", "feito": false, "fim": "2027-02-28"}, {"id": "s43", "curso": "concurso", "titulo": "Semana 16 — Português + Revisão final: resumos e questões erradas", "tipo": "estudo", "data": "2027-03-01", "feito": false, "fim": "2027-03-07"}, {"id": "s44", "curso": "concurso", "titulo": "Simulado completo (70 questões VUNESP) + correção", "tipo": "simulado", "data": "2026-12-19", "feito": false}, {"id": "s45", "curso": "concurso", "titulo": "Simulado completo (70 questões VUNESP) + correção", "tipo": "simulado", "data": "2027-01-23", "feito": false}, {"id": "s46", "curso": "concurso", "titulo": "Simulado completo (70 questões VUNESP) + correção", "tipo": "simulado", "data": "2027-02-20", "feito": false}, {"id": "s47", "curso": "concurso", "titulo": "Simulado completo (70 questões VUNESP) + correção", "tipo": "simulado", "data": "2027-03-06", "feito": false}, {"id": "s48", "curso": "concurso", "titulo": "TJSP: prova objetiva e discursiva", "tipo": "prova", "data": "2027-03-14", "feito": false}, {"id": "s49", "curso": "concurso", "titulo": "TJSP: gabarito", "tipo": "marco", "data": "2027-03-17", "feito": false}];
+  var JU_COURSES = {sebrae:{nome:"Faculdade Sebrae", em:"🎓", t:"agenda"}, tripleten:{nome:"TripleTen", em:"💻", t:"sono"}, concurso:{nome:"Concursos", em:"⚖️", t:"financas"}};
+  var JU_STUDY_TYPES = [["estudo","Estudo"],["revisao","Revisão"],["entrega","Entrega"],["prova","Prova"],["sprint","Sprint"],["simulado","Simulado"],["pagamento","Pagamento"],["prazo","Prazo"],["decisao","Decisão"],["marco","Marco"]];
+  var juStudyFilter = "todos";
+  function studies(){ var j = J(); if(!Array.isArray(j.studies)){ j.studies = JSON.parse(JSON.stringify(JU_STUDY_SEED)); setTimeout(function(){ persist(); }, 0); } return j.studies; }
+  function studyEnd(i){ return i.fim || i.data; }
+  function fmtRange(i){ var a = fmtDay(parseKey(i.data)); return i.fim && i.fim!==i.data ? a+" – "+fmtDay(parseKey(i.fim)) : a; }
+  function daysTo(k){ var t = parseKey(todayKey()); return Math.round((parseKey(k)-t)/86400000); }
+  function studyRow(i){
+    var c = JU_COURSES[i.curso]||JU_COURSES.sebrae, k = todayKey(), late = !i.feito && studyEnd(i) < k, now = !i.feito && i.data<=k && studyEnd(i)>=k;
+    var tipo = (JU_STUDY_TYPES.filter(function(x){ return x[0]===i.tipo; })[0]||["","Item"])[1];
+    return '<li style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center"><div class="ju-check'+(i.feito?" done":"")+'" style="align-items:flex-start">'+
+      '<button data-study="'+esc(i.id)+'" aria-label="'+(i.feito?"Desmarcar":"Concluir")+'">'+ico("check")+'</button>'+
+      '<span style="white-space:normal"><small class="ju-muted" style="display:block;font-size:11.5px">'+c.em+' '+esc(c.nome)+' · '+esc(tipo)+' · <b class="num" style="color:'+(late?"var(--j-red)":now?"var(--j-green)":"inherit")+'">'+fmtRange(i)+(late?" · atrasado":now?" · agora":"")+'</b></small>'+esc(i.titulo)+
+      (i.nota?'<small class="ju-muted" style="display:block;font-size:11.5px;margin-top:2px">'+esc(i.nota)+'</small>':'')+'</span></div>'+
+      '<button class="ju-del" data-delstudy="'+esc(i.id)+'" aria-label="Apagar">'+ico("trash")+'</button></li>';
+  }
+  function viewEstudos(){
+    var all = studies(), k = todayKey(), f = juStudyFilter;
+    var list = all.filter(function(i){ return f==="todos" || i.curso===f; }).slice().sort(function(a,b){ return (a.data+(a.fim||"")).localeCompare(b.data+(b.fim||"")); });
+    var cards = Object.keys(JU_COURSES).map(function(key){
+      var c = JU_COURSES[key], its = all.filter(function(i){ return i.curso===key; }), done = its.filter(function(i){ return i.feito; }).length;
+      var prova = its.filter(function(i){ return i.tipo==="prova" && !i.feito && studyEnd(i)>=k; }).sort(function(a,b){ return a.data.localeCompare(b.data); })[0];
+      var last = key==="tripleten" ? its.filter(function(i){ return i.tipo==="sprint"; }).sort(function(a,b){ return studyEnd(b).localeCompare(studyEnd(a)); })[0] : null;
+      var alvo = prova || last, alvoData = prova ? prova.data : (last ? studyEnd(last) : null), dd = alvoData ? daysTo(alvoData) : null;
+      return '<button class="ju-card tint" data-sfilter="'+key+'" style="'+tone(c.t)+';text-align:left;border:0;cursor:pointer'+(f===key?";outline:2px solid currentColor":"")+'"><span class="ju-label">'+c.em+' '+c.nome+'</span>'+
+        '<div class="ju-mid">'+done+'/'+its.length+'</div><div class="ju-progress" style="--c:currentColor;margin:6px 0"><i style="width:'+(its.length?Math.round(done/its.length*100):0)+'%"></i></div>'+
+        '<div class="ju-muted" style="font-size:12px">'+(alvo ? (prova ? "Próxima prova" : "Meta de conclusão")+': '+fmtDay(parseKey(alvoData))+(dd>=0?' · '+dd+' dias':'') : 'Sem prova marcada')+'</div></button>';
+    }).join("");
+    var semana = list.filter(function(i){ return !i.feito && i.data <= dKey(addDays(new Date(),7)); });
+    var futuros = list.filter(function(i){ return !i.feito && i.data > dKey(addDays(new Date(),7)); });
+    var feitos = list.filter(function(i){ return i.feito; });
+    var byMonth = {}, order = [];
+    futuros.forEach(function(i){ var m = i.data.slice(0,7); if(!byMonth[m]){ byMonth[m] = []; order.push(m); } byMonth[m].push(i); });
+    var blocks = ((state.dayPlan&&state.dayPlan.blocks)||[]).filter(function(b){ return b.area==="academico"||b.area==="complementar"; });
+    var DN = {seg:"seg",ter:"ter",qua:"qua",qui:"qui",sex:"sex",sab:"sáb",dom:"dom"};
+    return ''+
+      '<div class="ju-grid">'+cards+'<button class="ju-card" data-sfilter="todos" style="text-align:left;border:0;cursor:pointer'+(f==="todos"?";outline:2px solid var(--j-ink)":"")+'"><span class="ju-label">📚 Tudo</span><div class="ju-mid">'+all.filter(function(i){return i.feito;}).length+'/'+all.length+'</div><div class="ju-muted" style="font-size:12px">ver os três juntos</div></button></div>'+
+      '<button class="ju-btn primary block" data-act="study">'+ico("plus")+' Novo item de estudo</button>'+
+      '<section class="ju-card"><div class="ju-head" style="'+tone("agenda")+'"><span class="ic">'+ico("cal")+'</span><h3>Agora e próximos 7 dias</h3></div>'+
+        (semana.length ? '<ul class="ju-list" style="gap:12px">'+semana.map(studyRow).join("")+'</ul>' : '<p class="ju-empty">Nada pendente para esta semana.</p>')+'</section>'+
+      order.map(function(m){ var lbl = parseKey(m+"-01").toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
+        return '<section class="ju-card"><span class="ju-label">'+lbl.charAt(0).toUpperCase()+lbl.slice(1)+' · '+byMonth[m].length+'</span><ul class="ju-list" style="gap:12px;margin-top:10px">'+byMonth[m].map(studyRow).join("")+'</ul></section>'; }).join("")+
+      (feitos.length ? '<section class="ju-card"><details><summary class="ju-label" style="cursor:pointer">Concluídos · '+feitos.length+'</summary><ul class="ju-list" style="gap:12px;margin-top:10px">'+feitos.map(studyRow).join("")+'</ul></details></section>' : '')+
+      (blocks.length ? '<section class="ju-card"><div class="ju-head" style="'+tone("sono")+'"><span class="ic">'+ico("book")+'</span><h3>Horários de estudo da semana</h3></div><ul class="ju-list" style="gap:8px">'+
+        blocks.slice().sort(function(a,b){ return toMin(a.ini)-toMin(b.ini); }).map(function(b){ return '<li style="display:flex;justify-content:space-between;gap:10px"><span>'+esc(b.txt)+'</span><small class="ju-muted num" style="white-space:nowrap">'+esc(b.ini)+'–'+esc(b.fim)+' · '+(b.dias||[]).map(function(d){ return DN[d]||d; }).join(", ")+'</small></li>'; }).join("")+
+        '</ul><button class="ju-more" data-legacy="rotina">Ajustar horários '+ico("chev")+'</button></section>' : '');
+  }
+  function sheetStudy(){
+    openSheet("Novo item de estudo",
+      '<div class="ju-field">Curso'+seg("curso", [["sebrae","Sebrae"],["tripleten","TripleTen"],["concurso","Concurso"]], juStudyFilter!=="todos"?juStudyFilter:"sebrae")+'</div>'+
+      '<label class="ju-field">O quê<input name="titulo" placeholder="Ex.: entregar atividade, estudar Crase…" autocomplete="off"></label>'+
+      '<div class="ju-field">Tipo'+seg("tipo", JU_STUDY_TYPES.slice(0,6), "estudo")+'</div>'+
+      '<div class="ju-two"><label class="ju-field">Data<input name="data" type="date" value="'+todayKey()+'"></label><label class="ju-field">Até (opcional)<input name="fim" type="date"></label></div>',
+      function(f){ var t = f.titulo.value.trim(); if(!t) return "Descreva o item.";
+        var it = {id:uid("s"), curso:segVal(f,"curso")||"sebrae", titulo:t, tipo:segVal(f,"tipo")||"estudo", data:f.data.value||todayKey(), feito:false};
+        if(f.fim.value && f.fim.value>it.data) it.fim = f.fim.value;
+        studies().push(it); save(); toast("Item adicionado ao cronograma"); });
+  }
+
   // ---------- Compras do mês: mercado (vem da dieta) + necessidades extras ----------
   var juShopTab = "mercado";
   function shopData(){
@@ -4175,8 +4236,8 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
 
   function renderView(view){
     var el = document.querySelector('.ju-view[data-view="'+view+'"]'); if(!el) return;
-    var fn = {inicio:viewInicio, plano:viewPlano, tracker:viewTracker, financas:viewFinancas, sono:viewSono, bemestar:viewBemestar, tarefas:viewTarefas, compras:viewCompras, eu:viewEu}[view];
-    var sub = ["financas","sono","tarefas","compras"].indexOf(view)>-1;
+    var fn = {inicio:viewInicio, plano:viewPlano, tracker:viewTracker, financas:viewFinancas, sono:viewSono, bemestar:viewBemestar, tarefas:viewTarefas, compras:viewCompras, estudos:viewEstudos, eu:viewEu}[view];
+    var sub = ["financas","sono","tarefas","compras","estudos"].indexOf(view)>-1;
     el.innerHTML = (sub ? '<div class="ju-sub"><button class="ju-back" data-go="inicio" aria-label="Voltar">'+ico("back")+'</button></div>' : '') + fn();
     if(view==="inicio") renderAgora();
     if(view==="eu"){ var ib = document.getElementById("installApp"); var ji = document.getElementById("juInstall"); if(ji && ib && ib.hidden) ji.hidden = true; }
@@ -4198,7 +4259,7 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
         '<header class="ju-top"><button class="ju-avatar" data-go="eu" aria-label="Seu perfil"><img src="fotos/avatar.jpg" alt=""></button>'+
         '<h1 id="juTitle">Hoje</h1><span class="ju-date" id="juDate">'+ico("cal")+'<span></span></span></header>'+
         '<div class="ju-sync" id="juSync" aria-live="polite"></div>'+
-        ["inicio","plano","tracker","financas","sono","bemestar","tarefas","compras","eu"].map(function(v){ return '<section class="ju-view" data-view="'+v+'" hidden></section>'; }).join("")+
+        ["inicio","plano","tracker","financas","sono","bemestar","tarefas","compras","estudos","eu"].map(function(v){ return '<section class="ju-view" data-view="'+v+'" hidden></section>'; }).join("")+
       '</div>'+
       '<nav class="ju-nav" aria-label="Navegação principal"><div>'+
         [["inicio","Início","home"],["plano","Meu plano","cal"],["tracker","Tracker","tasks"],["bemestar","Bem-estar","heart"],["eu","Você","user"]]
@@ -4216,10 +4277,13 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
     if(st && window.MutationObserver) new MutationObserver(function(){ var s = document.getElementById("juSync"); if(s) s.textContent = st.textContent; }).observe(st, {childList:true, characterData:true, subtree:true});
 
     document.addEventListener("click", function(e){
-      var t = e.target.closest("[data-go],[data-act],[data-legacy],[data-task],[data-habit],[data-water],[data-pay],[data-deltx],[data-deltask],[data-delhabit],[data-day],[data-month],[data-mood],[data-proxy],[data-shop],[data-shoptab],[data-shopadd],[data-shopreset],[data-delshop],[data-treino],#juPhoto");
+      var t = e.target.closest("[data-go],[data-act],[data-legacy],[data-task],[data-habit],[data-water],[data-pay],[data-deltx],[data-deltask],[data-delhabit],[data-day],[data-month],[data-mood],[data-proxy],[data-shop],[data-shoptab],[data-shopadd],[data-shopreset],[data-delshop],[data-treino],[data-study],[data-delstudy],[data-sfilter],#juPhoto");
       if(!t || !t.closest(".ju, .ju-nav, .ju-legacy-bar")) return;
       if(t.id==="juPhoto"){ photoOffset++; var img = document.getElementById("juPhotoImg"); if(img) img.src = photoOfDay(photoOffset); return; }
       if(t.dataset.go){ go(t.dataset.go); return; }
+      if(t.dataset.sfilter){ juStudyFilter = t.dataset.sfilter; renderView("estudos"); return; }
+      if(t.dataset.study){ var si = studies().filter(function(x){ return x.id===t.dataset.study; })[0]; if(si){ si.feito = !si.feito; save(); if(si.feito) toast("Concluído ✓"); } return; }
+      if(t.dataset.delstudy){ armDelete(t, function(){ var a3 = studies(), ix3 = a3.map(function(x){ return x.id; }).indexOf(t.dataset.delstudy); if(ix3>-1){ a3.splice(ix3,1); save(); } }); return; }
       if(t.dataset.treino){ var wl = state.workout.log || (state.workout.log = {}), tk2 = todayKey(); if(wl[tk2]) delete wl[tk2]; else { wl[tk2] = true; toast("Treino registrado 💪"); } save(); return; }
       if(t.dataset.shoptab){ juShopTab = t.dataset.shoptab; renderView("compras"); return; }
       if(t.dataset.shop || t.dataset.delshop){
@@ -4243,7 +4307,7 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
         if(a==="gasto"||a==="entrada") sheetTx(a);
         else if(a==="bill") sheetBill("bill"); else if(a==="sub") sheetBill("sub");
         else if(a==="sleep") sheetSleep(); else if(a==="mood") sheetMood(k);
-        else if(a==="task") sheetTask(); else if(a==="habit") sheetHabit();
+        else if(a==="task") sheetTask(); else if(a==="study") sheetStudy(); else if(a==="habit") sheetHabit();
         else if(a==="period"){ var s = J().cycle.starts || (J().cycle.starts=[]); if(s.indexOf(k)<0){ s.push(k); save(); toast("Início do ciclo registrado"); } else toast("Hoje já está registrado"); }
         return;
       }
@@ -4278,7 +4342,7 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
       if(id==="juCycleDur" && v>=2 && v<=10){ J().cycle.dur = Math.round(v); persist(); }
     });
     var saved = "inicio"; try{ saved = localStorage.getItem("painelJuView") || "inicio"; }catch(e){}
-    juView = ["inicio","plano","tracker","financas","sono","bemestar","tarefas","compras","eu"].indexOf(saved)>-1 ? saved : "inicio";
+    juView = ["inicio","plano","tracker","financas","sono","bemestar","tarefas","compras","estudos","eu"].indexOf(saved)>-1 ? saved : "inicio";
   }
   function shellStart(){ go(juView); }
 
