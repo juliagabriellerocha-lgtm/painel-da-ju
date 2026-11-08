@@ -304,10 +304,10 @@
     document.body.classList.remove("ju-legacy");
     document.querySelectorAll(".ju-view").forEach(function(s){ s.hidden = s.dataset.view !== view; });
     document.querySelectorAll(".ju-nav button").forEach(function(b){
-      var main = JU_MAIN.indexOf(view)>-1 ? view : ({financas:"inicio", sono:"tracker", tarefas:"plano"})[view];
+      var main = JU_MAIN.indexOf(view)>-1 ? view : ({financas:"inicio", sono:"tracker", tarefas:"plano", compras:"inicio"})[view];
       if(b.dataset.go===main) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current");
     });
-    var titles = {inicio:"Hoje", plano:"Meu plano", tracker:"Tracker", bemestar:"Bem-estar", eu:"Você", financas:"Finanças", sono:"Sono", tarefas:"Tarefas"};
+    var titles = {inicio:"Hoje", plano:"Meu plano", tracker:"Tracker", bemestar:"Bem-estar", eu:"Você", financas:"Finanças", sono:"Sono", tarefas:"Tarefas", compras:"Compras do mês"};
     document.getElementById("juTitle").textContent = titles[view] || "Painel da Ju";
     try{ localStorage.setItem("painelJuView", view); }catch(e){}
     renderView(view);
@@ -336,7 +336,7 @@
 
     return ''+
     '<div class="ju-chips" role="navigation" aria-label="Atalhos">'+
-      chip("plano","Agenda","cal","agenda")+chip("tarefas","Tarefas","tasks","tarefas")+chip("financas","Finanças","coin","financas")+
+      chip("plano","Agenda","cal","agenda")+chip("tarefas","Tarefas","tasks","tarefas")+chip("compras","Compras","bag","habitos")+chip("financas","Finanças","coin","financas")+
       chip("sono","Sono","moon","sono")+chip("bemestar","Bem-estar","heart","bemestar")+chip("tracker","Hábitos","leaf","habitos")+
     '</div>'+
     '<div class="ju-hello"><div><h2>'+greet+', Ju!</h2><p>'+esc(helloLine())+'</p></div>'+
@@ -528,6 +528,26 @@
   }
   function stat(em, label, val){ return '<section class="ju-card ju-stat"><div class="em">'+em+'</div><span class="ju-label">'+label+'</span><div class="ju-mid">'+val+'</div></section>'; }
 
+  // Dieta do dia: cardápio de hoje (state.diet.plan), água e suplementos.
+  function dietaDoDia(){
+    var dk = ["dom","seg","ter","qua","qui","sex","sab"][new Date().getDay()];
+    var plan = (state.diet && state.diet.plan && state.diet.plan[dk]) || {};
+    var meals = [["cafe","☕","Café da manhã"],["almoco","🥗","Almoço"],["lanche","🍎","Lanche"],["jantar","🌙","Jantar"]];
+    var k = todayKey(), w = ((state.diet && state.diet.log && state.diet.log[k]) || {}).water || 0;
+    var sup = Array.isArray(state.supplements) ? state.supplements : [];
+    var has = meals.some(function(m){ return plan[m[0]]; });
+    var hr = new Date().getHours(), cur = hr<10 ? "cafe" : hr<15 ? "almoco" : hr<18 ? "lanche" : "jantar";
+    return '<section class="ju-card" style="'+tone("habitos")+'"><div class="ju-head"><span class="ic">'+ico("apple")+'</span><h3>Cardápio do dia</h3><span class="ju-muted">'+["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"][new Date().getDay()]+'</span></div>'+
+      (has ? '<ul class="ju-list" style="gap:12px">'+meals.filter(function(m){ return plan[m[0]]; }).map(function(m){
+        return '<li style="display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;align-items:start'+(m[0]===cur?';background:var(--j-blush);border-radius:12px;padding:8px;margin:-8px':'')+'"><span style="font-size:19px;line-height:1.2">'+m[1]+'</span><span style="min-width:0"><span class="ju-label" style="display:block">'+m[2]+'</span>'+esc(plan[m[0]])+'</span></li>';
+      }).join("")+'</ul>' : '<p class="ju-empty">Sem cardápio para hoje. Monte o da semana na Dieta.</p>')+
+      '<div class="ju-row" style="margin-top:12px"><span>💧 Água hoje</span><b class="num">'+w+'/8 copos</b></div>'+
+      '<div class="ju-progress" style="--c:var(--j-blue,#2E78B7);margin-top:6px"><i style="width:'+Math.min(100,w/8*100).toFixed(0)+'%"></i></div>'+
+      (sup.length ? '<details style="margin-top:12px"><summary class="ju-muted" style="cursor:pointer">Suplementos do dia</summary><ul class="ju-list" style="margin-top:8px;gap:8px">'+sup.map(function(g){
+        return '<li style="display:block"><span class="ju-label" style="display:block">'+esc(g.period||"")+'</span>'+(g.items||[]).map(function(it){ return esc(it[0])+(it[1]?' <small class="ju-muted">· '+esc(it[1])+'</small>':''); }).join('<br>')+'</li>';
+      }).join("")+'</ul></details>' : '')+
+      '<div class="ju-grid" style="margin-top:12px"><button class="ju-btn soft" data-go="tracker">Marcar água</button><button class="ju-btn ghost" data-legacy="dieta">Cardápio da semana</button><button class="ju-btn ghost" data-go="compras">Lista do mercado</button></div></section>';
+  }
   function viewBemestar(){
     var k = todayKey(), mood = J().mood[k];
     if(!juMonth){ var n = new Date(); juMonth = new Date(n.getFullYear(), n.getMonth(), 1); }
@@ -547,7 +567,7 @@
     var ci = cycleInfo();
     var liturgia = state.spirituality && state.spirituality.dailyLog && state.spirituality.dailyLog[k];
     var monthLabel = juMonth.toLocaleDateString("pt-BR",{month:"long"});
-    return ''+
+    return dietaDoDia()+
     '<section class="ju-card" style="'+tone("bemestar")+'"><div class="ju-head"><span class="ic">'+ico("heart")+'</span><h3>Como você está hoje?</h3></div>'+
       '<div class="ju-moods">'+JU_MOODS.map(function(m){ return '<button type="button" data-mood="'+m.v+'" class="'+(mood&&mood.v===m.v?"on":"")+'">'+m.e+'<small>'+m.t+'</small></button>'; }).join("")+'</div>'+
       (mood&&mood.nota?'<p class="ju-muted" style="margin:10px 0 0">“'+esc(mood.nota)+'”</p>':'')+
@@ -583,6 +603,44 @@
     return html;
   }
 
+  // ---------- Compras do mês: mercado (vem da dieta) + necessidades extras ----------
+  var juShopTab = "mercado";
+  function shopData(){
+    if(!state.shopping || typeof state.shopping!=="object") state.shopping = {items:[]};
+    if(!Array.isArray(state.shopping.items)) state.shopping.items = [];
+    if(!Array.isArray(state.shopping.extras)) state.shopping.extras = [];
+    return state.shopping;
+  }
+  function shopRow(i, kind){
+    return '<li style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center"><div class="ju-check'+(i.checked?" done":"")+'">'+
+      '<button data-shop="'+esc(kind+":"+i.id)+'" aria-label="'+(i.checked?"Desmarcar":"Marcar")+'">'+ico("check")+'</button><span>'+esc(i.text)+'</span></div>'+
+      '<button class="ju-del" data-delshop="'+esc(kind+":"+i.id)+'" aria-label="Remover">'+ico("trash")+'</button></li>';
+  }
+  function viewCompras(){
+    var S = shopData(), tab = juShopTab;
+    var list = tab==="mercado" ? S.items : S.extras;
+    var done = list.filter(function(i){ return i.checked; }).length;
+    var groups = {}, order = [];
+    list.forEach(function(i){ var c = i.category || (tab==="mercado" ? "Outros" : "Extras"); if(!groups[c]){ groups[c] = []; order.push(c); } groups[c].push(i); });
+    var head = '<div class="ju-grid">'+
+      '<button class="ju-btn '+(tab==="mercado"?"primary":"soft")+'" data-shoptab="mercado">🛒 Mercado</button>'+
+      '<button class="ju-btn '+(tab==="extras"?"primary":"soft")+'" data-shoptab="extras">🧴 Necessidades extras</button></div>';
+    var intro = tab==="mercado"
+      ? '<p class="ju-muted" style="margin:0">Ingredientes do cardápio da dieta, por categoria. Marque o que já foi para o carrinho.</p>'
+      : '<p class="ju-muted" style="margin:0">Tudo o que o mês pede além do mercado da dieta: casa, higiene, farmácia, pet, presentes.</p>';
+    var body = list.length ? order.map(function(c){
+        return '<section class="ju-card"><span class="ju-label">'+esc(c)+' · '+groups[c].filter(function(i){return i.checked;}).length+'/'+groups[c].length+'</span><ul class="ju-list" style="margin-top:10px">'+groups[c].map(function(i){ return shopRow(i, tab); }).join("")+'</ul></section>';
+      }).join("")
+      : '<section class="ju-card"><p class="ju-empty">'+(tab==="mercado" ? "A lista do mercado está vazia." : "Nenhuma necessidade extra anotada ainda.")+'</p></section>';
+    return head+intro+
+      '<section class="ju-card"><span class="ju-label">'+done+' de '+list.length+' marcados</span>'+
+        '<div style="display:flex;gap:8px;margin-top:10px"><input id="juShopNew" placeholder="'+(tab==="mercado"?"Novo item (ex.: leite, aveia…)":"Novo item (ex.: papel toalha, ração do Otto…)")+'" autocomplete="off" style="flex:1;min-width:0;font:inherit;padding:10px 12px;border-radius:12px;border:1px solid var(--j-line);background:var(--j-surface);color:var(--j-ink)">'+
+        '<button class="ju-plus" data-shopadd="'+tab+'" aria-label="Adicionar">'+ico("plus")+'</button></div></section>'+
+      body+
+      (done ? '<button class="ju-btn ghost block" data-shopreset="'+tab+'">Desmarcar todos (novo mês)</button>' : '')+
+      (tab==="mercado" ? '<button class="ju-btn ghost block" data-legacy="dieta">Ver cardápio da dieta</button>' : '');
+  }
+
   function viewEu(){
     var ht = habitsToday(), allHabits = J().habits, best = 0;
     allHabits.forEach(function(h){ best = Math.max(best, habitStreak(h)); });
@@ -609,8 +667,8 @@
 
   function renderView(view){
     var el = document.querySelector('.ju-view[data-view="'+view+'"]'); if(!el) return;
-    var fn = {inicio:viewInicio, plano:viewPlano, tracker:viewTracker, financas:viewFinancas, sono:viewSono, bemestar:viewBemestar, tarefas:viewTarefas, eu:viewEu}[view];
-    var sub = ["financas","sono","tarefas"].indexOf(view)>-1;
+    var fn = {inicio:viewInicio, plano:viewPlano, tracker:viewTracker, financas:viewFinancas, sono:viewSono, bemestar:viewBemestar, tarefas:viewTarefas, compras:viewCompras, eu:viewEu}[view];
+    var sub = ["financas","sono","tarefas","compras"].indexOf(view)>-1;
     el.innerHTML = (sub ? '<div class="ju-sub"><button class="ju-back" data-go="inicio" aria-label="Voltar">'+ico("back")+'</button></div>' : '') + fn();
     if(view==="inicio") renderAgora();
     if(view==="eu"){ var ib = document.getElementById("installApp"); var ji = document.getElementById("juInstall"); if(ji && ib && ib.hidden) ji.hidden = true; }
@@ -632,7 +690,7 @@
         '<header class="ju-top"><button class="ju-avatar" data-go="eu" aria-label="Seu perfil"><img src="fotos/avatar.jpg" alt=""></button>'+
         '<h1 id="juTitle">Hoje</h1><span class="ju-date" id="juDate">'+ico("cal")+'<span></span></span></header>'+
         '<div class="ju-sync" id="juSync" aria-live="polite"></div>'+
-        ["inicio","plano","tracker","financas","sono","bemestar","tarefas","eu"].map(function(v){ return '<section class="ju-view" data-view="'+v+'" hidden></section>'; }).join("")+
+        ["inicio","plano","tracker","financas","sono","bemestar","tarefas","compras","eu"].map(function(v){ return '<section class="ju-view" data-view="'+v+'" hidden></section>'; }).join("")+
       '</div>'+
       '<nav class="ju-nav" aria-label="Navegação principal"><div>'+
         [["inicio","Início","home"],["plano","Meu plano","cal"],["tracker","Tracker","tasks"],["bemestar","Bem-estar","heart"],["eu","Você","user"]]
@@ -650,10 +708,24 @@
     if(st && window.MutationObserver) new MutationObserver(function(){ var s = document.getElementById("juSync"); if(s) s.textContent = st.textContent; }).observe(st, {childList:true, characterData:true, subtree:true});
 
     document.addEventListener("click", function(e){
-      var t = e.target.closest("[data-go],[data-act],[data-legacy],[data-task],[data-habit],[data-water],[data-pay],[data-deltx],[data-deltask],[data-delhabit],[data-day],[data-month],[data-mood],[data-proxy],#juPhoto");
+      var t = e.target.closest("[data-go],[data-act],[data-legacy],[data-task],[data-habit],[data-water],[data-pay],[data-deltx],[data-deltask],[data-delhabit],[data-day],[data-month],[data-mood],[data-proxy],[data-shop],[data-shoptab],[data-shopadd],[data-shopreset],[data-delshop],#juPhoto");
       if(!t || !t.closest(".ju, .ju-nav, .ju-legacy-bar")) return;
       if(t.id==="juPhoto"){ photoOffset++; var img = document.getElementById("juPhotoImg"); if(img) img.src = photoOfDay(photoOffset); return; }
       if(t.dataset.go){ go(t.dataset.go); return; }
+      if(t.dataset.shoptab){ juShopTab = t.dataset.shoptab; renderView("compras"); return; }
+      if(t.dataset.shop || t.dataset.delshop){
+        var ref = (t.dataset.shop||t.dataset.delshop).split(":"), arr = ref[0]==="extras" ? shopData().extras : shopData().items;
+        if(t.dataset.delshop){ armDelete(t, function(){ var a2 = ref[0]==="extras" ? shopData().extras : shopData().items; var ix = a2.map(function(x){return x.id;}).indexOf(ref[1]); if(ix>-1){ a2.splice(ix,1); save(); } }); return; }
+        var it = arr.filter(function(x){ return x.id===ref[1]; })[0]; if(it){ it.checked = !it.checked; save(); } return;
+      }
+      if(t.dataset.shopadd){
+        var inp = document.getElementById("juShopNew"), txt = inp ? inp.value.trim() : "";
+        if(!txt){ if(inp) inp.focus(); return; }
+        var tgt = t.dataset.shopadd==="extras" ? shopData().extras : shopData().items;
+        tgt.push({id:uid(t.dataset.shopadd==="extras"?"x":"c"), text:txt, category:t.dataset.shopadd==="extras"?"Extras":"Outros", checked:false});
+        save(); toast("Item adicionado"); var n2 = document.getElementById("juShopNew"); if(n2) n2.focus(); return;
+      }
+      if(t.dataset.shopreset){ (t.dataset.shopreset==="extras" ? shopData().extras : shopData().items).forEach(function(i){ i.checked = false; }); save(); toast("Lista pronta para o novo mês"); return; }
       if(t.dataset.legacy){ openLegacy(t.dataset.legacy); return; }
       if(t.dataset.proxy){ var b = document.getElementById(t.dataset.proxy); if(b) b.click(); return; }
       var k = todayKey();
@@ -687,6 +759,9 @@
         else sheetMood(t.dataset.day);
       }
     });
+    document.addEventListener("keydown", function(e){
+      if(e.key==="Enter" && e.target && e.target.id==="juShopNew"){ e.preventDefault(); var b = document.querySelector("[data-shopadd]"); if(b) b.click(); }
+    });
     document.addEventListener("change", function(e){
       var id = e.target.id, v = parseFloat(e.target.value);
       if(id==="juGoal" && v>=4 && v<=12){ J().sleepGoal = v; persist(); toast("Meta de sono atualizada"); }
@@ -694,7 +769,7 @@
       if(id==="juCycleDur" && v>=2 && v<=10){ J().cycle.dur = Math.round(v); persist(); }
     });
     var saved = "inicio"; try{ saved = localStorage.getItem("painelJuView") || "inicio"; }catch(e){}
-    juView = ["inicio","plano","tracker","financas","sono","bemestar","tarefas","eu"].indexOf(saved)>-1 ? saved : "inicio";
+    juView = ["inicio","plano","tracker","financas","sono","bemestar","tarefas","compras","eu"].indexOf(saved)>-1 ? saved : "inicio";
   }
   function shellStart(){ go(juView); }
 
