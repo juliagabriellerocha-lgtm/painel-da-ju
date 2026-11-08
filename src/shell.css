@@ -340,3 +340,23 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
 @media (min-width:700px){ .ju-hello{grid-template-columns:minmax(0,1fr) 128px;} .ju-hello button{width:128px;} }
 @media (max-width:370px){ .ju-donut{grid-template-columns:1fr;justify-items:center;} .ju-big{font-size:30px;} }
 @media (prefers-reduced-motion: reduce){ .ju *{transition:none!important;} }
+
+/* mural dos sonhos */
+.ju-mural{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.ju-dream{background:var(--j-surface);border-radius:22px;overflow:hidden;box-shadow:0 1px 0 var(--j-line);border:1px solid var(--j-line);display:flex;flex-direction:column;min-width:0;}
+.ju-dream.big{grid-column:1/-1;}
+.ju-dream .ph{position:relative;aspect-ratio:4/3;display:grid;place-items:center;}
+.ju-dream.big .ph{aspect-ratio:16/9;}
+.ju-dream .em{font-size:44px;filter:drop-shadow(0 4px 10px rgba(46,31,43,.18));}
+.ju-dream.big .em{font-size:60px;}
+.ju-dream .hz{position:absolute;left:10px;top:10px;font-size:10.5px;font-weight:600;letter-spacing:.03em;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.82);color:var(--j-ink);}
+.ju-dream .cam{position:absolute;right:10px;top:10px;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.82);color:var(--j-ink);cursor:pointer;}
+.ju-dream .cam svg{width:14px;height:14px;}
+.ju-dream .bd{padding:12px 14px 14px;}
+.ju-dream h3{font-size:19px;}
+.ju-dream .fr{font-size:12.5px;line-height:1.4;color:var(--j-soft);margin:4px 0 0;}
+.ju-dream details{margin-top:8px;}
+.ju-dream summary{cursor:pointer;font-size:12.5px;font-weight:600;color:var(--j-petrol);}
+.ju-dream .dt{margin:8px 0 0;padding-left:18px;font-size:12.5px;line-height:1.45;color:var(--j-soft);}
+@media (max-width:360px){ .ju-mural{grid-template-columns:1fr;} }
+.ju-mural .ju-dream:nth-child(even):last-child{grid-column:1/-1;}

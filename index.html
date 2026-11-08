@@ -903,6 +903,26 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
 @media (min-width:700px){ .ju-hello{grid-template-columns:minmax(0,1fr) 128px;} .ju-hello button{width:128px;} }
 @media (max-width:370px){ .ju-donut{grid-template-columns:1fr;justify-items:center;} .ju-big{font-size:30px;} }
 @media (prefers-reduced-motion: reduce){ .ju *{transition:none!important;} }
+
+/* mural dos sonhos */
+.ju-mural{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.ju-dream{background:var(--j-surface);border-radius:22px;overflow:hidden;box-shadow:0 1px 0 var(--j-line);border:1px solid var(--j-line);display:flex;flex-direction:column;min-width:0;}
+.ju-dream.big{grid-column:1/-1;}
+.ju-dream .ph{position:relative;aspect-ratio:4/3;display:grid;place-items:center;}
+.ju-dream.big .ph{aspect-ratio:16/9;}
+.ju-dream .em{font-size:44px;filter:drop-shadow(0 4px 10px rgba(46,31,43,.18));}
+.ju-dream.big .em{font-size:60px;}
+.ju-dream .hz{position:absolute;left:10px;top:10px;font-size:10.5px;font-weight:600;letter-spacing:.03em;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.82);color:var(--j-ink);}
+.ju-dream .cam{position:absolute;right:10px;top:10px;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.82);color:var(--j-ink);cursor:pointer;}
+.ju-dream .cam svg{width:14px;height:14px;}
+.ju-dream .bd{padding:12px 14px 14px;}
+.ju-dream h3{font-size:19px;}
+.ju-dream .fr{font-size:12.5px;line-height:1.4;color:var(--j-soft);margin:4px 0 0;}
+.ju-dream details{margin-top:8px;}
+.ju-dream summary{cursor:pointer;font-size:12.5px;font-weight:600;color:var(--j-petrol);}
+.ju-dream .dt{margin:8px 0 0;padding-left:18px;font-size:12.5px;line-height:1.45;color:var(--j-soft);}
+@media (max-width:360px){ .ju-mural{grid-template-columns:1fr;} }
+.ju-mural .ju-dream:nth-child(even):last-child{grid-column:1/-1;}
 </style>
 
 <div class="app">
@@ -3794,10 +3814,10 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
     document.body.classList.remove("ju-legacy");
     document.querySelectorAll(".ju-view").forEach(function(s){ s.hidden = s.dataset.view !== view; });
     document.querySelectorAll(".ju-nav button").forEach(function(b){
-      var main = JU_MAIN.indexOf(view)>-1 ? view : ({financas:"inicio", sono:"tracker", tarefas:"plano", compras:"inicio", estudos:"plano"})[view];
+      var main = JU_MAIN.indexOf(view)>-1 ? view : ({financas:"inicio", sono:"tracker", tarefas:"plano", compras:"inicio", estudos:"plano", sonhos:"eu"})[view];
       if(b.dataset.go===main) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current");
     });
-    var titles = {inicio:"Hoje", plano:"Meu plano", tracker:"Tracker", bemestar:"Bem-estar", eu:"Você", financas:"Finanças", sono:"Sono", tarefas:"Tarefas", compras:"Compras do mês", estudos:"Estudos"};
+    var titles = {inicio:"Hoje", plano:"Meu plano", tracker:"Tracker", bemestar:"Bem-estar", eu:"Você", financas:"Finanças", sono:"Sono", tarefas:"Tarefas", compras:"Compras do mês", estudos:"Estudos", sonhos:"Mural dos sonhos"};
     document.getElementById("juTitle").textContent = titles[view] || "Painel da Ju";
     try{ localStorage.setItem("painelJuView", view); }catch(e){}
     renderView(view);
@@ -3827,7 +3847,7 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
     return ''+
     '<div class="ju-chipbar"><button type="button" class="ju-chip-arrow prev" data-chipscroll="-1" aria-label="Ver atalhos anteriores" hidden>'+ico("back")+'</button>'+
     '<div class="ju-chips" role="navigation" aria-label="Atalhos">'+
-      chip("plano","Agenda","cal","agenda")+chip("estudos","Estudos","cap","sono")+chip("tarefas","Tarefas","tasks","tarefas")+chip("compras","Compras","bag","habitos")+chip("financas","Finanças","coin","financas")+'<button class="ju-chip" data-legacy="progresso" style="'+tone("habitos")+'"><i>'+ico("trend")+'</i><span>Evolução</span></button>'+
+      chip("plano","Agenda","cal","agenda")+chip("estudos","Estudos","cap","sono")+chip("sonhos","Sonhos","star","financas")+chip("tarefas","Tarefas","tasks","tarefas")+chip("compras","Compras","bag","habitos")+chip("financas","Finanças","coin","financas")+'<button class="ju-chip" data-legacy="progresso" style="'+tone("habitos")+'"><i>'+ico("trend")+'</i><span>Evolução</span></button>'+
       chip("sono","Sono","moon","sono")+chip("bemestar","Bem-estar","heart","bemestar")+chip("tracker","Hábitos","leaf","habitos")+
     '</div><button type="button" class="ju-chip-arrow next" data-chipscroll="1" aria-label="Ver mais atalhos" hidden>'+ico("chev")+'</button></div>'+
     '<div class="ju-hello"><div><h2>'+greet+', Ju!</h2><p>'+esc(helloLine())+'</p></div>'+
@@ -4232,6 +4252,98 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
         studies().push(it); save(); toast("Item adicionado ao cronograma"); });
   }
 
+  // ---------- Mural dos sonhos ----------
+  var JU_DREAM_SEED = [
+    {id:"m_casa", titulo:"Casa das Graças", em:"🏡", cor:["#F4D9D2","#E9C48A"], horizonte:"longo",
+      frase:"Uma casa viva, sofisticada e aconchegante — simples, elegante, com cara de casa.",
+      detalhes:["3 suítes + 2 quartos de visita","Home office e mini biblioteca particular","Quarto-oratório","Sala para encontros de família (jogos, TV)","Quintal verde, muro vivo e piscina","Varanda com pôr do sol · porta de madeira maciça"],
+      passos:[{t:"Quitar as dívidas atuais",f:false},{t:"Formar a reserva de emergência",f:false},{t:"Calcular a entrada e o financiamento",f:false}]},
+    {id:"m_familia", titulo:"Família", em:"🤍", cor:["#F3E7E2","#D99AA0"], horizonte:"medio",
+      frase:"Um lar com paz, fé e gente amada reunida à mesa.",
+      detalhes:["Encontros de família com jogos e conversa","Presença perto do pai, dos avós e da tia","Uma casa onde todos se sentem acolhidos"],
+      passos:[{t:"Visitar a família com frequência (marcar na agenda)",f:false},{t:"Cuidar de mim primeiro: terapia, fé e rotina",f:false}]},
+    {id:"m_filhos", titulo:"Filhos", em:"👶", cor:["#ECE8F6","#B7A9DE"], horizonte:"longo",
+      frase:"Ser mãe no tempo certo, com estrutura e tranquilidade.",
+      detalhes:["Momento emocional e financeiro preparado","Casa com espaço para crescer"],
+      passos:[{t:"Estabilidade financeira (reserva + renda previsível)",f:false},{t:"Definir o momento com calma",f:false}]},
+    {id:"m_invest", titulo:"Investimentos", em:"📈", cor:["#E2EFE7","#0E5552"], horizonte:"medio",
+      frase:"Dinheiro trabalhando por mim: livre de dívidas e com renda crescente.",
+      detalhes:["Sair das dívidas (R$ 1.000/mês a partir de jan/2027)","Reserva de emergência de 6 meses","Investir todo mês","Meta de renda: R$ 35 mil/mês"],
+      passos:[{t:"Começar o plano de quitação em jan/2027",f:false},{t:"Abrir a conta da reserva de emergência",f:false},{t:"Primeiro aporte mensal",f:false}]},
+    {id:"m_carro", titulo:"Carro próprio", em:"🚙", cor:["#F6E1E6","#C14C64"], horizonte:"curto",
+      frase:"Liberdade para ir e vir — e, um dia, os carros dos sonhos.",
+      detalhes:["Primeiro: um carro que caiba no orçamento","Sonhos: um Fusca, uma caminhonete para a família e um Jipe JPX vermelho"],
+      passos:[{t:"Definir o teto de valor",f:false},{t:"Comparar à vista x financiado",f:false},{t:"Juntar a entrada",f:false}]},
+    {id:"m_viagens", titulo:"Viagens", em:"✈️", cor:["#E3EAF0","#55708A"], horizonte:"medio",
+      frase:"Conhecer o mundo: Tailândia, Itália e muitas estradas.",
+      detalhes:["Tailândia — primeira viagem internacional (fim de 2027)","Itália — o destino dos sonhos","Passeios de um dia (Maria Fumaça e afins)"],
+      passos:[{t:"Tirar/renovar o passaporte",f:false},{t:"Definir valor-alvo da Tailândia",f:false},{t:"Poupança mensal para viagens",f:false}]}
+  ];
+  var JU_HORIZ = {curto:"até 1 ano", medio:"1 a 3 anos", longo:"3+ anos"};
+  function dreams(){ var j = J(); if(!Array.isArray(j.mural)){ j.mural = JSON.parse(JSON.stringify(JU_DREAM_SEED)); setTimeout(function(){ persist(); }, 0); } return j.mural; }
+  function viewSonhos(){
+    var ds = dreams();
+    var total = 0, feitos = 0; ds.forEach(function(d){ (d.passos||[]).forEach(function(p){ total++; if(p.f) feitos++; }); });
+    return '<section class="ju-card" style="background:linear-gradient(135deg,#2E1F2B,#0E5552);color:#FBF6F3;border:0"><span class="ju-label" style="color:#E9C48A">Mural dos sonhos</span>'+
+        '<h2 style="font-size:24px;margin:4px 0 6px;color:#FBF6F3">O que você está construindo</h2><p style="margin:0;font-size:13px;opacity:.85">'+feitos+' de '+total+' passos dados. Toque num sonho para ver os detalhes e marcar o próximo passo.</p></section>'+
+      '<div class="ju-mural">'+ds.map(function(d,ix){
+        var ps = d.passos||[], ok = ps.filter(function(p){ return p.f; }).length, pct = ps.length ? Math.round(ok/ps.length*100) : 0;
+        var c = d.cor||["#F3E7E2","#D99AA0"];
+        return '<article class="ju-dream'+(ix===0?" big":"")+'">'+
+          '<div class="ph" style="background:'+(d.img?'url('+d.img+') center/cover':'linear-gradient(135deg,'+c[0]+','+c[1]+')')+'">'+(d.img?'':'<span class="em">'+d.em+'</span>')+
+            '<span class="hz">'+esc(JU_HORIZ[d.horizonte]||"")+'</span><label class="cam" aria-label="Trocar imagem">'+ico("plus")+'<input type="file" accept="image/*" data-dreamimg="'+esc(d.id)+'" hidden></label></div>'+
+          '<div class="bd"><h3>'+esc(d.titulo)+'</h3><p class="fr">'+esc(d.frase||"")+'</p>'+
+          '<div class="ju-progress" style="--c:'+c[1]+';margin:8px 0 4px"><i style="width:'+pct+'%"></i></div><small class="ju-muted">'+ok+'/'+ps.length+' passos</small>'+
+          '<details><summary>Detalhes e próximos passos</summary>'+
+            ((d.detalhes||[]).length?'<ul class="dt">'+d.detalhes.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join("")+'</ul>':'')+
+            '<ul class="ju-list" style="gap:8px;margin-top:8px">'+ps.map(function(p,pi){ return '<li class="ju-check'+(p.f?" done":"")+'"><button data-dreamstep="'+esc(d.id)+':'+pi+'" aria-label="Marcar passo">'+ico("check")+'</button><span style="white-space:normal">'+esc(p.t)+'</span></li>'; }).join("")+'</ul>'+
+            '<div class="ju-grid" style="margin-top:10px"><button class="ju-btn soft" data-dreamadd="'+esc(d.id)+'">'+ico("plus")+' Passo</button><button class="ju-btn ghost" data-dreamdel="'+esc(d.id)+'">Remover sonho</button></div>'+
+          '</details></div></article>';
+      }).join("")+'</div>'+
+      '<button class="ju-btn primary block" data-act="dream">'+ico("plus")+' Novo sonho</button>'+rodaHtml();
+  }
+  var JU_RODA = [["saude","Saúde"],["fe","Fé"],["familia","Família"],["amor","Amor"],["amizades","Amizades"],["carreira","Carreira"],["financas","Finanças"],["estudos","Estudos"],["lazer","Lazer"],["casa","Casa"],["proposito","Propósito"],["autocuidado","Autocuidado"]];
+  function rodaHtml(){
+    var r = J().roda || {}, vals = JU_RODA.map(function(a){ return +r[a[0]]||0; }), n = JU_RODA.length, cx = 150, cy = 150, R = 110;
+    var filled = vals.some(function(v){ return v>0; });
+    var pt = function(i,v){ var ang = -Math.PI/2 + i*2*Math.PI/n, rr = R*v/10; return [cx+rr*Math.cos(ang), cy+rr*Math.sin(ang)]; };
+    var grid = [2,4,6,8,10].map(function(l){ return '<polygon points="'+JU_RODA.map(function(_,i){ return pt(i,l).map(function(x){return x.toFixed(1);}).join(","); }).join(" ")+'" fill="none" stroke="var(--j-line)" stroke-width="1"/>'; }).join("");
+    var spokes = JU_RODA.map(function(a,i){ var e = pt(i,10), lb = pt(i,12.4); return '<line x1="'+cx+'" y1="'+cy+'" x2="'+e[0].toFixed(1)+'" y2="'+e[1].toFixed(1)+'" stroke="var(--j-line)"/><text x="'+lb[0].toFixed(1)+'" y="'+lb[1].toFixed(1)+'" font-size="10.5" text-anchor="middle" dominant-baseline="middle" fill="var(--j-soft)">'+a[1]+(vals[i]?' '+vals[i]:'')+'</text>'; }).join("");
+    var poly = filled ? '<polygon points="'+vals.map(function(v,i){ return pt(i,v).map(function(x){return x.toFixed(1);}).join(","); }).join(" ")+'" fill="rgba(217,154,160,.35)" stroke="#C14C64" stroke-width="2"/>' : '';
+    var low = filled ? JU_RODA.map(function(a,i){ return [a[1],vals[i]]; }).filter(function(x){ return x[1]>0; }).sort(function(a,b){ return a[1]-b[1]; }).slice(0,3) : [];
+    return '<section class="ju-card"><div class="ju-head" style="'+tone("bemestar")+'"><span class="ic">'+ico("heart")+'</span><h3>Roda da vida</h3></div>'+
+      '<svg viewBox="-20 -10 340 320" style="width:100%;max-width:360px;display:block;margin:0 auto">'+grid+spokes+poly+'</svg>'+
+      (filled ? '<p class="ju-muted" style="font-size:12.5px;margin:6px 0 0">Áreas que mais pedem cuidado agora: <b>'+low.map(function(x){ return x[0]+' ('+x[1]+')'; }).join(", ")+'</b>. Elas devem pesar na escolha dos próximos passos dos sonhos.</p>' : '<p class="ju-empty">Dê uma nota de 0 a 10 para cada área da sua vida hoje. Refaça uma vez por mês para ver a evolução.</p>')+
+      '<button class="ju-btn soft block" data-act="roda" style="margin-top:10px">'+(filled?"Atualizar notas":"Dar minhas notas")+'</button></section>';
+  }
+  function sheetRoda(){
+    var r = J().roda || {};
+    openSheet("Roda da vida (0 a 10)", '<div class="ju-two" style="grid-template-columns:1fr 1fr">'+JU_RODA.map(function(a){ return '<label class="ju-field">'+a[1]+'<input name="'+a[0]+'" type="number" min="0" max="10" inputmode="numeric" value="'+(r[a[0]]!=null?r[a[0]]:"")+'"></label>'; }).join("")+'</div>',
+      function(f){ var o = {}; JU_RODA.forEach(function(a){ var v = parseFloat(f[a[0]].value); if(!isNaN(v)) o[a[0]] = Math.max(0,Math.min(10,Math.round(v))); }); o.em = todayKey(); J().roda = o; save(); toast("Roda da vida atualizada"); });
+  }
+  function sheetDream(){
+    openSheet("Novo sonho",
+      '<div class="ju-two"><label class="ju-field">Emoji<input name="em" maxlength="4" value="✨"></label><label class="ju-field">Sonho<input name="titulo" placeholder="Ex.: Intercâmbio" autocomplete="off"></label></div>'+
+      '<label class="ju-field">Frase que te inspira<input name="frase" placeholder="Como vai ser quando acontecer?" autocomplete="off"></label>'+
+      '<div class="ju-field">Prazo'+seg("hz", [["curto","até 1 ano"],["medio","1–3 anos"],["longo","3+ anos"]], "medio")+'</div>'+
+      '<label class="ju-field">Primeiro passo<input name="passo" placeholder="Ex.: pesquisar valores" autocomplete="off"></label>',
+      function(f){ var t = f.titulo.value.trim(); if(!t) return "Dê um nome ao sonho.";
+        dreams().push({id:uid("m"), titulo:t, em:f.em.value.trim()||"✨", cor:["#F3E7E2","#D99AA0"], horizonte:segVal(f,"hz")||"medio", frase:f.frase.value.trim(), detalhes:[], passos:f.passo.value.trim()?[{t:f.passo.value.trim(),f:false}]:[]});
+        save(); toast("Sonho no mural ✨"); });
+  }
+  function sheetDreamStep(id){
+    openSheet("Novo passo", '<label class="ju-field">Passo<input name="t" placeholder="Ex.: abrir conta de investimento" autocomplete="off"></label>',
+      function(f){ var t = f.t.value.trim(); if(!t) return "Escreva o passo."; var d = dreams().filter(function(x){ return x.id===id; })[0]; if(d){ (d.passos=d.passos||[]).push({t:t,f:false}); save(); } });
+  }
+  function dreamImage(input){
+    var file = input.files && input.files[0], id = input.dataset.dreamimg; if(!file) return;
+    var img = new Image(), url = URL.createObjectURL(file);
+    img.onload = function(){ var m = 560, s = Math.min(1, m/Math.max(img.width,img.height)), cv = document.createElement("canvas"); cv.width = Math.round(img.width*s); cv.height = Math.round(img.height*s);
+      cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height); URL.revokeObjectURL(url);
+      var d = dreams().filter(function(x){ return x.id===id; })[0]; if(d){ d.img = cv.toDataURL("image/jpeg",0.72); save(); toast("Imagem no mural"); } };
+    img.src = url;
+  }
+
   // ---------- Compras do mês: mercado (vem da dieta) + necessidades extras ----------
   var juShopTab = "mercado";
   function shopData(){
@@ -4296,8 +4408,8 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
 
   function renderView(view){
     var el = document.querySelector('.ju-view[data-view="'+view+'"]'); if(!el) return;
-    var fn = {inicio:viewInicio, plano:viewPlano, tracker:viewTracker, financas:viewFinancas, sono:viewSono, bemestar:viewBemestar, tarefas:viewTarefas, compras:viewCompras, estudos:viewEstudos, eu:viewEu}[view];
-    var sub = ["financas","sono","tarefas","compras","estudos"].indexOf(view)>-1;
+    var fn = {inicio:viewInicio, plano:viewPlano, tracker:viewTracker, financas:viewFinancas, sono:viewSono, bemestar:viewBemestar, tarefas:viewTarefas, compras:viewCompras, estudos:viewEstudos, sonhos:viewSonhos, eu:viewEu}[view];
+    var sub = ["financas","sono","tarefas","compras","estudos","sonhos"].indexOf(view)>-1;
     el.innerHTML = (sub ? '<div class="ju-sub"><button class="ju-back" data-go="inicio" aria-label="Voltar">'+ico("back")+'</button></div>' : '') + fn();
     if(view==="inicio"){ renderAgora(); requestAnimationFrame(updateChipbars); }
     if(view==="eu"){ var ib = document.getElementById("installApp"); var ji = document.getElementById("juInstall"); if(ji && ib && ib.hidden) ji.hidden = true; }
@@ -4329,7 +4441,7 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
         '<header class="ju-top"><button class="ju-avatar" data-go="eu" aria-label="Seu perfil"><img src="fotos/avatar.jpg" alt=""></button>'+
         '<h1 id="juTitle">Hoje</h1><span class="ju-date" id="juDate">'+ico("cal")+'<span></span></span></header>'+
         '<div class="ju-sync" id="juSync" aria-live="polite"></div>'+
-        ["inicio","plano","tracker","financas","sono","bemestar","tarefas","compras","estudos","eu"].map(function(v){ return '<section class="ju-view" data-view="'+v+'" hidden></section>'; }).join("")+
+        ["inicio","plano","tracker","financas","sono","bemestar","tarefas","compras","estudos","sonhos","eu"].map(function(v){ return '<section class="ju-view" data-view="'+v+'" hidden></section>'; }).join("")+
       '</div>'+
       '<nav class="ju-nav" aria-label="Navegação principal"><div>'+
         [["inicio","Início","home"],["plano","Meu plano","cal"],["tracker","Tracker","tasks"],["bemestar","Bem-estar","heart"],["eu","Você","user"]]
@@ -4347,10 +4459,13 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
     if(st && window.MutationObserver) new MutationObserver(function(){ var s = document.getElementById("juSync"); if(s) s.textContent = st.textContent; }).observe(st, {childList:true, characterData:true, subtree:true});
 
     document.addEventListener("click", function(e){
-      var t = e.target.closest("[data-go],[data-act],[data-legacy],[data-task],[data-habit],[data-water],[data-pay],[data-deltx],[data-deltask],[data-delhabit],[data-day],[data-month],[data-mood],[data-proxy],[data-shop],[data-shoptab],[data-shopadd],[data-shopreset],[data-delshop],[data-treino],[data-study],[data-delstudy],[data-sfilter],[data-chipscroll],#juPhoto");
+      var t = e.target.closest("[data-go],[data-act],[data-legacy],[data-task],[data-habit],[data-water],[data-pay],[data-deltx],[data-deltask],[data-delhabit],[data-day],[data-month],[data-mood],[data-proxy],[data-shop],[data-shoptab],[data-shopadd],[data-shopreset],[data-delshop],[data-treino],[data-study],[data-delstudy],[data-sfilter],[data-chipscroll],[data-dreamstep],[data-dreamadd],[data-dreamdel],#juPhoto");
       if(!t || !t.closest(".ju, .ju-nav, .ju-legacy-bar")) return;
       if(t.id==="juPhoto"){ photoOffset++; var img = document.getElementById("juPhotoImg"); if(img) img.src = photoOfDay(photoOffset); return; }
       if(t.dataset.go){ go(t.dataset.go); return; }
+      if(t.dataset.dreamstep){ var dr = t.dataset.dreamstep.split(":"), dd = dreams().filter(function(x){ return x.id===dr[0]; })[0]; if(dd && dd.passos[+dr[1]]){ var st = dd.passos[+dr[1]]; st.f = !st.f; save(); if(st.f) toast("Mais um passo rumo ao sonho ✨"); } return; }
+      if(t.dataset.dreamadd){ sheetDreamStep(t.dataset.dreamadd); return; }
+      if(t.dataset.dreamdel){ armDelete(t, function(){ var a4 = dreams(), ix4 = a4.map(function(x){ return x.id; }).indexOf(t.dataset.dreamdel); if(ix4>-1){ a4.splice(ix4,1); save(); } }); return; }
       if(t.dataset.chipscroll){ var cs = t.parentNode.querySelector(".ju-chips"); if(cs) cs.scrollBy({left:(+t.dataset.chipscroll)*Math.max(160, cs.clientWidth*0.7), behavior:"smooth"}); return; }
       if(t.dataset.sfilter){ juStudyFilter = t.dataset.sfilter; renderView("estudos"); return; }
       if(t.dataset.study){ var si = studies().filter(function(x){ return x.id===t.dataset.study; })[0]; if(si){ si.feito = !si.feito; save(); if(si.feito) toast("Concluído ✓"); } return; }
@@ -4378,7 +4493,7 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
         if(a==="gasto"||a==="entrada") sheetTx(a);
         else if(a==="bill") sheetBill("bill"); else if(a==="sub") sheetBill("sub");
         else if(a==="sleep") sheetSleep(); else if(a==="mood") sheetMood(k);
-        else if(a==="task") sheetTask(); else if(a==="study") sheetStudy(); else if(a==="habit") sheetHabit();
+        else if(a==="task") sheetTask(); else if(a==="study") sheetStudy(); else if(a==="dream") sheetDream(); else if(a==="roda") sheetRoda(); else if(a==="habit") sheetHabit();
         else if(a==="period"){ var s = J().cycle.starts || (J().cycle.starts=[]); if(s.indexOf(k)<0){ s.push(k); save(); toast("Início do ciclo registrado"); } else toast("Hoje já está registrado"); }
         return;
       }
@@ -4409,13 +4524,14 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
       if(e.key==="Enter" && e.target && e.target.id==="juShopNew"){ e.preventDefault(); var b = document.querySelector("[data-shopadd]"); if(b) b.click(); }
     });
     document.addEventListener("change", function(e){
+      if(e.target && e.target.dataset && e.target.dataset.dreamimg){ dreamImage(e.target); return; }
       var id = e.target.id, v = parseFloat(e.target.value);
       if(id==="juGoal" && v>=4 && v<=12){ J().sleepGoal = v; persist(); toast("Meta de sono atualizada"); }
       if(id==="juCycleLen" && v>=18 && v<=45){ J().cycle.len = Math.round(v); persist(); }
       if(id==="juCycleDur" && v>=2 && v<=10){ J().cycle.dur = Math.round(v); persist(); }
     });
     var saved = "inicio"; try{ saved = localStorage.getItem("painelJuView") || "inicio"; }catch(e){}
-    juView = ["inicio","plano","tracker","financas","sono","bemestar","tarefas","compras","estudos","eu"].indexOf(saved)>-1 ? saved : "inicio";
+    juView = ["inicio","plano","tracker","financas","sono","bemestar","tarefas","compras","estudos","sonhos","eu"].indexOf(saved)>-1 ? saved : "inicio";
   }
   function shellStart(){ go(juView); }
 
