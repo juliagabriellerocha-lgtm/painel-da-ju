@@ -336,7 +336,7 @@
 
     return ''+
     '<div class="ju-chips" role="navigation" aria-label="Atalhos">'+
-      chip("plano","Agenda","cal","agenda")+chip("tarefas","Tarefas","tasks","tarefas")+chip("compras","Compras","bag","habitos")+chip("financas","Finanças","coin","financas")+
+      chip("plano","Agenda","cal","agenda")+chip("tarefas","Tarefas","tasks","tarefas")+chip("compras","Compras","bag","habitos")+chip("financas","Finanças","coin","financas")+'<button class="ju-chip" data-legacy="progresso" style="'+tone("habitos")+'"><i>'+ico("trend")+'</i><span>Evolução</span></button>'+
       chip("sono","Sono","moon","sono")+chip("bemestar","Bem-estar","heart","bemestar")+chip("tracker","Hábitos","leaf","habitos")+
     '</div>'+
     '<div class="ju-hello"><div><h2>'+greet+', Ju!</h2><p>'+esc(helloLine())+'</p></div>'+
@@ -433,6 +433,9 @@
       });
     });
     html += '<button class="ju-btn soft block" data-act="habit">'+ico("plus")+' Novo hábito</button>';
+    html += '<section class="ju-card"><div class="ju-head" style="'+tone("financas")+'"><span class="ic">'+ico("trend")+'</span><h3>Dashboards de evolução</h3></div>'+
+      '<p class="ju-muted" style="margin:0 0 12px">Índice geral, sequência de treino, rotina, água, dívidas quitadas, estudos e a revisão semanal por área.</p>'+
+      '<div class="ju-grid"><button class="ju-btn primary" data-legacy="progresso">'+ico("chart")+' Progresso</button><button class="ju-btn soft" data-legacy="projecoes">'+ico("star")+' Projeções</button></div></section>';
     return html;
   }
 

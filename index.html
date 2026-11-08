@@ -2717,7 +2717,7 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
 
   // ---------- render: Projeções (revisão semanal) ----------
   var AREAS = [
-    {key:"profissional", label:"Profissional", color:"--profissional", kind:"pct", eps:8, hint:"% da meta de setembro realizada",
+    {key:"profissional", label:"Profissional", color:"--profissional", kind:"pct", eps:8, hint:"% da meta do mês realizada",
       calc:function(s){ var k=s.professional.kpis; return {value: Math.round((k.realizado/k.metaSetembro)*1000)/10}; }},
     {key:"dividas", label:"Dívidas", color:"--warn", kind:"money", lowerIsBetter:true, hint:"valor total ainda pendente",
       calc:function(s){ var v=s.debts.filter(function(d){return d.status!=="pago";}).reduce(function(a,d){return a+(Number(d.value)||0);},0); return {value: Math.round(v*100)/100}; }},
@@ -3815,7 +3815,7 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
 
     return ''+
     '<div class="ju-chips" role="navigation" aria-label="Atalhos">'+
-      chip("plano","Agenda","cal","agenda")+chip("tarefas","Tarefas","tasks","tarefas")+chip("compras","Compras","bag","habitos")+chip("financas","Finanças","coin","financas")+
+      chip("plano","Agenda","cal","agenda")+chip("tarefas","Tarefas","tasks","tarefas")+chip("compras","Compras","bag","habitos")+chip("financas","Finanças","coin","financas")+'<button class="ju-chip" data-legacy="progresso" style="'+tone("habitos")+'"><i>'+ico("trend")+'</i><span>Evolução</span></button>'+
       chip("sono","Sono","moon","sono")+chip("bemestar","Bem-estar","heart","bemestar")+chip("tracker","Hábitos","leaf","habitos")+
     '</div>'+
     '<div class="ju-hello"><div><h2>'+greet+', Ju!</h2><p>'+esc(helloLine())+'</p></div>'+
@@ -3912,6 +3912,9 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
       });
     });
     html += '<button class="ju-btn soft block" data-act="habit">'+ico("plus")+' Novo hábito</button>';
+    html += '<section class="ju-card"><div class="ju-head" style="'+tone("financas")+'"><span class="ic">'+ico("trend")+'</span><h3>Dashboards de evolução</h3></div>'+
+      '<p class="ju-muted" style="margin:0 0 12px">Índice geral, sequência de treino, rotina, água, dívidas quitadas, estudos e a revisão semanal por área.</p>'+
+      '<div class="ju-grid"><button class="ju-btn primary" data-legacy="progresso">'+ico("chart")+' Progresso</button><button class="ju-btn soft" data-legacy="projecoes">'+ico("star")+' Projeções</button></div></section>';
     return html;
   }
 
