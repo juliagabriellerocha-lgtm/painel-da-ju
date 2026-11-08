@@ -3613,7 +3613,19 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
   function habitsToday(){ var k = todayKey(); var hs = J().habits; var done = hs.filter(function(h){ return habitDone(h,k); }).length; return {done:done, total:hs.length}; }
   function water(k){ return (state.diet.log[k||todayKey()]||{}).water||0; }
 
-  function monthTx(mk){ return J().money.tx.filter(function(t){ return String(t.data).slice(0,7)===mk; }); }
+  // Lançamentos e contas que a automação diária grava em financas/espelho (só existe no painel da Claude).
+  function extFin(){
+    var E = (typeof espelhoData!=="undefined" && espelhoData) ? espelhoData : null;
+    var own = {}; J().money.tx.forEach(function(t){ own[t.id] = 1; });
+    var tx = E && Array.isArray(E.lancamentos) ? E.lancamentos.filter(function(l){ return l && l.data && !own[l.id]; }).map(function(l){
+      var v = Number(l.valor)||0;
+      return {id:l.id, tipo:v<0?"saida":"entrada", valor:Math.abs(v), desc:l.desc, cat:v<0?"outros":"reembolso", data:String(l.data).slice(0,10), conta:l.conta, ext:true, pend:l.status==="pendente"};
+    }) : [];
+    var contas = E && Array.isArray(E.contas) ? E.contas : [];
+    return {tx:tx, contas:contas, quando:E ? (E.atualizadoEmTexto||"") : ""};
+  }
+  function allTx(){ return J().money.tx.concat(extFin().tx); }
+  function monthTx(mk){ return allTx().filter(function(t){ return String(t.data).slice(0,7)===mk; }); }
   function sums(mk){
     var tx = monthTx(mk), ent = 0, sai = 0;
     tx.forEach(function(t){ if(t.tipo==="entrada") ent += t.valor; else sai += t.valor; });
@@ -3797,6 +3809,7 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
     var blocks = todaysBlocks(), m = now.getHours()*60+now.getMinutes();
     var nextBlocks = blocks.filter(function(b){ return toMin(b.fim) > m; }).slice(0,3);
     var ag = (state.agenda||[]).filter(function(a){ return a && a.date===k; });
+    var soon = (state.agenda||[]).filter(function(a){ return a && a.date && a.date>k && a.date<=dKey(addDays(now,14)); }).sort(function(a,b){ return (a.date+(a.time||"")).localeCompare(b.date+(b.time||"")); }).slice(0,3);
     var mood = J().mood[k], moodE = mood && mood.v ? (JU_MOODS.filter(function(x){return x.v===mood.v;})[0]||{}).e : null;
     var moodStrip = ""; for(var i=6;i>=0;i--){ var mm = J().mood[todayKey(-i)]; moodStrip += '<b style="height:'+(mm&&mm.v?20+mm.v*9:6)+'px" class="'+(mm&&mm.v?"":"off")+'"></b>'; }
 
@@ -3814,6 +3827,7 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
           ag.map(function(a){ return '<li style="--c:var(--j-red)"><span class="dot"></span><span class="t">'+esc(a.time||"—")+'</span><span class="x">'+esc(a.title||"Compromisso")+'</span></li>'; }).join("")+
           nextBlocks.slice(0, Math.max(0,3-ag.length)).map(function(b){ return '<li style="--c:var('+(AREA_COLOR[b.area]||"--j-rose")+')"><span class="dot"></span><span class="t">'+esc(b.ini)+'</span><span class="x">'+esc(blockLabel(b))+'</span></li>'; }).join("")+
         '</ul>' : '<p class="ju-empty">Dia livre a partir de agora.</p>')+
+        (soon.length ? '<span class="ju-label" style="display:block;margin-top:10px">Próximos dias</span><ul class="ju-list ju-agenda">'+soon.map(function(a){ return '<li style="--c:var(--j-red)"><span class="dot"></span><span class="t">'+esc(fmtDay(parseKey(a.date)))+'</span><span class="x">'+esc(a.title||"Compromisso")+'</span></li>'; }).join("")+'</ul>' : '')+
         '<button class="ju-more" data-go="plano">Ver agenda '+ico("chev")+'</button></section>'+
       '<section class="ju-card" style="'+tone("tarefas")+'"><div class="ju-head"><span class="ic">'+ico("tasks")+'</span><h3>Minhas tarefas</h3><button class="ju-plus" data-act="task" aria-label="Nova tarefa">'+ico("plus")+'</button></div>'+
         (tasks.length ? '<ul class="ju-list">'+tasks.map(taskRow).join("")+'</ul>' : '<p class="ju-empty">Nada pendente para hoje. Toque em + para anotar.</p>')+
@@ -3906,17 +3920,26 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
     var subsTotal = mo.subs.reduce(function(a,b){ return a+b.valor; },0);
     var fixas = mo.bills.filter(function(b){ return b.recorrente; });
     var fixasTotal = fixas.reduce(function(a,b){ return a+b.valor; },0);
+    fixasTotal += extFin().contas.reduce(function(a,c){ return a+(Number(c.previsto)||0); },0);
     var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     var pending = mo.bills.concat(mo.subs.map(function(x){ return {id:x.id, nome:x.nome, valor:x.valor, recorrente:true, dia:x.dia, pagos:x.pagos||{}, sub:true}; }))
       .filter(function(b){ return !billPaid(b) && billDue(b); })
       .map(function(b){ var d = billDue(b); return {b:b, d:d, days:Math.round((d-today)/86400000)}; })
+      .concat(extFin().contas.filter(function(c){ return c && c.status!=="paga" && c.venceEm; }).map(function(c){
+        var d = parseKey(String(c.venceEm).slice(0,10));
+        return {b:{id:c.id, nome:c.nome, valor:Number(c.previsto)||0, ext:true, conta:c.tipo==="lar" ? "Lar · "+(c.responsavel||"") : (c.conta||"")}, d:d, days:Math.round((d-today)/86400000)};
+      }))
       .sort(function(a,b){ return a.d-b.d; });
     var byCat = {}; monthTx(mk).filter(function(t){ return t.tipo!=="entrada"; }).forEach(function(t){ byCat[t.cat] = (byCat[t.cat]||0)+t.valor; });
     var cats = Object.keys(byCat).map(function(id){ var c = JU_CATS.filter(function(x){return x.id===id;})[0] || JU_CATS[JU_CATS.length-1]; return {c:c, v:byCat[id]}; }).sort(function(a,b){ return b.v-a.v; });
     var total = cats.reduce(function(a,b){ return a+b.v; },0);
     var donut = "", off = 0, r = 40, circ = 2*Math.PI*r;
     cats.forEach(function(x){ var len = total? x.v/total*circ : 0; donut += '<circle cx="50" cy="50" r="'+r+'" fill="none" stroke="'+x.c.cor+'" stroke-width="16" stroke-dasharray="'+Math.max(0,len-1.5).toFixed(2)+' '+circ.toFixed(2)+'" stroke-dashoffset="'+(-off).toFixed(2)+'"/>'; off += len; });
-    var recent = mo.tx.slice().sort(function(a,b){ return String(b.data).localeCompare(String(a.data)); }).slice(0,8);
+    var recent = allTx().sort(function(a,b){ return String(b.data).localeCompare(String(a.data)); }).slice(0,10);
+    var debts = (state.debts||[]).filter(function(d){ return d && d.status!=="pago" && d.status!=="quitado"; });
+    var debtTotal = debts.reduce(function(a,d){ return a+(Number(d.value)||0); },0);
+    var debtGroups = {}; debts.forEach(function(d){ var g = d.group||"Outras"; (debtGroups[g] = debtGroups[g] || {n:0, v:0}); debtGroups[g].n++; debtGroups[g].v += Number(d.value)||0; });
+    var ef = extFin();
     var monthName = now.toLocaleDateString("pt-BR",{month:"long"});
     return ''+
     '<section class="ju-card ju-money-hero"><span class="ic">'+ico("wallet")+'</span><div style="flex:1;min-width:0"><span class="ju-label">Saldo de '+monthName+'</span>'+
@@ -3936,7 +3959,7 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
         return '<li class="ju-bill"><span class="em">'+(p.b.sub?"📺":"🧾")+'</span><div style="min-width:0"><div class="nm">'+esc(p.b.nome)+'</div>'+
           '<div class="dd">'+(late?'venceu '+fmtDay(p.d):p.days===0?'vence hoje':p.days===1?'vence amanhã':'vence '+fmtDay(p.d))+'</div>'+
           '<div class="ju-progress" style="--c:'+col+'"><i style="width:'+pct.toFixed(0)+'%"></i></div></div>'+
-          '<div><div class="vl '+(late?"down":"")+'">'+money(p.b.valor)+'</div><button class="pay" data-pay="'+esc(p.b.id)+'">Paguei</button></div></li>';
+          '<div><div class="vl '+(late?"down":"")+'">'+money(p.b.valor)+'</div>'+(p.b.ext ? '<small class="ju-muted" style="font-size:11px">'+esc(p.b.conta||"")+'</small>' : '<button class="pay" data-pay="'+esc(p.b.id)+'">Paguei</button>')+'</div></li>';
       }).join("")+'</ul>' : '<p class="ju-empty">Nenhuma conta pendente neste mês. Cadastre luz, internet, aluguel e o app avisa o vencimento.</p>')+'</section>'+
     '<section class="ju-card"><div class="ju-head" style="'+tone("financas")+'"><span class="ic">'+ico("chart")+'</span><h3>Gastos por categoria</h3></div>'+
       (cats.length ? '<div class="ju-donut"><div style="position:relative"><svg viewBox="0 0 100 100">'+donut+'</svg><div style="position:absolute;inset:0;display:grid;place-items:center;text-align:center;font-size:12px;color:var(--j-soft)">Neste<br>mês</div></div>'+
@@ -3945,9 +3968,14 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
     '<section class="ju-card"><div class="ju-head"><span class="ic" style="'+tone("financas")+'">'+ico("trend")+'</span><h3>Últimos lançamentos</h3></div>'+
       (recent.length ? '<ul class="ju-list">'+recent.map(function(t){
         var c = t.tipo==="entrada" ? (JU_IN_CATS.filter(function(x){return x.id===t.cat;})[0]||JU_IN_CATS[0]) : (JU_CATS.filter(function(x){return x.id===t.cat;})[0]||JU_CATS[JU_CATS.length-1]);
-        return '<li class="ju-tx"><span class="em">'+c.em+'</span><span style="min-width:0">'+esc(t.desc||c.nome)+'<small>'+fmtDay(parseKey(t.data))+' · '+esc(c.nome)+'</small></span>'+
-          '<b class="num '+(t.tipo==="entrada"?"up":"")+'">'+(t.tipo==="entrada"?"+":"−")+money(t.valor).replace("R$ ","R$ ")+'</b><button class="ju-del" data-deltx="'+esc(t.id)+'" aria-label="Apagar">'+ico("trash")+'</button></li>';
+        return '<li class="ju-tx"><span class="em">'+c.em+'</span><span style="min-width:0">'+esc(t.desc||c.nome)+'<small>'+fmtDay(parseKey(t.data))+' · '+esc(t.ext ? (t.conta||"e-mail")+(t.pend?" · a setorizar":"") : c.nome)+'</small></span>'+
+          '<b class="num '+(t.tipo==="entrada"?"up":"")+'">'+(t.tipo==="entrada"?"+":"−")+money(t.valor).replace("R$ ","R$ ")+'</b>'+(t.ext ? '<span></span>' : '<button class="ju-del" data-deltx="'+esc(t.id)+'" aria-label="Apagar">'+ico("trash")+'</button>')+'</li>';
       }).join("")+'</ul>' : '<p class="ju-empty">Ainda sem lançamentos.</p>')+'</section>'+
+    (debts.length ? '<section class="ju-card"><div class="ju-head" style="'+tone("financas")+'"><span class="ic">'+ico("chart")+'</span><h3>Dívidas em aberto</h3></div>'+
+      '<span class="ju-label">'+debts.length+' itens pendentes</span><div class="ju-mid down">'+money(debtTotal)+'</div>'+
+      '<ul class="ju-legend" style="margin-top:10px">'+Object.keys(debtGroups).map(function(g){ return '<li><i style="background:var(--j-gold)"></i><span>'+esc(g)+' ('+debtGroups[g].n+')</span><b>'+(debtGroups[g].v?money(debtGroups[g].v):"valor a confirmar")+'</b></li>'; }).join("")+'</ul>'+
+      '<button class="ju-more" data-legacy="dividas">Ver plano de quitação '+ico("chev")+'</button></section>' : '')+
+    (ef.quando ? '<p class="ju-muted" style="font-size:12px;text-align:center;margin:0">Contas e lançamentos do e-mail atualizados em '+esc(ef.quando)+'.</p>' : '')+
     '<div class="ju-grid"><button class="ju-btn ghost" data-legacy="financeiro">Relatório completo</button><button class="ju-btn ghost" data-legacy="dividas">Dívidas</button></div>';
   }
 
