@@ -532,6 +532,25 @@
   function stat(em, label, val){ return '<section class="ju-card ju-stat"><div class="em">'+em+'</div><span class="ju-label">'+label+'</span><div class="ju-mid">'+val+'</div></section>'; }
 
   // Dieta do dia: cardápio de hoje (state.diet.plan), água e suplementos.
+  function treinoDoDia(){
+    var keys = ["dom","seg","ter","qua","qui","sex","sab"], now = new Date(), dk = keys[now.getDay()], k = todayKey();
+    var plan = (state.workout && state.workout.plan && state.workout.plan[dk]) || "Descanso";
+    var log = (state.workout && state.workout.log) || {}, done = !!log[k];
+    var m = /Treino\s+([A-Z])\b/.exec(plan);
+    var det = m && typeof WORKOUT_DETAIL!=="undefined" ? WORKOUT_DETAIL.filter(function(w){ return w.letter===m[1]; })[0] : null;
+    var cut = plan.indexOf(":"), titulo = cut>-1 ? plan.slice(0,cut) : plan, resumo = cut>-1 ? plan.slice(cut+1).trim() : "";
+    var week = ""; for(var i=6;i>=0;i--){ var d = addDays(now,-i), kk = dKey(d); week += '<span style="flex:1;text-align:center"><b style="display:block;height:26px;border-radius:8px;margin-bottom:4px;background:'+(log[kk]?"var(--j-green)":"var(--j-surface-2)")+(kk===k?";outline:2px solid var(--j-green);outline-offset:1px":"")+'"></b><small class="ju-muted" style="font-size:10.5px">'+JU_WEEK[d.getDay()]+'</small></span>'; }
+    var body = det ? det.blocks.map(function(b){
+        return '<li style="display:block"><span class="ju-label" style="display:block">'+esc(b.name)+'</span>'+b.items.map(function(it){
+          return '<div style="display:flex;justify-content:space-between;gap:10px;font-size:13.5px;padding:2px 0"><span style="min-width:0">'+esc(it[0])+'</span><span class="ju-muted num" style="white-space:nowrap">'+esc(it[1])+'</span></div>'; }).join("")+'</li>';
+      }).join("")
+      : (resumo ? '<li style="display:block">'+esc(resumo)+'</li>' : '');
+    return '<section class="ju-card" style="'+tone("treino")+'"><div class="ju-head"><span class="ic">'+ico("dumb")+'</span><h3>Treino do dia</h3><span class="ju-muted">'+esc(det ? det.title : "")+'</span></div>'+
+      '<div class="ju-mid" style="font-size:22px">'+esc(titulo)+'</div>'+
+      (body ? '<ul class="ju-list" style="gap:10px;margin-top:10px">'+body+'</ul>' : '')+
+      '<span class="ju-label" style="display:block;margin-top:14px">Últimos 7 dias</span><div style="display:flex;gap:6px;margin-top:6px">'+week+'</div>'+
+      '<div class="ju-grid" style="margin-top:12px"><button class="ju-btn '+(done?"soft":"primary")+'" data-treino="1">'+(done?"✓ Treino feito":"Marcar treino feito")+'</button><button class="ju-btn ghost" data-legacy="treino">Ficha completa</button></div></section>';
+  }
   function dietaDoDia(){
     var dk = ["dom","seg","ter","qua","qui","sex","sab"][new Date().getDay()];
     var plan = (state.diet && state.diet.plan && state.diet.plan[dk]) || {};
@@ -570,7 +589,7 @@
     var ci = cycleInfo();
     var liturgia = state.spirituality && state.spirituality.dailyLog && state.spirituality.dailyLog[k];
     var monthLabel = juMonth.toLocaleDateString("pt-BR",{month:"long"});
-    return dietaDoDia()+
+    return dietaDoDia()+treinoDoDia()+
     '<section class="ju-card" style="'+tone("bemestar")+'"><div class="ju-head"><span class="ic">'+ico("heart")+'</span><h3>Como você está hoje?</h3></div>'+
       '<div class="ju-moods">'+JU_MOODS.map(function(m){ return '<button type="button" data-mood="'+m.v+'" class="'+(mood&&mood.v===m.v?"on":"")+'">'+m.e+'<small>'+m.t+'</small></button>'; }).join("")+'</div>'+
       (mood&&mood.nota?'<p class="ju-muted" style="margin:10px 0 0">“'+esc(mood.nota)+'”</p>':'')+
@@ -711,10 +730,11 @@
     if(st && window.MutationObserver) new MutationObserver(function(){ var s = document.getElementById("juSync"); if(s) s.textContent = st.textContent; }).observe(st, {childList:true, characterData:true, subtree:true});
 
     document.addEventListener("click", function(e){
-      var t = e.target.closest("[data-go],[data-act],[data-legacy],[data-task],[data-habit],[data-water],[data-pay],[data-deltx],[data-deltask],[data-delhabit],[data-day],[data-month],[data-mood],[data-proxy],[data-shop],[data-shoptab],[data-shopadd],[data-shopreset],[data-delshop],#juPhoto");
+      var t = e.target.closest("[data-go],[data-act],[data-legacy],[data-task],[data-habit],[data-water],[data-pay],[data-deltx],[data-deltask],[data-delhabit],[data-day],[data-month],[data-mood],[data-proxy],[data-shop],[data-shoptab],[data-shopadd],[data-shopreset],[data-delshop],[data-treino],#juPhoto");
       if(!t || !t.closest(".ju, .ju-nav, .ju-legacy-bar")) return;
       if(t.id==="juPhoto"){ photoOffset++; var img = document.getElementById("juPhotoImg"); if(img) img.src = photoOfDay(photoOffset); return; }
       if(t.dataset.go){ go(t.dataset.go); return; }
+      if(t.dataset.treino){ var wl = state.workout.log || (state.workout.log = {}), tk2 = todayKey(); if(wl[tk2]) delete wl[tk2]; else { wl[tk2] = true; toast("Treino registrado 💪"); } save(); return; }
       if(t.dataset.shoptab){ juShopTab = t.dataset.shoptab; renderView("compras"); return; }
       if(t.dataset.shop || t.dataset.delshop){
         var ref = (t.dataset.shop||t.dataset.delshop).split(":"), arr = ref[0]==="extras" ? shopData().extras : shopData().items;
