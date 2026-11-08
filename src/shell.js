@@ -335,10 +335,11 @@
     var moodStrip = ""; for(var i=6;i>=0;i--){ var mm = J().mood[todayKey(-i)]; moodStrip += '<b style="height:'+(mm&&mm.v?20+mm.v*9:6)+'px" class="'+(mm&&mm.v?"":"off")+'"></b>'; }
 
     return ''+
+    '<div class="ju-chipbar"><button type="button" class="ju-chip-arrow prev" data-chipscroll="-1" aria-label="Ver atalhos anteriores" hidden>'+ico("back")+'</button>'+
     '<div class="ju-chips" role="navigation" aria-label="Atalhos">'+
       chip("plano","Agenda","cal","agenda")+chip("estudos","Estudos","cap","sono")+chip("tarefas","Tarefas","tasks","tarefas")+chip("compras","Compras","bag","habitos")+chip("financas","Finanças","coin","financas")+'<button class="ju-chip" data-legacy="progresso" style="'+tone("habitos")+'"><i>'+ico("trend")+'</i><span>Evolução</span></button>'+
       chip("sono","Sono","moon","sono")+chip("bemestar","Bem-estar","heart","bemestar")+chip("tracker","Hábitos","leaf","habitos")+
-    '</div>'+
+    '</div><button type="button" class="ju-chip-arrow next" data-chipscroll="1" aria-label="Ver mais atalhos" hidden>'+ico("chev")+'</button></div>'+
     '<div class="ju-hello"><div><h2>'+greet+', Ju!</h2><p>'+esc(helloLine())+'</p></div>'+
       '<button type="button" id="juPhoto" aria-label="Trocar foto"><img id="juPhotoImg" src="'+photoOfDay(photoOffset)+'" alt="Foto da Ju"></button></div>'+
     '<div id="agoraSlot"></div>'+
@@ -760,8 +761,18 @@
     var fn = {inicio:viewInicio, plano:viewPlano, tracker:viewTracker, financas:viewFinancas, sono:viewSono, bemestar:viewBemestar, tarefas:viewTarefas, compras:viewCompras, estudos:viewEstudos, eu:viewEu}[view];
     var sub = ["financas","sono","tarefas","compras","estudos"].indexOf(view)>-1;
     el.innerHTML = (sub ? '<div class="ju-sub"><button class="ju-back" data-go="inicio" aria-label="Voltar">'+ico("back")+'</button></div>' : '') + fn();
-    if(view==="inicio") renderAgora();
+    if(view==="inicio"){ renderAgora(); requestAnimationFrame(updateChipbars); }
     if(view==="eu"){ var ib = document.getElementById("installApp"); var ji = document.getElementById("juInstall"); if(ji && ib && ib.hidden) ji.hidden = true; }
+  }
+  // Setas e esmaecimento nas bordas dos atalhos, conforme há mais conteúdo para cada lado.
+  function updateChipbars(){
+    document.querySelectorAll(".ju-chipbar").forEach(function(bar){
+      var c = bar.querySelector(".ju-chips"); if(!c) return;
+      var max = c.scrollWidth - c.clientWidth, left = c.scrollLeft > 4, right = c.scrollLeft < max - 4;
+      bar.classList.toggle("more-l", left); bar.classList.toggle("more-r", right && max > 4);
+      var p = bar.querySelector(".prev"), n = bar.querySelector(".next");
+      if(p) p.hidden = !left; if(n) n.hidden = !(right && max > 4);
+    });
   }
   function renderShell(){
     if(!document.getElementById("ju") || !state) return;
@@ -798,10 +809,11 @@
     if(st && window.MutationObserver) new MutationObserver(function(){ var s = document.getElementById("juSync"); if(s) s.textContent = st.textContent; }).observe(st, {childList:true, characterData:true, subtree:true});
 
     document.addEventListener("click", function(e){
-      var t = e.target.closest("[data-go],[data-act],[data-legacy],[data-task],[data-habit],[data-water],[data-pay],[data-deltx],[data-deltask],[data-delhabit],[data-day],[data-month],[data-mood],[data-proxy],[data-shop],[data-shoptab],[data-shopadd],[data-shopreset],[data-delshop],[data-treino],[data-study],[data-delstudy],[data-sfilter],#juPhoto");
+      var t = e.target.closest("[data-go],[data-act],[data-legacy],[data-task],[data-habit],[data-water],[data-pay],[data-deltx],[data-deltask],[data-delhabit],[data-day],[data-month],[data-mood],[data-proxy],[data-shop],[data-shoptab],[data-shopadd],[data-shopreset],[data-delshop],[data-treino],[data-study],[data-delstudy],[data-sfilter],[data-chipscroll],#juPhoto");
       if(!t || !t.closest(".ju, .ju-nav, .ju-legacy-bar")) return;
       if(t.id==="juPhoto"){ photoOffset++; var img = document.getElementById("juPhotoImg"); if(img) img.src = photoOfDay(photoOffset); return; }
       if(t.dataset.go){ go(t.dataset.go); return; }
+      if(t.dataset.chipscroll){ var cs = t.parentNode.querySelector(".ju-chips"); if(cs) cs.scrollBy({left:(+t.dataset.chipscroll)*Math.max(160, cs.clientWidth*0.7), behavior:"smooth"}); return; }
       if(t.dataset.sfilter){ juStudyFilter = t.dataset.sfilter; renderView("estudos"); return; }
       if(t.dataset.study){ var si = studies().filter(function(x){ return x.id===t.dataset.study; })[0]; if(si){ si.feito = !si.feito; save(); if(si.feito) toast("Concluído ✓"); } return; }
       if(t.dataset.delstudy){ armDelete(t, function(){ var a3 = studies(), ix3 = a3.map(function(x){ return x.id; }).indexOf(t.dataset.delstudy); if(ix3>-1){ a3.splice(ix3,1); save(); } }); return; }
@@ -853,6 +865,8 @@
         else sheetMood(t.dataset.day);
       }
     });
+    document.addEventListener("scroll", function(e){ if(e.target && e.target.classList && e.target.classList.contains("ju-chips")) updateChipbars(); }, true);
+    window.addEventListener("resize", updateChipbars);
     document.addEventListener("keydown", function(e){
       if(e.key==="Enter" && e.target && e.target.id==="juShopNew"){ e.preventDefault(); var b = document.querySelector("[data-shopadd]"); if(b) b.click(); }
     });
