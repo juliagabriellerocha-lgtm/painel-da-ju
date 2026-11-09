@@ -360,3 +360,8 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
 .ju-dream .dt{margin:8px 0 0;padding-left:18px;font-size:12.5px;line-height:1.45;color:var(--j-soft);}
 @media (max-width:360px){ .ju-mural{grid-template-columns:1fr;} }
 .ju-mural .ju-dream:nth-child(even):last-child{grid-column:1/-1;}
+
+/* treino: séries e carga */
+.ju-set{width:30px;height:30px;border-radius:9px;border:1.5px solid var(--j-line);background:var(--j-surface);color:var(--j-soft);font:600 12px/1 inherit;cursor:pointer;padding:0;}
+.ju-set.on{background:var(--j-green);border-color:var(--j-green);color:#fff;}
+.ju-kg{width:70px!important;flex:none;min-height:0!important;padding:6px 8px;border-radius:10px;border:1px solid var(--j-line);background:var(--j-surface);color:var(--j-ink);font:inherit;font-size:13px;text-align:right;}

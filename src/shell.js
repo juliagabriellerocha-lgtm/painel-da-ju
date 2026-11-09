@@ -131,6 +131,12 @@
     while(habitDone(h, dKey(d)) && n < 400){ n++; d = addDays(d,-1); }
     return n;
   }
+  function habitDots(h){
+    var out = '', d0 = addDays(new Date(),-6), k0 = todayKey();
+    for(var i=0;i<7;i++){ var d = addDays(d0,i), k = dKey(d), on = habitDone(h,k);
+      out += '<i title="'+JU_WEEK[d.getDay()]+'" style="width:15px;height:15px;border-radius:5px;display:inline-block;background:'+(on?'var(--j-green)':'var(--j-surface-2)')+(k===k0?';outline:2px solid var(--j-green);outline-offset:1px':'')+'"></i>'; }
+    return '<div style="display:flex;gap:5px;margin-top:6px" aria-label="Últimos 7 dias">'+out+'</div>';
+  }
   function habitsToday(){ var k = todayKey(); var hs = J().habits; var done = hs.filter(function(h){ return habitDone(h,k); }).length; return {done:done, total:hs.length}; }
   function water(k){ return (state.diet.log[k||todayKey()]||{}).water||0; }
 
@@ -429,7 +435,7 @@
         var sub = h.tipo==="treino" ? '<div class="ju-muted">'+esc(todaysWorkoutShort())+'</div>' : "";
         html += '<div class="ju-habit'+(done?" done":"")+'"><button class="tick" data-habit="'+esc(h.id)+'" aria-label="'+(done?"Desmarcar":"Concluir")+' '+esc(h.nome)+'">'+ico("check")+'</button>'+
           '<div style="min-width:0"><div class="tags"><span class="ju-tag">Hábito</span><span class="ju-streak">'+(st?"🔥 "+st+(st>1?" dias":" dia"):"comece hoje")+'</span></div>'+
-          '<div class="nm">'+esc(h.em||"")+' '+esc(h.nome)+'</div>'+sub+'</div>'+
+          '<div class="nm">'+esc(h.em||"")+' '+esc(h.nome)+'</div>'+sub+habitDots(h)+'</div>'+
           '<button class="ju-del" data-delhabit="'+esc(h.id)+'" aria-label="Apagar">'+ico("trash")+'</button>'+wb+'</div>';
       });
     });
@@ -533,6 +539,100 @@
   function stat(em, label, val){ return '<section class="ju-card ju-stat"><div class="em">'+em+'</div><span class="ju-label">'+label+'</span><div class="ju-mid">'+val+'</div></section>'; }
 
   // Dieta do dia: cardápio de hoje (state.diet.plan), água e suplementos.
+  // ---------- Treino com carga, cronômetro e semana ----------
+  function gym(){ var j = J(); if(!j.gym || typeof j.gym!=="object") j.gym = {log:{}, sess:{}}; j.gym.log = j.gym.log||{}; j.gym.sess = j.gym.sess||{}; return j.gym; }
+  function parseScheme(s){
+    var reps = [], iso = /"/.test(s);
+    String(s).split("+").forEach(function(part){ var m = /(\d+)\s*[×x]\s*(\d+)/.exec(part); if(m){ for(var i=0;i<+m[1];i++) reps.push(+m[2]); } });
+    return {reps:reps, iso:iso};
+  }
+  function lastKg(name, before){
+    var L = gym().log, ds = Object.keys(L).filter(function(d){ return d<before && L[d][name] && L[d][name].kg; }).sort();
+    return ds.length ? {kg:L[ds[ds.length-1]][name].kg, d:ds[ds.length-1]} : null;
+  }
+  function dayVolume(d){
+    var L = gym().log[d] || {}, v = 0;
+    Object.keys(L).forEach(function(n){ var e = L[n], sc = e.reps||[]; (e.s||[]).forEach(function(on,i){ if(on && e.kg) v += (sc[i]||0)*e.kg; }); });
+    return Math.round(v);
+  }
+  function weekStart(d){ var x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); var wd = (x.getDay()+6)%7; return addDays(x,-wd); }
+  function plannedMinutes(dk){
+    var bl = ((state.dayPlan&&state.dayPlan.blocks)||[]).filter(function(b){ return /treino/i.test(b.txt||"") && (b.dias||[]).indexOf(dk)>-1; });
+    return bl.reduce(function(a,b){ return a + Math.max(0, toMin(b.fim)-toMin(b.ini)); }, 0);
+  }
+  function gymWeek(){
+    var ws = weekStart(new Date()), keys = ["seg","ter","qua","qui","sex","sab","dom"], goal = 0, min = 0, n = 0, kg = 0, G = gym();
+    for(var i=0;i<7;i++){ var d = addDays(ws,i), k = dKey(d); goal += plannedMinutes(keys[i]);
+      var s = G.sess[k]; if(s && s.ini){ var end = s.fim || (k===todayKey()? Date.now() : s.ini); min += Math.min(180, Math.max(0, Math.round((end - s.ini)/60000))); }
+      if(state.workout.log[k]){ n++; if(!(s&&s.ini)) min += plannedMinutes(keys[i]); }
+      kg += dayVolume(k); }
+    var st = 0, dd = new Date(); if(!state.workout.log[dKey(dd)]) dd = addDays(dd,-1); while(state.workout.log[dKey(dd)] && st<400){ st++; dd = addDays(dd,-1); }
+    return {goal:goal, min:min, n:n, kg:kg, streak:st};
+  }
+  function fmtMin(m){ var h = Math.floor(m/60), r = m%60; return h ? h+"h"+(r?String(r).padStart(2,"0"):"") : r+"min"; }
+  function gymTimerText(){ var s = gym().sess[todayKey()]; if(!s || !s.ini) return "00:00"; var t = Math.floor(((s.fim||Date.now()) - s.ini)/1000); var h = Math.floor(t/3600), m = Math.floor(t%3600/60), x = t%60; return (h?h+":":"")+String(m).padStart(2,"0")+":"+String(x).padStart(2,"0"); }
+  setInterval(function(){ var el = document.getElementById("juGymTimer"); if(el){ var s = gym().sess[todayKey()]; if(s && s.ini && !s.fim) el.textContent = gymTimerText(); } }, 1000);
+  function treinoSemana(){
+    var w = gymWeek(), pct = w.goal ? w.min/w.goal : 0;
+    return '<section class="ju-card" style="'+tone("treino")+';display:flex;gap:14px;align-items:center">'+ring(pct, Math.round(pct*100)+"%", "SEMANA", "var(--j-green)", 84)+
+      '<div style="flex:1;min-width:0"><span class="ju-label">Volume da semana '+(pct>=1?'<b style="color:var(--j-green)">· meta batida</b>':pct>=0.6?'<b style="color:var(--j-green)">· em dia</b>':'')+'</span>'+
+      '<div class="ju-mid" style="font-size:22px">'+fmtMin(w.min)+' <small class="ju-muted" style="font-size:14px">de '+fmtMin(w.goal)+'</small></div>'+
+      '<small class="ju-muted">'+w.n+' treino'+(w.n===1?"":"s")+' · '+w.kg.toLocaleString("pt-BR")+' kg levantados · sequência de '+w.streak+' dia'+(w.streak===1?"":"s")+'</small></div></section>';
+  }
+
+  // ---------- Dieta: calorias e macros ----------
+  var JU_MEAL_EST = {cafe:{kcal:400,p:25,c:45,g:12}, almoco:{kcal:600,p:40,c:60,g:18}, lanche:{kcal:250,p:15,c:25,g:8}, jantar:{kcal:500,p:35,c:45,g:15}};
+  function nutri(){ var j = J(); if(!j.nutri || typeof j.nutri!=="object") j.nutri = {meta:{kcal:1800,p:115,c:190,g:58}, log:{}}; j.nutri.log = j.nutri.log||{}; j.nutri.meta = j.nutri.meta||{kcal:1800,p:115,c:190,g:58}; return j.nutri; }
+  function nutriDay(k){ var L = nutri().log[k] || {}, t = {kcal:0,p:0,c:0,g:0,n:0}; Object.keys(L).forEach(function(m){ var e = L[m]; if(!e) return; t.n++; ["kcal","p","c","g"].forEach(function(x){ t[x] += +e[x]||0; }); }); return t; }
+  function macrosHtml(){
+    var k = todayKey(), N = nutri(), M = N.meta, t = nutriDay(k), pct = M.kcal ? t.kcal/M.kcal : 0, falta = Math.max(0, M.kcal - t.kcal);
+    var bar = function(lbl, v, m, col){ return '<div style="min-width:0"><small class="ju-muted" style="font-size:11.5px">'+lbl+'</small><div class="num" style="font-size:13px"><b>'+Math.round(v)+'</b>/'+m+'g</div><div class="ju-progress" style="--c:'+col+';margin-top:4px"><i style="width:'+Math.min(100, m? v/m*100 : 0).toFixed(0)+'%"></i></div></div>'; };
+    return '<div style="display:flex;gap:14px;align-items:center;margin:4px 0 12px">'+ring(pct, Math.round(pct*100)+"%", "DO PLANO", "var(--j-rose,#C14C64)", 78)+
+      '<div style="min-width:0"><span class="ju-label">Plano de hoje '+(t.n?'<b style="color:var(--j-green)">· em dia</b>':'')+'</span><div class="ju-mid num" style="font-size:24px">'+t.kcal.toLocaleString("pt-BR")+' <small class="ju-muted" style="font-size:14px">de '+M.kcal.toLocaleString("pt-BR")+' kcal</small></div>'+
+      '<small class="ju-muted">faltam '+falta.toLocaleString("pt-BR")+' kcal · '+t.n+' refeiç'+(t.n===1?"ão":"ões")+' registrada'+(t.n===1?"":"s")+'</small></div></div>'+
+      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px">'+bar("Proteína",t.p,M.p,"var(--j-green)")+bar("Carbo",t.c,M.c,"var(--j-lav,#7D6BB8)")+bar("Gordura",t.g,M.g,"var(--j-rose,#C14C64)")+'</div>';
+  }
+  function sheetMeal(m){
+    var k = todayKey(), e = (nutri().log[k]||{})[m] || JU_MEAL_EST[m] || {kcal:0,p:0,c:0,g:0};
+    var nm = {cafe:"Café da manhã", almoco:"Almoço", lanche:"Lanche", jantar:"Jantar"}[m] || "Refeição";
+    openSheet(nm+" — quanto foi?", '<p class="ju-muted" style="margin:0 0 10px;font-size:12.5px">Os números vêm de uma estimativa do seu cardápio. Ajuste se comeu diferente.</p>'+
+      '<div class="ju-two"><label class="ju-field">Calorias (kcal)<input name="kcal" type="number" inputmode="numeric" value="'+(e.kcal||0)+'"></label><label class="ju-field">Proteína (g)<input name="p" type="number" inputmode="numeric" value="'+(e.p||0)+'"></label></div>'+
+      '<div class="ju-two"><label class="ju-field">Carboidrato (g)<input name="c" type="number" inputmode="numeric" value="'+(e.c||0)+'"></label><label class="ju-field">Gordura (g)<input name="g" type="number" inputmode="numeric" value="'+(e.g||0)+'"></label></div>',
+      function(f){ var L = nutri().log[k] || (nutri().log[k] = {}); L[m] = {kcal:+f.kcal.value||0, p:+f.p.value||0, c:+f.c.value||0, g:+f.g.value||0}; save(); toast("Refeição registrada"); });
+  }
+  function sheetDietMeta(){
+    var M = nutri().meta;
+    openSheet("Metas diárias da dieta", '<p class="ju-muted" style="margin:0 0 10px;font-size:12.5px">Coloque aqui os números da sua nutricionista. Os atuais são uma estimativa a partir do cardápio.</p>'+
+      '<div class="ju-two"><label class="ju-field">Calorias (kcal)<input name="kcal" type="number" value="'+M.kcal+'"></label><label class="ju-field">Proteína (g)<input name="p" type="number" value="'+M.p+'"></label></div>'+
+      '<div class="ju-two"><label class="ju-field">Carboidrato (g)<input name="c" type="number" value="'+M.c+'"></label><label class="ju-field">Gordura (g)<input name="g" type="number" value="'+M.g+'"></label></div>',
+      function(f){ nutri().meta = {kcal:+f.kcal.value||1800, p:+f.p.value||115, c:+f.c.value||190, g:+f.g.value||58}; save(); toast("Metas atualizadas"); });
+  }
+
+  // ---------- Sugestões da semana ----------
+  function semanaInsights(){
+    var ws = weekStart(new Date()), today = new Date(), keys = ["seg","ter","qua","qui","sex","sab","dom"], days = [];
+    for(var i=0;i<7;i++){ var d = addDays(ws,i); if(d>today) break; days.push(dKey(d)); }
+    var prevWs = addDays(ws,-7), prev = []; for(var j=0;j<7;j++) prev.push(dKey(addDays(prevWs,j)));
+    var hs = J().habits, hd = 0, ht = 0; days.forEach(function(k){ hs.forEach(function(h){ ht++; if(habitDone(h,k)) hd++; }); });
+    var w = gymWeek(), waterAvg = days.length ? days.reduce(function(a,k){ return a+water(k); },0)/days.length : 0;
+    var plannedT = 0; days.forEach(function(k,i){ if(plannedMinutes(keys[i])>0) plannedT++; });
+    var stDone = (J().studies||[]).filter(function(s){ return s.feito && s.data>=dKey(ws) && s.data<=todayKey(); }).length;
+    var stLate = (J().studies||[]).filter(function(s){ return !s.feito && (s.fim||s.data) < todayKey(); }).length;
+    var prot = days.map(function(k){ return nutriDay(k); }).filter(function(t){ return t.n; }), protAvg = prot.length ? prot.reduce(function(a,t){ return a+t.p; },0)/prot.length : 0;
+    var tips = [];
+    if(plannedT && w.n < plannedT) tips.push(["🏋️","Treino: "+w.n+" de "+plannedT+" treinos previstos até hoje. Que tal garantir o próximo logo cedo, no horário das 05:50?"]);
+    else if(w.n) tips.push(["🏋️","Treinos em dia: "+w.n+" nesta semana e "+w.kg.toLocaleString("pt-BR")+" kg levantados. Se a última série ficou fácil, suba 1–2 kg no próximo treino."]);
+    if(waterAvg < 6) tips.push(["💧","Água: média de "+waterAvg.toFixed(1).replace(".",",")+" copos por dia. Deixe a garrafa de 950 ml na mesa da HDL e encha duas vezes até o almoço."]);
+    if(prot.length && protAvg < nutri().meta.p*0.85) tips.push(["🥚","Proteína: média de "+Math.round(protAvg)+" g de "+nutri().meta.p+" g. Um ovo ou iogurte no lanche fecha boa parte da diferença."]);
+    if(stLate) tips.push(["📚","Estudos: "+stLate+" item"+(stLate>1?"s":"")+" atrasado"+(stLate>1?"s":"")+". Comece pelos P1 na aba Estudos."]);
+    else if(stDone) tips.push(["📚","Estudos: "+stDone+" item"+(stDone>1?"s":"")+" concluído"+(stDone>1?"s":"")+" nesta semana. Siga o cronograma."]);
+    if(ht && hd/ht < 0.6) tips.push(["🌿","Hábitos: "+Math.round(hd/ht*100)+"% feitos. Escolha só um para não falhar amanhã — o resto vem depois."]);
+    var ok = ht && hd/ht>=0.8 && (!plannedT || w.n>=plannedT);
+    var head = ok ? "Sua semana está fechando bem." : tips.length ? "Ajustes para a sua semana" : "A semana está só começando";
+    return '<section class="ju-card" style="background:linear-gradient(135deg,#2E1F2B,#46283F);color:#FBF6F3;border:0"><div class="ju-head" style="margin-bottom:6px"><span class="ic" style="background:rgba(255,255,255,.12);color:#E9C48A">'+ico("target")+'</span><h3 style="color:#FBF6F3">'+head+'</h3></div>'+
+      (tips.length ? '<ul style="margin:0;padding:0;list-style:none;display:grid;gap:8px">'+tips.slice(0,3).map(function(t){ return '<li style="display:grid;grid-template-columns:22px 1fr;gap:8px;font-size:13px;line-height:1.45;opacity:.92"><span>'+t[0]+'</span><span>'+esc(t[1])+'</span></li>'; }).join("")+'</ul>' : '<p style="margin:0;font-size:13px;opacity:.85">Marque seus hábitos, treinos e refeições — as sugestões aparecem aqui conforme a semana anda.</p>')+'</section>';
+  }
+
   // Dicas de execução da ficha da EF Academia (Prof. Bruna).
   var JU_FICHA_URL = "https://claude.ai/artifact/7hg3iJtaqShcqpa5HKxUqK";
   var JU_TIPS = [["Agachamento Barra Guiada", "joelhos alinhados com a ponta do pé, não deixe cair para dentro; desça até 90° sem tirar o calcanhar do chão."], ["Agachamento Pêndulo", "mantenha a lombar apoiada no encosto — o movimento vem do quadril e joelho, não da lombar."], ["Agachamento Sumô Articulado", "empurre os joelhos na direção dos pés durante a descida, sem deixá-los fechar."], ["Leg 45°", "não trave os joelhos no topo nem descole a lombar do banco na descida."], ["Leg Horizontal Unilateral", "desça devagar e controlado — é fácil compensar com o lado mais forte."], ["Extensora", "segure o pico sem jogar o corpo para trás; desça controlado, sem soltar o peso."], ["Glúteo Máquina", "aperte o glúteo com força no topo; evite hiperestender a lombar."], ["Flexora", "mantenha o quadril fixo — o movimento é só do joelho, não do quadril."], ["Adutor", "movimento controlado nas duas direções, sem usar impulso."], ["Abdutor", "movimento controlado nas duas direções, sem usar impulso."], ["Panturrilha", "amplitude completa — alongue bem embaixo antes de subir na ponta do pé."], ["Desenvolvimento", "core firme, sem jogar a lombar para trás; cotovelos levemente à frente do corpo."], ["Elevação Lateral", "cotovelos levemente flexionados, sem usar impulso do tronco para subir o peso."], ["Elevação Frontal", "sem balançar o corpo para ajudar a levantar o peso."], ["Supino Vertical", "escápulas retraídas contra o banco antes de empurrar."], ["Peck Deck Posterior", "leve flexão no cotovelo; foque em afastar os braços com a escápula."], ["Peck Deck", "movimento controlado, como se fosse abraçar um tronco de árvore."], ["Tríceps Cross Barra", "cotovelos colados ao corpo — só o antebraço se move."], ["Tríceps Cross Corda", "abra a corda no final do movimento para ativar mais a cabeça lateral."], ["Puxador Frente", "puxe com as costas, não só com o braço — leve o cotovelo em direção ao bolso de trás."], ["Puxador High Row", "peito estufado, ombros baixos durante todo o movimento."], ["Remada Curvada", "não arredonde a lombar; puxe levando os cotovelos para trás, não para cima."], ["Tração Cross", "braços praticamente retos; o movimento vem do ombro, não do cotovelo."], ["Rosca Scott", "não estenda o cotovelo totalmente no fim, para preservar a articulação."], ["Rosca Martelo", "cotovelo fixo ao lado do corpo, pegada neutra o tempo todo."], ["Reto Sob", "leve o queixo em direção ao peito, sem puxar o pescoço com as mãos."], ["Prancha Frontal", "quadril alinhado (nem subido, nem caído); respire normalmente durante o tempo."]];
@@ -545,15 +645,23 @@
     var det = m && typeof WORKOUT_DETAIL!=="undefined" ? WORKOUT_DETAIL.filter(function(w){ return w.letter===m[1]; })[0] : null;
     var cut = plan.indexOf(":"), titulo = cut>-1 ? plan.slice(0,cut) : plan, resumo = cut>-1 ? plan.slice(cut+1).trim() : "";
     var week = ""; for(var i=6;i>=0;i--){ var d = addDays(now,-i), kk = dKey(d); week += '<span style="flex:1;text-align:center"><b style="display:block;height:26px;border-radius:8px;margin-bottom:4px;background:'+(log[kk]?"var(--j-green)":"var(--j-surface-2)")+(kk===k?";outline:2px solid var(--j-green);outline-offset:1px":"")+'"></b><small class="ju-muted" style="font-size:10.5px">'+JU_WEEK[d.getDay()]+'</small></span>'; }
+    var GL = gym().log[k] || {};
     var body = det ? det.blocks.map(function(b){
         return '<li style="display:block"><span class="ju-label" style="display:block">'+esc(b.name)+'</span>'+b.items.map(function(it){
-          var tip = tipFor(it[0]);
+          var tip = tipFor(it[0]), sc = parseScheme(it[1]), e = GL[it[0]] || {}, sets = e.s || [], lk = lastKg(it[0], k);
+          var dots = sc.reps.map(function(r,si){ return '<button class="ju-set'+(sets[si]?" on":"")+'" data-gymset="'+esc(it[0])+'|'+si+'" data-reps="'+esc(sc.reps.join(","))+'" aria-label="Série '+(si+1)+'">'+(si+1)+'</button>'; }).join("");
+          var vol = 0; sets.forEach(function(on,si){ if(on && e.kg) vol += (sc.reps[si]||0)*e.kg; });
+          var gymRow = sc.reps.length ? '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:4px 0 6px">'+dots+
+            (sc.iso ? '' : '<label style="display:flex;align-items:center;gap:4px;margin-left:auto;font-size:12px" class="ju-muted"><input class="ju-kg num" type="number" inputmode="decimal" step="0.5" min="0" placeholder="kg" value="'+(e.kg||"")+'" data-gymkg="'+esc(it[0])+'" aria-label="Carga em kg">kg</label>')+
+            '<small class="ju-muted" style="width:100%;font-size:11px">'+(sets.filter(Boolean).length)+'/'+sc.reps.length+' séries'+(vol?' · '+vol.toLocaleString("pt-BR")+' kg':'')+(lk?' · última vez: '+lk.kg+' kg':'')+'</small></div>' : '';
           return '<details style="font-size:13.5px;padding:2px 0"><summary style="display:flex;justify-content:space-between;gap:10px;cursor:pointer;list-style:none"><span style="min-width:0">'+esc(it[0])+(tip?' <span class="ju-muted" style="font-size:11px">ⓘ</span>':'')+'</span><span class="ju-muted num" style="white-space:nowrap">'+esc(it[1])+'</span></summary>'+
-            (tip ? '<p class="ju-muted" style="margin:4px 0 6px;font-size:12.5px;line-height:1.45"><b>Atenção:</b> '+esc(tip)+'</p>' : '')+'</details>'; }).join("")+'</li>';
+            (tip ? '<p class="ju-muted" style="margin:4px 0 6px;font-size:12.5px;line-height:1.45"><b>Atenção:</b> '+esc(tip)+'</p>' : '')+'</details>'+gymRow; }).join("")+'</li>';
       }).join("")
       : (resumo ? '<li style="display:block">'+esc(resumo)+'</li>' : '');
     return '<section class="ju-card" style="'+tone("treino")+'"><div class="ju-head"><span class="ic">'+ico("dumb")+'</span><h3>Treino do dia</h3><span class="ju-muted">'+esc(det ? det.title : "")+'</span></div>'+
       '<div class="ju-mid" style="font-size:22px">'+esc(titulo)+'</div>'+
+      (det ? (function(){ var s = gym().sess[k]||{}, run = s.ini && !s.fim; return '<div style="display:flex;align-items:center;gap:10px;margin:10px 0 2px"><b id="juGymTimer" class="num" style="font-size:24px">'+gymTimerText()+'</b><span class="num" style="color:var(--j-green);font-weight:600">'+dayVolume(k).toLocaleString("pt-BR")+' kg</span>'+
+        (s.fim ? '<span class="ju-muted" style="margin-left:auto;font-size:12px">treino encerrado ✓</span>' : '<button class="ju-btn '+(run?"primary":"soft")+'" style="margin-left:auto" data-gymact="'+(run?"stop":"start")+'">'+(run?"Encerrar":"Iniciar treino")+'</button>')+'</div>'; })() : '')+
       (body ? '<ul class="ju-list" style="gap:10px;margin-top:10px">'+body+'</ul>' : '')+
       '<span class="ju-label" style="display:block;margin-top:14px">Últimos 7 dias</span><div style="display:flex;gap:6px;margin-top:6px">'+week+'</div>'+
       '<div class="ju-grid" style="margin-top:12px"><button class="ju-btn '+(done?"soft":"primary")+'" data-treino="1">'+(done?"✓ Treino feito":"Marcar treino feito")+'</button><a class="ju-btn ghost" href="'+JU_FICHA_URL+'" target="_blank" rel="noopener" style="text-align:center;text-decoration:none">Ficha da academia</a></div>'+
@@ -567,16 +675,19 @@
     var sup = Array.isArray(state.supplements) ? state.supplements : [];
     var has = meals.some(function(m){ return plan[m[0]]; });
     var hr = new Date().getHours(), cur = hr<10 ? "cafe" : hr<15 ? "almoco" : hr<18 ? "lanche" : "jantar";
+    var NL = nutri().log[k] || {};
     return '<section class="ju-card" style="'+tone("habitos")+'"><div class="ju-head"><span class="ic">'+ico("apple")+'</span><h3>Cardápio do dia</h3><span class="ju-muted">'+["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"][new Date().getDay()]+'</span></div>'+
+      macrosHtml()+
       (has ? '<ul class="ju-list" style="gap:12px">'+meals.filter(function(m){ return plan[m[0]]; }).map(function(m){
-        return '<li style="display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;align-items:start'+(m[0]===cur?';background:var(--j-blush);border-radius:12px;padding:8px;margin:-8px':'')+'"><span style="font-size:19px;line-height:1.2">'+m[1]+'</span><span style="min-width:0"><span class="ju-label" style="display:block">'+m[2]+'</span>'+esc(plan[m[0]])+'</span></li>';
+        return '<li style="display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;align-items:start'+(m[0]===cur?';background:var(--j-blush);border-radius:12px;padding:8px;margin:-8px':'')+'"><span style="font-size:19px;line-height:1.2">'+m[1]+'</span><span style="min-width:0"><span class="ju-label" style="display:block">'+m[2]+(NL[m[0]]?' · <b style="color:var(--j-green)">'+NL[m[0]].kcal+' kcal · '+NL[m[0]].p+' g prot.</b>':'')+'</span>'+esc(plan[m[0]])+
+          '<span style="display:flex;gap:6px;margin-top:6px"><button class="ju-btn '+(NL[m[0]]?"soft":"primary")+'" style="padding:6px 12px;font-size:12px" data-meal="'+m[0]+'">'+(NL[m[0]]?"✓ Registrado":"Comi")+'</button><button class="ju-btn ghost" style="padding:6px 10px;font-size:12px" data-mealedit="'+m[0]+'">Ajustar</button></span></span></li>';
       }).join("")+'</ul>' : '<p class="ju-empty">Sem cardápio para hoje. Monte o da semana na Dieta.</p>')+
       '<div class="ju-row" style="margin-top:12px"><span>💧 Água hoje</span><b class="num">'+w+'/8 copos</b></div>'+
       '<div class="ju-progress" style="--c:var(--j-blue,#2E78B7);margin-top:6px"><i style="width:'+Math.min(100,w/8*100).toFixed(0)+'%"></i></div>'+
       (sup.length ? '<details style="margin-top:12px"><summary class="ju-muted" style="cursor:pointer">Suplementos do dia</summary><ul class="ju-list" style="margin-top:8px;gap:8px">'+sup.map(function(g){
         return '<li style="display:block"><span class="ju-label" style="display:block">'+esc(g.period||"")+'</span>'+(g.items||[]).map(function(it){ return esc(it[0])+(it[1]?' <small class="ju-muted">· '+esc(it[1])+'</small>':''); }).join('<br>')+'</li>';
       }).join("")+'</ul></details>' : '')+
-      '<div class="ju-grid" style="margin-top:12px"><button class="ju-btn soft" data-go="tracker">Marcar água</button><button class="ju-btn ghost" data-legacy="dieta">Cardápio da semana</button><button class="ju-btn ghost" data-go="compras">Lista do mercado</button></div></section>';
+      '<div class="ju-grid" style="margin-top:12px"><button class="ju-btn soft" data-go="tracker">Marcar água</button><button class="ju-btn ghost" data-legacy="dieta">Cardápio da semana</button><button class="ju-btn ghost" data-go="compras">Lista do mercado</button><button class="ju-btn ghost" data-act="dietmeta">Metas da dieta</button></div></section>';
   }
   function viewBemestar(){
     var k = todayKey(), mood = J().mood[k];
@@ -597,7 +708,7 @@
     var ci = cycleInfo();
     var liturgia = state.spirituality && state.spirituality.dailyLog && state.spirituality.dailyLog[k];
     var monthLabel = juMonth.toLocaleDateString("pt-BR",{month:"long"});
-    return dietaDoDia()+treinoDoDia()+
+    return semanaInsights()+dietaDoDia()+treinoSemana()+treinoDoDia()+
     '<section class="ju-card" style="'+tone("bemestar")+'"><div class="ju-head"><span class="ic">'+ico("heart")+'</span><h3>Como você está hoje?</h3></div>'+
       '<div class="ju-moods">'+JU_MOODS.map(function(m){ return '<button type="button" data-mood="'+m.v+'" class="'+(mood&&mood.v===m.v?"on":"")+'">'+m.e+'<small>'+m.t+'</small></button>'; }).join("")+'</div>'+
       (mood&&mood.nota?'<p class="ju-muted" style="margin:10px 0 0">“'+esc(mood.nota)+'”</p>':'')+
@@ -949,10 +1060,20 @@
     if(st && window.MutationObserver) new MutationObserver(function(){ var s = document.getElementById("juSync"); if(s) s.textContent = st.textContent; }).observe(st, {childList:true, characterData:true, subtree:true});
 
     document.addEventListener("click", function(e){
-      var t = e.target.closest("[data-go],[data-act],[data-legacy],[data-task],[data-habit],[data-water],[data-pay],[data-deltx],[data-deltask],[data-delhabit],[data-day],[data-month],[data-mood],[data-proxy],[data-shop],[data-shoptab],[data-shopadd],[data-shopreset],[data-delshop],[data-treino],[data-study],[data-delstudy],[data-sfilter],[data-chipscroll],[data-dreamstep],[data-dreamadd],[data-dreamdel],#juPhoto");
+      var t = e.target.closest("[data-go],[data-act],[data-legacy],[data-task],[data-habit],[data-water],[data-pay],[data-deltx],[data-deltask],[data-delhabit],[data-day],[data-month],[data-mood],[data-proxy],[data-shop],[data-shoptab],[data-shopadd],[data-shopreset],[data-delshop],[data-treino],[data-study],[data-delstudy],[data-sfilter],[data-chipscroll],[data-dreamstep],[data-dreamadd],[data-dreamdel],[data-gymset],[data-gymact],[data-meal],[data-mealedit],#juPhoto");
       if(!t || !t.closest(".ju, .ju-nav, .ju-legacy-bar")) return;
       if(t.id==="juPhoto"){ photoOffset++; var img = document.getElementById("juPhotoImg"); if(img) img.src = photoOfDay(photoOffset); return; }
       if(t.dataset.go){ go(t.dataset.go); return; }
+      if(t.dataset.gymset){ var gs = t.dataset.gymset.split("|"), gk = todayKey(), GLk = gym().log[gk] || (gym().log[gk] = {}), ge = GLk[gs[0]] || (GLk[gs[0]] = {s:[]});
+        ge.s = ge.s || []; ge.s[+gs[1]] = !ge.s[+gs[1]]; ge.reps = String(t.dataset.reps||"").split(",").map(Number);
+        var sess = gym().sess[gk] || (gym().sess[gk] = {}); if(!sess.ini) sess.ini = Date.now();
+        save(); return; }
+      if(t.dataset.gymact){ var sk = todayKey(), ss = gym().sess[sk] || (gym().sess[sk] = {});
+        if(t.dataset.gymact==="start"){ ss.ini = ss.ini || Date.now(); delete ss.fim; toast("Bom treino! 💪"); }
+        else { ss.fim = Date.now(); state.workout.log[sk] = true; toast("Treino encerrado · "+dayVolume(sk).toLocaleString("pt-BR")+" kg"); }
+        save(); return; }
+      if(t.dataset.meal){ var mk2 = todayKey(), ML = nutri().log[mk2] || (nutri().log[mk2] = {}); if(ML[t.dataset.meal]) delete ML[t.dataset.meal]; else { ML[t.dataset.meal] = JSON.parse(JSON.stringify(JU_MEAL_EST[t.dataset.meal]||{kcal:0,p:0,c:0,g:0})); toast("Refeição registrada"); } save(); return; }
+      if(t.dataset.mealedit){ sheetMeal(t.dataset.mealedit); return; }
       if(t.dataset.dreamstep){ var dr = t.dataset.dreamstep.split(":"), dd = dreams().filter(function(x){ return x.id===dr[0]; })[0]; if(dd && dd.passos[+dr[1]]){ var st = dd.passos[+dr[1]]; st.f = !st.f; save(); if(st.f) toast("Mais um passo rumo ao sonho ✨"); } return; }
       if(t.dataset.dreamadd){ sheetDreamStep(t.dataset.dreamadd); return; }
       if(t.dataset.dreamdel){ armDelete(t, function(){ var a4 = dreams(), ix4 = a4.map(function(x){ return x.id; }).indexOf(t.dataset.dreamdel); if(ix4>-1){ a4.splice(ix4,1); save(); } }); return; }
@@ -983,7 +1104,7 @@
         if(a==="gasto"||a==="entrada") sheetTx(a);
         else if(a==="bill") sheetBill("bill"); else if(a==="sub") sheetBill("sub");
         else if(a==="sleep") sheetSleep(); else if(a==="mood") sheetMood(k);
-        else if(a==="task") sheetTask(); else if(a==="study") sheetStudy(); else if(a==="dream") sheetDream(); else if(a==="roda") sheetRoda(); else if(a==="habit") sheetHabit();
+        else if(a==="task") sheetTask(); else if(a==="study") sheetStudy(); else if(a==="dream") sheetDream(); else if(a==="roda") sheetRoda(); else if(a==="dietmeta") sheetDietMeta(); else if(a==="habit") sheetHabit();
         else if(a==="period"){ var s = J().cycle.starts || (J().cycle.starts=[]); if(s.indexOf(k)<0){ s.push(k); save(); toast("Início do ciclo registrado"); } else toast("Hoje já está registrado"); }
         return;
       }
@@ -1015,6 +1136,7 @@
     });
     document.addEventListener("change", function(e){
       if(e.target && e.target.dataset && e.target.dataset.dreamimg){ dreamImage(e.target); return; }
+      if(e.target && e.target.dataset && e.target.dataset.gymkg){ var kk = todayKey(), GL2 = gym().log[kk] || (gym().log[kk] = {}), en = GL2[e.target.dataset.gymkg] || (GL2[e.target.dataset.gymkg] = {s:[]}); en.kg = parseFloat(String(e.target.value).replace(",",".")) || 0; save(); return; }
       var id = e.target.id, v = parseFloat(e.target.value);
       if(id==="juGoal" && v>=4 && v<=12){ J().sleepGoal = v; persist(); toast("Meta de sono atualizada"); }
       if(id==="juCycleLen" && v>=18 && v<=45){ J().cycle.len = Math.round(v); persist(); }
