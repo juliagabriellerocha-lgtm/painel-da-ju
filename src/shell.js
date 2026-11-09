@@ -382,6 +382,16 @@
   function chip(go, label, icon, t){ return '<button class="ju-chip" data-go="'+go+'" style="'+tone(t)+'"><i>'+ico(icon)+'</i><span>'+label+'</span></button>'; }
   function taskRow(t){ return '<li class="ju-check'+(t.feita?" done":"")+'"><button data-task="'+esc(t.id)+'" aria-label="'+(t.feita?"Desmarcar":"Concluir")+' tarefa">'+ico("check")+'</button><span>'+esc(t.texto)+'</span></li>'; }
 
+  function sheetEvent(){
+    openSheet("Novo compromisso",
+      '<label class="ju-field">O quê<input name="title" placeholder="Ex.: consulta, reunião, visita…" autocomplete="off"></label>'+
+      '<div class="ju-two"><label class="ju-field">Data<input name="date" type="date" value="'+dKey(addDays(new Date(), juPlanDay))+'"></label><label class="ju-field">Horário<input name="time" type="time"></label></div>'+
+      '<label class="ju-field">Local (opcional)<input name="place" autocomplete="off"></label>',
+      function(f){ var t = f.title.value.trim(); if(!t) return "Descreva o compromisso."; if(!f.date.value) return "Escolha a data.";
+        var it = {id:uid("ag"), date:f.date.value, title:t}; if(f.time.value) it.time = f.time.value; if(f.place.value.trim()) it.place = f.place.value.trim();
+        (state.agenda = state.agenda || []).push(it); state.agenda.sort(function(a,b){ return ((a.date||"")+(a.time||"")).localeCompare((b.date||"")+(b.time||"")); });
+        save(); toast("Compromisso na agenda"); });
+  }
   function viewPlano(){
     var today = new Date(), sel = addDays(today, juPlanDay), selKey = dKey(sel);
     var dk = DAY_KEYS[sel.getDay()];
@@ -401,7 +411,7 @@
         var cls = juPlanDay===0 ? (m>=toMin(it.fim) && !it.ag ? "past" : (m>=toMin(it.ini) && m<toMin(it.fim) ? "now" : "")) : "";
         return '<li class="'+cls+'" style="--c:var('+(it.ag?"--j-red":(AREA_COLOR[it.area]||"--j-rose"))+')"><span class="t">'+esc(it.ini)+'</span><span class="d"></span><span class="x">'+esc(it.txt)+(it.ag&&it.sub?'<small>'+esc(it.sub)+'</small>':(!it.ag?'<small>até '+esc(it.fim)+'</small>':''))+'</span></li>';
       }).join("")+'</ul>' : '<p class="ju-empty">Nada planejado para este dia.</p>')+
-      '<button class="ju-more" data-legacy="rotina">Ajustar horários '+ico("chev")+'</button></section>'+
+      '<div class="ju-grid" style="margin-top:10px"><button class="ju-btn primary" data-act="event">'+ico("plus")+' Compromisso</button><button class="ju-btn ghost" data-legacy="rotina">Ajustar horários</button></div></section>'+
     '<section class="ju-card" style="'+tone("tarefas")+'"><div class="ju-head"><span class="ic">'+ico("tasks")+'</span><h3>Tarefas do dia</h3><button class="ju-plus" data-act="task" aria-label="Nova tarefa">'+ico("plus")+'</button></div>'+
       (tasks.length ? '<ul class="ju-list">'+tasks.map(taskRow).join("")+'</ul>' : '<p class="ju-empty">Sem tarefas para este dia.</p>')+'</section>'+
     (upcoming.length ? '<section class="ju-card"><div class="ju-head" style="'+tone("agenda")+'"><span class="ic">'+ico("star")+'</span><h3>Mais adiante</h3></div><ul class="ju-list ju-agenda">'+
@@ -1137,7 +1147,7 @@
         if(a==="gasto"||a==="entrada") sheetTx(a);
         else if(a==="bill") sheetBill("bill"); else if(a==="sub") sheetBill("sub");
         else if(a==="sleep") sheetSleep(); else if(a==="mood") sheetMood(k);
-        else if(a==="task") sheetTask(); else if(a==="study") sheetStudy(); else if(a==="dream") sheetDream(); else if(a==="roda") sheetRoda(); else if(a==="dietmeta") sheetDietMeta(); else if(a==="habit") sheetHabit();
+        else if(a==="task") sheetTask(); else if(a==="event") sheetEvent(); else if(a==="study") sheetStudy(); else if(a==="dream") sheetDream(); else if(a==="roda") sheetRoda(); else if(a==="dietmeta") sheetDietMeta(); else if(a==="habit") sheetHabit();
         else if(a==="period"){ var s = J().cycle.starts || (J().cycle.starts=[]); if(s.indexOf(k)<0){ s.push(k); save(); toast("Início do ciclo registrado"); } else toast("Hoje já está registrado"); }
         return;
       }
