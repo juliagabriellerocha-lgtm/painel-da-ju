@@ -310,10 +310,10 @@
     document.body.classList.remove("ju-legacy");
     document.querySelectorAll(".ju-view").forEach(function(s){ s.hidden = s.dataset.view !== view; });
     document.querySelectorAll(".ju-nav button").forEach(function(b){
-      var main = JU_MAIN.indexOf(view)>-1 ? view : ({financas:"inicio", sono:"tracker", tarefas:"plano", compras:"inicio", estudos:"plano", sonhos:"eu"})[view];
+      var main = JU_MAIN.indexOf(view)>-1 ? view : ({financas:"inicio", sono:"tracker", tarefas:"plano", compras:"inicio", estudos:"plano", sonhos:"eu", ficha:"bemestar"})[view];
       if(b.dataset.go===main) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current");
     });
-    var titles = {inicio:"Hoje", plano:"Meu plano", tracker:"Tracker", bemestar:"Bem-estar", eu:"Você", financas:"Finanças", sono:"Sono", tarefas:"Tarefas", compras:"Compras do mês", estudos:"Estudos", sonhos:"Mural dos sonhos"};
+    var titles = {inicio:"Hoje", plano:"Meu plano", tracker:"Tracker", bemestar:"Bem-estar", eu:"Você", financas:"Finanças", sono:"Sono", tarefas:"Tarefas", compras:"Compras do mês", estudos:"Estudos", sonhos:"Mural dos sonhos", ficha:"Ficha de treino"};
     document.getElementById("juTitle").textContent = titles[view] || "Painel da Ju";
     try{ localStorage.setItem("painelJuView", view); }catch(e){}
     renderView(view);
@@ -634,7 +634,6 @@
   }
 
   // Dicas de execução da ficha da EF Academia (Prof. Bruna).
-  var JU_FICHA_URL = "https://claude.ai/artifact/7hg3iJtaqShcqpa5HKxUqK";
   var JU_TIPS = [["Agachamento Barra Guiada", "joelhos alinhados com a ponta do pé, não deixe cair para dentro; desça até 90° sem tirar o calcanhar do chão."], ["Agachamento Pêndulo", "mantenha a lombar apoiada no encosto — o movimento vem do quadril e joelho, não da lombar."], ["Agachamento Sumô Articulado", "empurre os joelhos na direção dos pés durante a descida, sem deixá-los fechar."], ["Leg 45°", "não trave os joelhos no topo nem descole a lombar do banco na descida."], ["Leg Horizontal Unilateral", "desça devagar e controlado — é fácil compensar com o lado mais forte."], ["Extensora", "segure o pico sem jogar o corpo para trás; desça controlado, sem soltar o peso."], ["Glúteo Máquina", "aperte o glúteo com força no topo; evite hiperestender a lombar."], ["Flexora", "mantenha o quadril fixo — o movimento é só do joelho, não do quadril."], ["Adutor", "movimento controlado nas duas direções, sem usar impulso."], ["Abdutor", "movimento controlado nas duas direções, sem usar impulso."], ["Panturrilha", "amplitude completa — alongue bem embaixo antes de subir na ponta do pé."], ["Desenvolvimento", "core firme, sem jogar a lombar para trás; cotovelos levemente à frente do corpo."], ["Elevação Lateral", "cotovelos levemente flexionados, sem usar impulso do tronco para subir o peso."], ["Elevação Frontal", "sem balançar o corpo para ajudar a levantar o peso."], ["Supino Vertical", "escápulas retraídas contra o banco antes de empurrar."], ["Peck Deck Posterior", "leve flexão no cotovelo; foque em afastar os braços com a escápula."], ["Peck Deck", "movimento controlado, como se fosse abraçar um tronco de árvore."], ["Tríceps Cross Barra", "cotovelos colados ao corpo — só o antebraço se move."], ["Tríceps Cross Corda", "abra a corda no final do movimento para ativar mais a cabeça lateral."], ["Puxador Frente", "puxe com as costas, não só com o braço — leve o cotovelo em direção ao bolso de trás."], ["Puxador High Row", "peito estufado, ombros baixos durante todo o movimento."], ["Remada Curvada", "não arredonde a lombar; puxe levando os cotovelos para trás, não para cima."], ["Tração Cross", "braços praticamente retos; o movimento vem do ombro, não do cotovelo."], ["Rosca Scott", "não estenda o cotovelo totalmente no fim, para preservar a articulação."], ["Rosca Martelo", "cotovelo fixo ao lado do corpo, pegada neutra o tempo todo."], ["Reto Sob", "leve o queixo em direção ao peito, sem puxar o pescoço com as mãos."], ["Prancha Frontal", "quadril alinhado (nem subido, nem caído); respire normalmente durante o tempo."]];
   function tipFor(name){ for(var i=0;i<JU_TIPS.length;i++){ if(String(name).indexOf(JU_TIPS[i][0])===0) return JU_TIPS[i][1]; } return ""; }
   function treinoDoDia(){
@@ -664,8 +663,41 @@
         (s.fim ? '<span class="ju-muted" style="margin-left:auto;font-size:12px">treino encerrado ✓</span>' : '<button class="ju-btn '+(run?"primary":"soft")+'" style="margin-left:auto" data-gymact="'+(run?"stop":"start")+'">'+(run?"Encerrar":"Iniciar treino")+'</button>')+'</div>'; })() : '')+
       (body ? '<ul class="ju-list" style="gap:10px;margin-top:10px">'+body+'</ul>' : '')+
       '<span class="ju-label" style="display:block;margin-top:14px">Últimos 7 dias</span><div style="display:flex;gap:6px;margin-top:6px">'+week+'</div>'+
-      '<div class="ju-grid" style="margin-top:12px"><button class="ju-btn '+(done?"soft":"primary")+'" data-treino="1">'+(done?"✓ Treino feito":"Marcar treino feito")+'</button><a class="ju-btn ghost" href="'+JU_FICHA_URL+'" target="_blank" rel="noopener" style="text-align:center;text-decoration:none">Ficha da academia</a></div>'+
+      '<div class="ju-grid" style="margin-top:12px"><button class="ju-btn '+(done?"soft":"primary")+'" data-treino="1">'+(done?"✓ Treino feito":"Marcar treino feito")+'</button><button class="ju-btn ghost" data-go="ficha">Ficha completa</button></div>'+
       (det ? '<p class="ju-muted" style="font-size:12px;margin:10px 0 0">Toque no exercício para ver a dica de execução. Descanso: 45–60s nas séries de 20; 60–90s nas de 15.</p>' : '')+'</section>';
+  }
+  var juFichaSel = null;
+  function viewFicha(){
+    if(typeof WORKOUT_DETAIL==="undefined" || !WORKOUT_DETAIL.length) return '<section class="ju-card"><p class="ju-empty">Ficha não encontrada.</p></section>';
+    var keys = ["dom","seg","ter","qua","qui","sex","sab"], hoje = keys[new Date().getDay()], plan = (state.workout&&state.workout.plan)||{};
+    var hojeLetter = (/Treino\s+([A-Z])\b/.exec(plan[hoje]||"")||[])[1];
+    var sel = juFichaSel || hojeLetter || WORKOUT_DETAIL[0].letter;
+    var W = WORKOUT_DETAIL.filter(function(w){ return w.letter===sel; })[0] || WORKOUT_DETAIL[0];
+    var DN = {seg:"Seg",ter:"Ter",qua:"Qua",qui:"Qui",sex:"Sex",sab:"Sáb",dom:"Dom"};
+    var semana = ["seg","ter","qua","qui","sex","sab","dom"].map(function(d){ var t = plan[d]||"Descanso", L = (/Treino\s+([A-Z])\b/.exec(t)||[])[1];
+      return '<div style="display:grid;grid-template-columns:40px 1fr;gap:8px;align-items:center;padding:6px 0;border-top:1px solid var(--j-line)'+(d===hoje?';font-weight:600':'')+'"><b class="num" style="color:'+(d===hoje?'var(--j-green)':'var(--j-soft)')+'">'+DN[d]+'</b><span style="font-size:13px">'+(L?'<b style="display:inline-grid;place-items:center;width:22px;height:22px;border-radius:7px;background:var(--j-green-soft);color:var(--j-green);margin-right:6px;font-size:12px">'+L+'</b>':'')+esc(t.split(":")[0])+'</span></div>'; }).join("");
+    var tabs = WORKOUT_DETAIL.map(function(w){ return '<button class="ju-btn '+(w.letter===W.letter?"primary":"soft")+'" style="padding:8px 0" data-ficha="'+w.letter+'">'+w.letter+'</button>'; }).join("");
+    var blocos = W.blocks.map(function(b){
+      return '<section class="ju-card"><span class="ju-label">'+esc(b.name)+'</span><ul class="ju-list" style="gap:10px;margin-top:10px">'+b.items.map(function(it,ix){ var tip = tipFor(it[0]), lk = lastKg(it[0], dKey(addDays(new Date(),1)));
+        return '<li style="display:block"><div style="display:grid;grid-template-columns:24px 1fr auto;gap:8px;align-items:baseline"><b class="num ju-muted" style="font-size:12px">'+String(ix+1).padStart(2,"0")+'</b><span style="font-size:14px">'+esc(it[0])+'</span><b class="num" style="white-space:nowrap;font-size:13px">'+esc(it[1])+'</b></div>'+
+          (lk ? '<small class="ju-muted" style="display:block;margin-left:32px;font-size:11.5px">última carga: '+lk.kg+' kg ('+fmtDay(parseKey(lk.d))+')</small>' : '')+
+          (tip ? '<p class="ju-muted" style="margin:4px 0 0 32px;font-size:12.5px;line-height:1.45"><b style="color:var(--j-ink)">Atenção:</b> '+esc(tip)+'</p>' : '')+'</li>'; }).join("")+'</ul></section>';
+    }).join("");
+    return '<section class="ju-card" style="'+tone("treino")+'"><span class="ju-label">EF Academia · Prof. Bruna</span><h2 style="font-size:22px;margin:4px 0 2px">Ficha de treino</h2>'+
+        '<p class="ju-muted" style="margin:0;font-size:12.5px">Objetivo: definição e fortalecimento · vigência até 21/11 — peça a ficha nova para a Bruna.</p></section>'+
+      '<div style="display:grid;grid-template-columns:repeat('+WORKOUT_DETAIL.length+',1fr);gap:8px">'+tabs+'</div>'+
+      '<section class="ju-card"><span class="ju-label">Treino '+esc(W.letter)+(W.letter===hojeLetter?' · hoje':'')+'</span><h3 style="font-size:20px;margin:2px 0 0">'+esc(W.title)+'</h3>'+
+        '<p class="ju-muted" style="margin:6px 0 0;font-size:12.5px">'+W.blocks.reduce(function(a,b){ return a+b.items.length; },0)+' exercícios · '+W.blocks.map(function(b){ return b.name; }).join(" · ")+'</p>'+
+        (W.letter===hojeLetter ? '<button class="ju-btn primary block" style="margin-top:10px" data-go="bemestar">Treinar agora (marcar séries e carga)</button>' : '')+'</section>'+
+      blocos+
+      '<section class="ju-card"><div class="ju-head" style="'+tone("treino")+'"><span class="ic">'+ico("cal")+'</span><h3>Sua semana de treinos</h3></div>'+semana+'</section>'+
+      '<section class="ju-card"><span class="ju-label">Dicas de execução</span><ul style="margin:8px 0 0;padding-left:18px;font-size:12.5px;line-height:1.5;color:var(--j-soft);display:grid;gap:6px">'+
+        '<li><b style="color:var(--j-ink)">Ordem importa:</b> comece pelos compostos (agachamento, leg) antes dos isoladores (extensora, flexora).</li>'+
+        '<li><b style="color:var(--j-ink)">Séries piramidais (2×20 + 2×15):</b> comece mais leve com mais repetições e aumente a carga reduzindo as repetições.</li>'+
+        '<li><b style="color:var(--j-ink)">Pico de contração 2":</b> segure 2 segundos no topo antes de descer.</li>'+
+        '<li><b style="color:var(--j-ink)">Descanso:</b> 45–60s nas séries de 20; 60–90s nas de 15.</li>'+
+        '<li><b style="color:var(--j-ink)">Core todo dia:</b> a prancha e o abdominal vêm no fim de cada treino — não pule.</li>'+
+        '<li><b style="color:var(--j-ink)">Dor diferente do cansaço:</b> pare e peça ajuste à Bruna.</li></ul></section>';
   }
   function dietaDoDia(){
     var dk = ["dom","seg","ter","qua","qui","sex","sab"][new Date().getDay()];
@@ -1009,8 +1041,8 @@
 
   function renderView(view){
     var el = document.querySelector('.ju-view[data-view="'+view+'"]'); if(!el) return;
-    var fn = {inicio:viewInicio, plano:viewPlano, tracker:viewTracker, financas:viewFinancas, sono:viewSono, bemestar:viewBemestar, tarefas:viewTarefas, compras:viewCompras, estudos:viewEstudos, sonhos:viewSonhos, eu:viewEu}[view];
-    var sub = ["financas","sono","tarefas","compras","estudos","sonhos"].indexOf(view)>-1;
+    var fn = {inicio:viewInicio, plano:viewPlano, tracker:viewTracker, financas:viewFinancas, sono:viewSono, bemestar:viewBemestar, tarefas:viewTarefas, compras:viewCompras, estudos:viewEstudos, sonhos:viewSonhos, ficha:viewFicha, eu:viewEu}[view];
+    var sub = ["financas","sono","tarefas","compras","estudos","sonhos","ficha"].indexOf(view)>-1;
     el.innerHTML = (sub ? '<div class="ju-sub"><button class="ju-back" data-go="inicio" aria-label="Voltar">'+ico("back")+'</button></div>' : '') + fn();
     if(view==="inicio"){ renderAgora(); requestAnimationFrame(updateChipbars); }
     if(view==="eu"){ var ib = document.getElementById("installApp"); var ji = document.getElementById("juInstall"); if(ji && ib && ib.hidden) ji.hidden = true; }
@@ -1042,7 +1074,7 @@
         '<header class="ju-top"><button class="ju-avatar" data-go="eu" aria-label="Seu perfil"><img src="fotos/avatar.jpg" alt=""></button>'+
         '<h1 id="juTitle">Hoje</h1><span class="ju-date" id="juDate">'+ico("cal")+'<span></span></span></header>'+
         '<div class="ju-sync" id="juSync" aria-live="polite"></div>'+
-        ["inicio","plano","tracker","financas","sono","bemestar","tarefas","compras","estudos","sonhos","eu"].map(function(v){ return '<section class="ju-view" data-view="'+v+'" hidden></section>'; }).join("")+
+        ["inicio","plano","tracker","financas","sono","bemestar","tarefas","compras","estudos","sonhos","ficha","eu"].map(function(v){ return '<section class="ju-view" data-view="'+v+'" hidden></section>'; }).join("")+
       '</div>'+
       '<nav class="ju-nav" aria-label="Navegação principal"><div>'+
         [["inicio","Início","home"],["plano","Meu plano","cal"],["tracker","Tracker","tasks"],["bemestar","Bem-estar","heart"],["eu","Você","user"]]
@@ -1060,10 +1092,11 @@
     if(st && window.MutationObserver) new MutationObserver(function(){ var s = document.getElementById("juSync"); if(s) s.textContent = st.textContent; }).observe(st, {childList:true, characterData:true, subtree:true});
 
     document.addEventListener("click", function(e){
-      var t = e.target.closest("[data-go],[data-act],[data-legacy],[data-task],[data-habit],[data-water],[data-pay],[data-deltx],[data-deltask],[data-delhabit],[data-day],[data-month],[data-mood],[data-proxy],[data-shop],[data-shoptab],[data-shopadd],[data-shopreset],[data-delshop],[data-treino],[data-study],[data-delstudy],[data-sfilter],[data-chipscroll],[data-dreamstep],[data-dreamadd],[data-dreamdel],[data-gymset],[data-gymact],[data-meal],[data-mealedit],#juPhoto");
+      var t = e.target.closest("[data-go],[data-act],[data-legacy],[data-task],[data-habit],[data-water],[data-pay],[data-deltx],[data-deltask],[data-delhabit],[data-day],[data-month],[data-mood],[data-proxy],[data-shop],[data-shoptab],[data-shopadd],[data-shopreset],[data-delshop],[data-treino],[data-study],[data-delstudy],[data-sfilter],[data-chipscroll],[data-dreamstep],[data-dreamadd],[data-dreamdel],[data-gymset],[data-gymact],[data-meal],[data-mealedit],[data-ficha],#juPhoto");
       if(!t || !t.closest(".ju, .ju-nav, .ju-legacy-bar")) return;
       if(t.id==="juPhoto"){ photoOffset++; var img = document.getElementById("juPhotoImg"); if(img) img.src = photoOfDay(photoOffset); return; }
       if(t.dataset.go){ go(t.dataset.go); return; }
+      if(t.dataset.ficha){ juFichaSel = t.dataset.ficha; renderView("ficha"); return; }
       if(t.dataset.gymset){ var gs = t.dataset.gymset.split("|"), gk = todayKey(), GLk = gym().log[gk] || (gym().log[gk] = {}), ge = GLk[gs[0]] || (GLk[gs[0]] = {s:[]});
         ge.s = ge.s || []; ge.s[+gs[1]] = !ge.s[+gs[1]]; ge.reps = String(t.dataset.reps||"").split(",").map(Number);
         var sess = gym().sess[gk] || (gym().sess[gk] = {}); if(!sess.ini) sess.ini = Date.now();
@@ -1143,7 +1176,7 @@
       if(id==="juCycleDur" && v>=2 && v<=10){ J().cycle.dur = Math.round(v); persist(); }
     });
     var saved = "inicio"; try{ saved = localStorage.getItem("painelJuView") || "inicio"; }catch(e){}
-    juView = ["inicio","plano","tracker","financas","sono","bemestar","tarefas","compras","estudos","sonhos","eu"].indexOf(saved)>-1 ? saved : "inicio";
+    juView = ["inicio","plano","tracker","financas","sono","bemestar","tarefas","compras","estudos","sonhos","ficha","eu"].indexOf(saved)>-1 ? saved : "inicio";
   }
   function shellStart(){ go(juView); }
 
