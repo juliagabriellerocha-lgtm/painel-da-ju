@@ -98,3 +98,10 @@
           if(!p.done){ var c = f.querySelector("[data-close]"); if(c) c.textContent = "Agora não"; }
         } });
   }
+  function lnDemoBar(){
+    if(!window.LUNORA_DEMO || document.getElementById("lnDemo")) return;
+    var b = document.createElement("div"); b.id = "lnDemo"; b.className = "ln-demo";
+    b.innerHTML = '<span>✨ Demonstração com dados de exemplo</span><button type="button" id="lnDemoReset">Recomeçar do zero</button>';
+    document.body.appendChild(b);
+    document.getElementById("lnDemoReset").addEventListener("click", function(){ try{ localStorage.clear(); sessionStorage.setItem("lnDemoEmpty","1"); }catch(e){} location.reload(); });
+  }

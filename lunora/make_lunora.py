@@ -154,7 +154,7 @@ rep("""        await pullFromAccount();
 # ---------- código novo: helpers, criar conta e onboarding ----------
 LN = pathlib.Path("/home/claude/lunora/lunora_extra.js").read_text(encoding="utf-8")
 rep("""  function shellStart(){ go(juView); }""", LN + """
-  function shellStart(){ go(juView); setTimeout(lnMaybeOnboard, 400); }""")
+  function shellStart(){ go(juView); setTimeout(lnMaybeOnboard, 400); lnDemoBar(); }""")
 rep("""      if(t.id==="juPhoto"){ photoOffset++; var img = document.getElementById("juPhotoImg"); if(img) img.src = photoOfDay(photoOffset); return; }""",
     """      if(t.dataset && t.dataset.act==="onboarding"){ lnOnboard(); return; }""")
 
@@ -184,8 +184,8 @@ rep("""value="'+(+J().cycle.dur||5)+'"></div>'+""", """value="'+(+J().cycle.dur|
 
 # ---------- recursos inteligentes (inspirados em Todoist, TickTick, Neotriad, Forest, Clockify, TimeTune, Mobills) ----------
 SMART = pathlib.Path("/home/claude/lunora/lunora_smart.js").read_text(encoding="utf-8")
-rep("""  function shellStart(){ go(juView); setTimeout(lnMaybeOnboard, 400); }""", SMART + """
-  function shellStart(){ go(juView); setTimeout(lnMaybeOnboard, 400); }""")
+rep("""  function shellStart(){ go(juView); setTimeout(lnMaybeOnboard, 400); lnDemoBar(); }""", SMART + """
+  function shellStart(){ go(juView); setTimeout(lnMaybeOnboard, 400); lnDemoBar(); }""")
 rep("""    '<div id="agoraSlot"></div>'+
     '<div class="ju-grid">'+""", """    lnQuickBar()+
     '<div id="agoraSlot"></div>'+
@@ -216,4 +216,6 @@ rep('var p = state.workout.plan[dk] || "Descanso";', 'var p = state.workout.plan
 # checagem final: nada pessoal pode sobrar
 bad = re.findall(r"André|Andre\b|Ju Rocha|HDL|Sermar|TJSP|TripleTen|Sebrae|Bruna|Otto|Casa das Gra|Júlia|fotos/|Cravinhos|Escrevente", s)
 OUT.write_text(s, encoding="utf-8")
+DEMO = s.replace('<script src="./config.js"></script>', '<script src="./config.js"></script>\n  <script src="./demo.js"></script>', 1).replace("<title>Lunora</title>", "<title>Lunora — demonstração</title>", 1)
+pathlib.Path("/home/claude/lunora/demo.html").write_text(DEMO, encoding="utf-8")
 print("ok", len(s), "restos:", sorted(set(bad)))

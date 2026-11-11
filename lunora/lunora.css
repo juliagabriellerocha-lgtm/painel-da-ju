@@ -58,3 +58,6 @@
 .ln-fbars i{display:block;width:100%;max-width:26px;border-radius:8px;background:#7D6BB8;}
 .ln-fbars i.off{background:var(--j-line,#E8DCD6);}
 .ln-fbars small{font-size:10.5px;color:var(--j-soft,#7A6A74);}
+.ln-demo{position:fixed;left:50%;transform:translateX(-50%);top:calc(6px + env(safe-area-inset-top));z-index:50;display:flex;align-items:center;gap:10px;padding:6px 8px 6px 14px;border-radius:999px;background:#2A1C3A;color:#F6E7C8;font-size:12px;box-shadow:0 6px 18px rgba(42,28,58,.25);white-space:nowrap;}
+.ln-demo button{border:0;border-radius:999px;padding:5px 10px;background:#F6E7C8;color:#2A1C3A;font:inherit;font-weight:600;cursor:pointer;}
+body:has(.ln-demo) .ju{padding-top:38px;}
