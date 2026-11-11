@@ -365,3 +365,7 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
 .ju-set{width:30px;height:30px;border-radius:9px;border:1.5px solid var(--j-line);background:var(--j-surface);color:var(--j-soft);font:600 12px/1 inherit;cursor:pointer;padding:0;}
 .ju-set.on{background:var(--j-green);border-color:var(--j-green);color:#fff;}
 .ju-kg{width:70px!important;flex:none;min-height:0!important;padding:6px 8px;border-radius:10px;border:1px solid var(--j-line);background:var(--j-surface);color:var(--j-ink);font:inherit;font-size:13px;text-align:right;}
+
+/* botão Entrar visível na janela da conta */
+.account-dialog{--tab-c:#0E5552;}
+.account-dialog .btn.primary{padding:11px 22px;border-radius:999px;font-size:14px;}
