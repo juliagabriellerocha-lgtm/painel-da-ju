@@ -411,3 +411,7 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
 .ln-fbars i.off{background:var(--j-line,#E8DCD6);}
 .ln-fbars small{font-size:10.5px;color:var(--j-soft,#7A6A74);}
 .linkbtn{background:none;border:0;padding:0;font:inherit;color:#0E5552;text-decoration:underline;cursor:pointer;}
+.ln-qmic{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--j-line,#E8DCD6);background:transparent;color:#5B3F6E;display:grid;place-items:center;cursor:pointer;flex:none;}
+.ln-qmic svg{width:19px;height:19px;}
+.ln-qmic.on{background:#B4434F;border-color:#B4434F;color:#fff;animation:lnPulse 1.2s ease-in-out infinite;}
+@keyframes lnPulse{0%,100%{box-shadow:0 0 0 0 rgba(180,67,79,.45);}50%{box-shadow:0 0 0 8px rgba(180,67,79,0);}}

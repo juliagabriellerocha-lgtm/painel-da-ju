@@ -974,6 +974,10 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
 .ln-fbars i.off{background:var(--j-line,#E8DCD6);}
 .ln-fbars small{font-size:10.5px;color:var(--j-soft,#7A6A74);}
 .linkbtn{background:none;border:0;padding:0;font:inherit;color:#0E5552;text-decoration:underline;cursor:pointer;}
+.ln-qmic{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--j-line,#E8DCD6);background:transparent;color:#5B3F6E;display:grid;place-items:center;cursor:pointer;flex:none;}
+.ln-qmic svg{width:19px;height:19px;}
+.ln-qmic.on{background:#B4434F;border-color:#B4434F;color:#fff;animation:lnPulse 1.2s ease-in-out infinite;}
+@keyframes lnPulse{0%,100%{box-shadow:0 0 0 0 rgba(180,67,79,.45);}50%{box-shadow:0 0 0 8px rgba(180,67,79,0);}}
 </style>
 
 <div class="app">
@@ -4836,7 +4840,9 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
   }
   function lnQuickBar(){
     return '<form class="ln-quick" id="lnQuickForm" autocomplete="off"><div class="ln-qrow"><span class="ln-qicon">'+ico("spark")+'</span>'+
-      '<input id="lnQuick" enterkeyhint="done" placeholder="Anote do seu jeito: “consulta sexta 9h”…" aria-label="Adicionar tarefa ou compromisso"><button class="ln-qgo" type="submit" aria-label="Adicionar">'+ico("plus")+'</button></div>'+
+      '<input id="lnQuick" enterkeyhint="done" placeholder="Anote ou fale: “consulta sexta 9h”…" aria-label="Adicionar tarefa ou compromisso">'+
+      (lnVoiceOk() ? '<button class="ln-qmic" type="button" id="lnMic" aria-label="Falar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>' : '')+
+      '<button class="ln-qgo" type="submit" aria-label="Adicionar">'+ico("plus")+'</button></div>'+
       '<div class="ln-qprev" id="lnQuickPrev">'+lnPreview(null)+'</div></form>';
   }
   function lnQuickSave(){
@@ -4851,7 +4857,7 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
       var t = {id:uid("t"), texto:p.title, data:p.date||todayKey(), feita:false, triade:tri, tag:p.tag}; if(p.time) t.hora = p.time;
       J().tasks.unshift(t); toast("Tarefa salva"+(p.date && p.date!==todayKey() ? " para "+fmtDay(parseKey(p.date)) : " para hoje"));
     }
-    lnQuickTri = null; inp.value = ""; save();
+    lnQuickTri = null; inp.value = ""; save(); setTimeout(function(){ window.lnScheduleNotifications && window.lnScheduleNotifications(); window.lnSyncCalendar && window.lnSyncCalendar(); }, 600);
   }
   document.addEventListener("input", function(e){ if(e.target && e.target.id==="lnQuick"){ lnQuickTri = null; var pv = document.getElementById("lnQuickPrev"); if(pv) pv.innerHTML = lnPreview(lnParse(e.target.value)); } });
   document.addEventListener("submit", function(e){ if(e.target && e.target.id==="lnQuickForm"){ e.preventDefault(); lnQuickSave(); } });
@@ -4861,6 +4867,32 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
     lnQuickTri = order[(order.indexOf(cur)+1)%3]; var pv = document.getElementById("lnQuickPrev"); if(pv) pv.innerHTML = lnPreview(lnParse(document.getElementById("lnQuick").value));
   });
 
+
+  // ---------- Voz: fale a tarefa ou o compromisso ----------
+  function lnVoiceOk(){ return !!(window.lnNativeSpeech || window.SpeechRecognition || window.webkitSpeechRecognition); }
+  var lnRec = null;
+  function lnVoiceSet(listening){ var b = document.getElementById("lnMic"); if(b) b.classList.toggle("on", listening); var i = document.getElementById("lnQuick"); if(i) i.placeholder = listening ? "Ouvindo… fale com calma" : "Anote ou fale: “consulta sexta 9h”…"; }
+  function lnVoiceText(t, final){
+    var i = document.getElementById("lnQuick"); if(!i) return; i.value = t;
+    var pv = document.getElementById("lnQuickPrev"); if(pv){ lnQuickTri = null; pv.innerHTML = lnPreview(lnParse(t)); }
+    if(final && t){ lnVoiceSet(false); toast("Confira e toque em + para salvar"); }
+  }
+  async function lnVoice(){
+    if(lnRec){ try{ lnRec.stop(); }catch(e){} if(window.lnNativeSpeech) window.lnNativeSpeech.stop(); lnRec = null; lnVoiceSet(false); return; }
+    if(window.lnNativeSpeech){
+      lnRec = {stop:function(){}}; lnVoiceSet(true);
+      try{ var t = await window.lnNativeSpeech.listen(function(p){ lnVoiceText(p, false); }); lnVoiceText(t, true); }
+      catch(e){ toast(e.message || "Não consegui ouvir"); }
+      lnRec = null; lnVoiceSet(false); return;
+    }
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition; if(!SR){ toast("Seu navegador não tem reconhecimento de voz"); return; }
+    var r = new SR(); r.lang = "pt-BR"; r.interimResults = true; r.continuous = false; r.maxAlternatives = 1;
+    r.onresult = function(e){ var t = ""; for(var i=0;i<e.results.length;i++) t += e.results[i][0].transcript; lnVoiceText(t.trim(), e.results[e.results.length-1].isFinal); };
+    r.onerror = function(e){ toast(e.error==="not-allowed" ? "Permita o microfone para usar a voz" : e.error==="no-speech" ? "Não ouvi nada — tente de novo" : "Voz indisponível agora"); };
+    r.onend = function(){ lnRec = null; lnVoiceSet(false); };
+    lnRec = r; lnVoiceSet(true); try{ r.start(); }catch(e){ lnRec = null; lnVoiceSet(false); }
+  }
+  document.addEventListener("click", function(e){ if(e.target.closest && e.target.closest("#lnMic")){ e.preventDefault(); lnVoice(); } });
   // Tríade do Tempo: o ideal é ~70% importante, ~20% urgente, ~10% circunstancial.
   function lnTriOf(t){ return t.triade || lnParse(t.texto).triade; }
   function lnTriadeCard(){

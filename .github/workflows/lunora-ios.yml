@@ -1,0 +1,65 @@
+name: Lunora iOS → TestFlight
+
+# Rode manualmente em Actions → "Lunora iOS → TestFlight" → Run workflow.
+# Precisa destes segredos (Settings → Secrets and variables → Actions):
+#   APPLE_TEAM_ID   — Team ID da conta Apple Developer (10 letras/números)
+#   ASC_KEY_ID      — Key ID da chave da App Store Connect API
+#   ASC_ISSUER_ID   — Issuer ID da App Store Connect API
+#   ASC_KEY_P8      — conteúdo do arquivo AuthKey_XXXX.p8
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: lunora-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Instalar dependências
+        run: npm ci
+      - name: Copiar o app web e sincronizar o iOS
+        run: |
+          node scripts/copy-web.mjs
+          npx cap sync ios
+      - name: Chave da App Store Connect
+        env:
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/keys"
+          printf '%s' "$ASC_KEY_P8" > "$RUNNER_TEMP/keys/AuthKey.p8"
+      - name: Gerar o arquivo do app (archive)
+        env:
+          TEAM: ${{ secrets.APPLE_TEAM_ID }}
+          KID: ${{ secrets.ASC_KEY_ID }}
+          ISS: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release \
+            -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/App.xcarchive" archive \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/keys/AuthKey.p8" -authenticationKeyID "$KID" -authenticationKeyIssuerID "$ISS" \
+            DEVELOPMENT_TEAM="$TEAM" CODE_SIGN_STYLE=Automatic CURRENT_PROJECT_VERSION=${{ github.run_number }}
+      - name: Enviar para o TestFlight
+        env:
+          TEAM: ${{ secrets.APPLE_TEAM_ID }}
+          KID: ${{ secrets.ASC_KEY_ID }}
+          ISS: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          cat > "$RUNNER_TEMP/export.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>teamID</key><string>$TEAM</string>
+            <key>signingStyle</key><string>automatic</string>
+          </dict></plist>
+          PLIST
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/App.xcarchive" -exportOptionsPlist "$RUNNER_TEMP/export.plist" \
+            -exportPath "$RUNNER_TEMP/export" -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/keys/AuthKey.p8" -authenticationKeyID "$KID" -authenticationKeyIssuerID "$ISS"

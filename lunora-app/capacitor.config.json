@@ -1,0 +1,14 @@
+{
+  "appId": "br.app.lunora",
+  "appName": "Lunora",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#1F1530",
+    "scheme": "Lunora"
+  },
+  "plugins": {
+    "SplashScreen": { "launchShowDuration": 900, "backgroundColor": "#1F1530", "showSpinner": false },
+    "LocalNotifications": { "iconColor": "#5B3F6E" }
+  }
+}
