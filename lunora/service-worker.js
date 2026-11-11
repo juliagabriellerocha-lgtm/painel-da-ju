@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE_NAME = "lunora-v1";
+const CACHE_NAME = "lunora-v2";
 const APP_SHELL = [
   "./",
   "./index.html",

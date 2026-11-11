@@ -101,50 +101,12 @@ rep("""        : '<p class="ju-empty">A liturgia do dia aparece aqui quando esti
       '<button class="ju-more" data-legacy="espirito">Espiritualidade '+ico("chev")+'</button></section>' : '');""")
 
 # chave do servidor da Lunora (preenchida quando o projeto Supabase existir)
-rep('var SB_DEFAULT = { url: "", key: "" };', 'var SB_DEFAULT = window.LUNORA_CONFIG || { url: "", key: "" };')
+resub(r'var SB_DEFAULT = \{[^}]*\};', 'var SB_DEFAULT = window.LUNORA_CONFIG || { url: "", key: "" };')
 rep('var SB_CONFIG_KEY = "painelJuSupabase", CACHE_KEY = "painelJuCacheV2";', 'var SB_CONFIG_KEY = "lunoraSupabase", CACHE_KEY = "lunoraCacheV1";')
 s = s.replace('"painelJuView"', '"lunoraView"')
 
-# ---------- tela de conta: criar conta + esqueci a senha ----------
-rep("""    <h2>Sua conta</h2>
-    <p class="msg" id="accountWho">Entre para carregar e sincronizar seus dados entre celular e computador.</p>""",
-    """    <h2 id="accountTitle">Entrar na Lunora</h2>
-    <p class="msg" id="accountWho">Entre para carregar e sincronizar seus dados entre celular e computador.</p>""")
-rep("""      <label>Senha<input id="sbPassword" type="password" autocomplete="current-password" required></label>
-    </div>""",
-    """      <label>Senha<input id="sbPassword" type="password" autocomplete="current-password" minlength="6" required></label>
-      <p class="msg" style="margin:4px 0 0"><button type="button" class="linkbtn" id="accountMode">Ainda não tem conta? Criar conta</button> · <button type="button" class="linkbtn" id="accountForgot">Esqueci a senha</button></p>
-    </div>""")
-rep("""        var r = await sb.auth.signInWithPassword({ email: document.getElementById("sbEmail").value.trim(), password: document.getElementById("sbPassword").value });
-        if(r.error) throw new Error(r.error.message === "Invalid login credentials" ? "E-mail ou senha incorretos." : r.error.message);
-        sbUser = r.data.user;""",
-    """        var em = document.getElementById("sbEmail").value.trim(), pw = document.getElementById("sbPassword").value, r;
-        if(lnSignup){
-          r = await sb.auth.signUp({ email: em, password: pw, options: { emailRedirectTo: location.origin + location.pathname } });
-          if(r.error) throw new Error(/registered/i.test(r.error.message) ? "Este e-mail já tem conta. Toque em Entrar." : /Password/i.test(r.error.message) ? "A senha precisa ter pelo menos 6 caracteres." : r.error.message);
-          if(!r.data.session){ msg.className = "msg"; msg.textContent = "Conta criada! Enviamos um link para "+em+". Abra o e-mail para confirmar e depois entre aqui."; lnSetMode(false); return; }
-        } else {
-          r = await sb.auth.signInWithPassword({ email: em, password: pw });
-          if(r.error) throw new Error(r.error.message === "Invalid login credentials" ? "E-mail ou senha incorretos." : /confirm/i.test(r.error.message) ? "Confirme seu e-mail pelo link que enviamos antes de entrar." : r.error.message);
-        }
-        sbUser = r.data.user;""")
-rep("""    document.getElementById("accountLogout").addEventListener("click", async function(){""",
-    """    document.getElementById("accountMode").addEventListener("click", function(){ lnSetMode(!lnSignup); msg.textContent = ""; });
-    document.getElementById("accountForgot").addEventListener("click", async function(){
-      var em = document.getElementById("sbEmail").value.trim();
-      if(!em){ msg.className = "msg error"; msg.textContent = "Digite seu e-mail acima e toque de novo em Esqueci a senha."; return; }
-      try{ var c = sbConfig(), lib = await loadSdk(); if(!sb) sb = lib.createClient(c.url, c.key, { auth: { persistSession: true, autoRefreshToken: true } });
-        var r = await sb.auth.resetPasswordForEmail(em, { redirectTo: location.origin + location.pathname });
-        if(r.error) throw r.error; msg.className = "msg"; msg.textContent = "Enviamos um link para criar uma nova senha em "+em+".";
-      }catch(err){ msg.className = "msg error"; msg.textContent = err.message || "Não foi possível enviar agora."; }
-    });
-    document.getElementById("accountLogout").addEventListener("click", async function(){""")
-rep("""    document.getElementById("accountProject").open = !(c.url && c.key);""",
-    """    document.getElementById("accountProject").open = !(c.url && c.key);
-    document.getElementById("accountProject").hidden = !!(SB_DEFAULT.url && SB_DEFAULT.key);
-    document.getElementById("accountTitle").textContent = sbUser ? "Sua conta" : (lnSignup ? "Criar conta na Lunora" : "Entrar na Lunora");""")
-rep("""btn.textContent = sbUser ? "Conta" : "Entrar";""", """btn.textContent = sbUser ? "Conta" : "Entrar";
-    var mode = document.getElementById("accountMode"); if(mode) mode.parentNode.hidden = !!sbUser;""")
+# ---------- tela de conta (criar conta e esqueci a senha já vêm do app base) ----------
+rep("""<h2 id="accountTitle">Sua conta</h2>""", """<h2 id="accountTitle">Entrar na Lunora</h2>""")
 # depois de entrar, se a pessoa nunca fez o cadastro inicial, abre o onboarding
 rep("""        await pullFromAccount();
         dlg.close();""", """        await pullFromAccount();
@@ -182,33 +144,8 @@ rep("// ---------- fotos da Ju ----------", "// ---------- (sem fotos pessoais) 
 rep("""      '<div class="ju-row"><span>Duração do ciclo (dias)</span>""", """      (lnArea("ciclo") ? '<div class="ju-row"><span>Duração do ciclo (dias)</span>""")
 rep("""value="'+(+J().cycle.dur||5)+'"></div>'+""", """value="'+(+J().cycle.dur||5)+'"></div>' : '')+""")
 
-# ---------- recursos inteligentes (inspirados em Todoist, TickTick, Neotriad, Forest, Clockify, TimeTune, Mobills) ----------
-SMART = pathlib.Path("/home/claude/lunora/lunora_smart.js").read_text(encoding="utf-8")
-rep("""  function shellStart(){ go(juView); setTimeout(lnMaybeOnboard, 400); lnDemoBar(); }""", SMART + """
-  function shellStart(){ go(juView); setTimeout(lnMaybeOnboard, 400); lnDemoBar(); }""")
-rep("""    '<div id="agoraSlot"></div>'+
-    '<div class="ju-grid">'+""", """    lnQuickBar()+
-    '<div id="agoraSlot"></div>'+
-    '<div class="ju-grid">'+""")
-rep('chip("plano","Agenda","cal","agenda")+', """'<button class="ju-chip" data-lnfocus style="'+tone("sono")+'"><i>'+ico("moon")+'</i><span>Foco</span></button>'+chip("plano","Agenda","cal","agenda")+""")
-rep("""    var html = '<button class="ju-btn primary block" data-act="task">'+ico("plus")+' Nova tarefa</button>'+""",
-    """    var html = lnQuickBar()+lnTriadeCard()+""")
-rep("""    '<section class="ju-card" style="'+tone("tarefas")+'"><div class="ju-head"><span class="ic">'+ico("tasks")+'</span><h3>Tarefas do dia</h3>""",
-    """    (juPlanDay===0 ? lnEncaixeCard() : '')+
-    '<section class="ju-card" style="'+tone("tarefas")+'"><div class="ju-head"><span class="ic">'+ico("tasks")+'</span><h3>Tarefas do dia</h3>""")
-rep("""    var html = '<section class="ju-card" style="display:flex;align-items:center;gap:16px;'+tone("habitos")""",
-    """    var html = lnFocusCard()+'<section class="ju-card" style="display:flex;align-items:center;gap:16px;'+tone("habitos")""")
-rep("""    '<section class="ju-card ju-money-hero">""", """    lnSafeSpend()+'<section class="ju-card ju-money-hero">""")
-rep("""<span>'+esc(t.texto)+'</span></li>'; }""", """<span>'+esc(t.texto)+lnTaskMeta(t)+'</span></li>'; }
-  function lnTaskMeta(t){ if(t.feita) return ""; var tr = LN_TRI[lnTriOf(t)]; return ' <small class="ln-tm" style="color:'+tr.c+'">● '+tr.l+(t.hora?' · '+esc(t.hora):'')+(t.tag==="trabalho"?' · 💼':'')+'</small>'; }""")
-rep("""      '<label class="ju-field">Para quando<input name="data" type="date" value="'+todayKey()+'"></label>',
-      function(f){ var t = f.texto.value.trim(); if(!t) return "Escreva a tarefa.";
-        J().tasks.unshift({id:uid("t"), texto:t, data:f.data.value||todayKey(), feita:false}); save(); toast("Tarefa adicionada"); });""",
-    """      '<div class="ju-two"><label class="ju-field">Para quando<input name="data" type="date" value="'+todayKey()+'"></label><label class="ju-field">Horário (opcional)<input name="hora" type="time"></label></div>'+
-      '<div class="ju-field">Tríade do tempo'+seg("tri", [["importante","Importante"],["urgente","Urgente"],["circunstancial","Circunstancial"]], "importante")+'</div>',
-      function(f){ var t = f.texto.value.trim(); if(!t) return "Escreva a tarefa.";
-        var it = {id:uid("t"), texto:t, data:f.data.value||todayKey(), feita:false, triade:segVal(f,"tri")||"importante", tag:LN_WORK.test(t)?"trabalho":"pessoal"}; if(f.hora.value) it.hora = f.hora.value;
-        J().tasks.unshift(it); save(); toast("Tarefa adicionada"); });""")
+# ---------- recursos inteligentes: já vêm do app base (src/shell.js); só tiramos o perfil fixo da Ju ----------
+resub(r"  // Perfil da Ju para os recursos inteligentes.*?\n  function lnArea\(\)\{ return true; \}\n", "")
 rep('placeholder="Ex.: retornar cotação"', 'placeholder="Ex.: pagar a conta de luz"')
 
 rep('var p = state.workout.plan[dk] || "Descanso";', 'var p = state.workout.plan[dk] || "Treino do dia";')

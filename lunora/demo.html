@@ -935,6 +935,48 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
 /* botão Entrar visível na janela da conta */
 .account-dialog{--tab-c:#0E5552;}
 .account-dialog .btn.primary{padding:11px 22px;border-radius:999px;font-size:14px;}
+
+/* recursos inteligentes (vindos da Lunora) */
+/* captura rápida */
+.ln-quick{background:var(--j-surface,#fff);border:1.5px solid var(--j-line,#E8DCD6);border-radius:22px;padding:10px 10px 10px 14px;margin:0 0 14px;box-shadow:0 6px 18px rgba(42,28,58,.06);}
+.ln-qrow{display:flex;align-items:center;gap:10px;}
+.ln-qicon{color:#8A6BA8;display:grid;place-items:center;width:22px;height:22px;flex:none;}
+.ln-qicon svg{width:20px;height:20px;}
+.ln-quick input{flex:1;min-width:0;border:0;outline:0;background:transparent;font:inherit;font-size:15px;color:var(--j-ink,#2A1C28);padding:8px 0;}
+.ln-qgo{width:40px;height:40px;border-radius:50%;border:0;background:#5B3F6E;color:#fff;display:grid;place-items:center;cursor:pointer;flex:none;}
+.ln-qgo svg{width:20px;height:20px;}
+.ln-qprev{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;min-height:24px;}
+.ln-hint{font-size:12px;color:var(--j-soft,#7A6A74);line-height:1.5;}
+.ln-tag{font-size:12px;padding:4px 9px;border-radius:999px;background:var(--j-surface-2,#F3E7E2);color:var(--j-ink,#2A1C28);border:0;font-family:inherit;white-space:nowrap;}
+.ln-tri{cursor:pointer;font-weight:600;}
+.ln-tm{display:block;font-size:11px;margin-top:2px;}
+/* tríade */
+.ln-tribar{display:flex;height:12px;border-radius:99px;overflow:hidden;gap:2px;margin-top:4px;}
+.ln-tribar i{display:block;}
+.ln-trileg{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px;font-size:12px;color:var(--j-soft,#7A6A74);}
+.ln-trileg b{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;}
+/* foco */
+.ln-focus{position:fixed;inset:0;z-index:9999;background:radial-gradient(circle at 50% 30%,#3A2850,#1A1226 70%);color:#F6E7C8;display:grid;place-items:center;padding:24px 20px calc(24px + env(safe-area-inset-bottom));overflow:auto;}
+.ln-fbody{display:grid;justify-items:center;gap:14px;width:100%;max-width:360px;text-align:center;}
+.ln-fkick{letter-spacing:.2em;font-size:12px;margin:0;color:#E9C48A;}
+.ln-fclose{position:absolute;top:calc(14px + env(safe-area-inset-top));right:16px;width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.1);color:#F6E7C8;font-size:18px;cursor:pointer;}
+#lnFSetup{display:grid;gap:12px;width:100%;}
+#lnFLabel{width:100%;padding:13px 16px;border-radius:16px;border:1px solid rgba(246,231,200,.25);background:rgba(255,255,255,.06);color:#F6E7C8;font:inherit;font-size:15px;text-align:center;}
+#lnFLabel::placeholder{color:rgba(246,231,200,.5);}
+.ln-fdur{display:flex;gap:8px;justify-content:center;}
+.ln-fdur button,.ln-frow button{padding:9px 16px;border-radius:999px;border:1px solid rgba(246,231,200,.3);background:transparent;color:#F6E7C8;font:inherit;cursor:pointer;}
+.ln-fdur button.on{background:#F6E7C8;color:#2A1C3A;border-color:#F6E7C8;}
+.ln-fstart{width:100%;padding:14px;border-radius:999px;border:0;background:#E9C48A;color:#2A1C3A;font:600 16px/1 inherit;cursor:pointer;}
+.ln-fnote{font-size:12.5px;opacity:.7;margin:0;line-height:1.45;}
+.ln-ftime{font:600 64px/1 "Cormorant Garamond",Georgia,serif;letter-spacing:.02em;font-variant-numeric:tabular-nums;}
+.ln-flabel{margin:0;font-size:15px;opacity:.85;}
+.ln-frow{display:flex;gap:10px;justify-content:center;}
+.ln-fbars{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end;height:84px;margin-top:6px;}
+.ln-fbars div{display:grid;justify-items:center;gap:4px;align-content:end;height:100%;}
+.ln-fbars i{display:block;width:100%;max-width:26px;border-radius:8px;background:#7D6BB8;}
+.ln-fbars i.off{background:var(--j-line,#E8DCD6);}
+.ln-fbars small{font-size:10.5px;color:var(--j-soft,#7A6A74);}
+.linkbtn{background:none;border:0;padding:0;font:inherit;color:#0E5552;text-decoration:underline;cursor:pointer;}
 </style>
 
 <style>
@@ -3071,11 +3113,14 @@ body:has(.ln-demo) .ju{padding-top:38px;}
   // com uma cópia no aparelho para abrir rápido e funcionar sem internet.
   var SB_CONFIG_KEY = "lunoraSupabase", CACHE_KEY = "lunoraCacheV1";
   var SB_DEFAULT = window.LUNORA_CONFIG || { url: "", key: "" };
+  var lnSignup = false;
+  function lnSetMode(signup){ lnSignup = !!signup; var b = document.getElementById("accountMode"), t = document.getElementById("accountTitle"), go = document.getElementById("accountLogin"), pw = document.getElementById("sbPassword"), f = document.getElementById("accountForgot");
+    if(b) b.textContent = lnSignup ? "Já tem conta? Entrar" : "Ainda não tem conta? Criar conta"; if(t) t.textContent = lnSignup ? "Criar sua conta" : "Entrar na sua conta"; if(go) go.textContent = lnSignup ? "Criar conta" : "Entrar"; if(pw) pw.setAttribute("autocomplete", lnSignup ? "new-password" : "current-password"); if(f) f.hidden = lnSignup; }
   var sb = null, sbUser = null, syncTimer = null, syncing = false, dirty = false;
 
   function readJSON(key){ try{ return JSON.parse(localStorage.getItem(key)||"null"); }catch(e){ return null; } }
   function writeJSON(key, value){ try{ localStorage.setItem(key, JSON.stringify(value)); return true; }catch(e){ return false; } }
-  function sbConfig(){ var c = readJSON(SB_CONFIG_KEY) || {}; return { url: c.url || SB_DEFAULT.url, key: c.key || SB_DEFAULT.key }; }
+  function sbConfig(){ var c = readJSON(SB_CONFIG_KEY) || {}; return { url: SB_DEFAULT.url || c.url, key: SB_DEFAULT.key || c.key }; }
 
   function loadSdk(){
     if(window.supabase && window.supabase.createClient) return Promise.resolve(window.supabase);
@@ -3173,7 +3218,7 @@ body:has(.ln-demo) .ju{padding-top:38px;}
     document.getElementById("sbUrl").value = c.url; document.getElementById("sbKey").value = c.key;
     document.getElementById("accountProject").open = !(c.url && c.key);
     document.getElementById("accountProject").hidden = !!(SB_DEFAULT.url && SB_DEFAULT.key);
-    document.getElementById("accountTitle").textContent = sbUser ? "Sua conta" : (lnSignup ? "Criar conta na Lunora" : "Entrar na Lunora");
+    document.getElementById("accountTitle").textContent = sbUser ? "Sua conta" : (lnSignup ? "Criar sua conta" : "Entrar na sua conta");
   }
 
   async function connect(){
@@ -3207,7 +3252,7 @@ body:has(.ln-demo) .ju{padding-top:38px;}
         if(lnSignup){
           r = await sb.auth.signUp({ email: em, password: pw, options: { emailRedirectTo: location.origin + location.pathname } });
           if(r.error) throw new Error(/registered/i.test(r.error.message) ? "Este e-mail já tem conta. Toque em Entrar." : /Password/i.test(r.error.message) ? "A senha precisa ter pelo menos 6 caracteres." : r.error.message);
-          if(!r.data.session){ msg.className = "msg"; msg.textContent = "Conta criada! Enviamos um link para "+em+". Abra o e-mail para confirmar e depois entre aqui."; lnSetMode(false); return; }
+          if(!r.data.session){ msg.className = "msg"; msg.textContent = "Conta criada! Enviamos um link para "+em+". Abra o e-mail, toque no link para confirmar e depois volte aqui e entre."; lnSetMode(false); return; }
         } else {
           r = await sb.auth.signInWithPassword({ email: em, password: pw });
           if(r.error) throw new Error(r.error.message === "Invalid login credentials" ? "E-mail ou senha incorretos." : /confirm/i.test(r.error.message) ? "Confirme seu e-mail pelo link que enviamos antes de entrar." : r.error.message);
@@ -4392,114 +4437,6 @@ body:has(.ln-demo) .ju{padding-top:38px;}
     juView = ["inicio","plano","tracker","financas","sono","bemestar","tarefas","compras","estudos","sonhos","ficha","eu"].indexOf(saved)>-1 ? saved : "inicio";
   }
   // =====================================================================
-  // Lunora: perfil da pessoa, criar conta e cadastro inicial (onboarding)
-  // =====================================================================
-  var lnSignup = false;
-  var LN_AREAS = [
-    ["treino","Treino","🏋️"], ["dieta","Alimentação","🥗"], ["estudos","Estudos","📚"], ["financas","Finanças","💰"],
-    ["trabalho","Trabalho","💼"], ["leitura","Leitura","📖"], ["fe","Fé e espiritualidade","🙏"], ["ciclo","Ciclo menstrual","🌸"]
-  ];
-  function lnProfile(){ return (state && state.ju && state.ju.profile) || null; }
-  function lnName(){ var p = lnProfile(); return p && p.name ? p.name : ""; }
-  // Áreas que a pessoa escolheu. Antes do cadastro, tudo aparece.
-  function lnArea(key){
-    var p = lnProfile(); if(!p || !Array.isArray(p.areas)) return true;
-    var map = {dieta:"dieta", treino:"treino", leitura:"leitura", fe:"fe", financas:"financas", ciclo:"ciclo", metas:true, rotina:true, compras:true, progresso:true};
-    var k = map[key]; if(k===true) return true; if(!k) k = key;
-    return p.areas.indexOf(k) > -1;
-  }
-  function lnAvatar(big){
-    var n = lnName(), ini = n ? n.trim().charAt(0).toUpperCase() : "";
-    return '<span class="ln-avatar'+(big?" big":"")+'" aria-hidden="true">'+(ini ? esc(ini) : '<span class="ln-moon sm"></span>')+'</span>';
-  }
-  function lnRefreshTop(){ var a = document.querySelector(".ju-avatar"); if(a) a.innerHTML = lnAvatar(); }
-  function lnSetMode(signup){
-    lnSignup = !!signup;
-    var b = document.getElementById("accountMode"), t = document.getElementById("accountTitle"), go = document.getElementById("accountLogin"), pw = document.getElementById("sbPassword");
-    if(b) b.textContent = lnSignup ? "Já tem conta? Entrar" : "Ainda não tem conta? Criar conta";
-    if(t) t.textContent = lnSignup ? "Criar conta na Lunora" : "Entrar na Lunora";
-    if(go) go.textContent = lnSignup ? "Criar conta" : "Entrar";
-    if(pw) pw.setAttribute("autocomplete", lnSignup ? "new-password" : "current-password");
-    var f = document.getElementById("accountForgot"); if(f) f.hidden = lnSignup;
-  }
-  function lnMaybeOnboard(){
-    if(!state) return;
-    var p = lnProfile();
-    if(!p || !p.done){ lnOnboard(); }
-    lnRefreshTop();
-  }
-  function lnAddMin(hhmm, min){
-    var p = String(hhmm||"07:00").split(":"), t = (+p[0])*60 + (+p[1]||0) + min; t = ((t % 1440) + 1440) % 1440;
-    return String(Math.floor(t/60)).padStart(2,"0")+":"+String(t%60).padStart(2,"0");
-  }
-  // Monta a rotina-base do dia a partir das respostas (a pessoa ajusta depois em Horários).
-  function lnBuildBlocks(p){
-    var ALL = ["seg","ter","qua","qui","sex","sab","dom"], UTEIS = ["seg","ter","qua","qui","sex"], b = [], n = 0;
-    function add(ini, fim, txt, area, dias){ b.push({id:"ln"+(++n), ini:ini, fim:fim, txt:txt, area:area, dias:dias||ALL}); }
-    var a = p.areas, w = p.wake || "06:30", sl = p.sleep || "22:30";
-    if(a.indexOf("fe")>-1) add(w, lnAddMin(w,20), "Oração da manhã", "fe");
-    if(a.indexOf("dieta")>-1){ add(lnAddMin(w,30), lnAddMin(w,60), "Café da manhã", "diet"); add("12:00","13:00","Almoço","diet", ALL); add(lnAddMin(sl,-180), lnAddMin(sl,-150), "Jantar", "diet"); }
-    if(a.indexOf("treino")>-1){ var th = {manha:lnAddMin(w,70), tarde:"17:30", noite:"19:00"}[p.treinoTurno||"manha"]; add(th, lnAddMin(th,60), "Treino do dia", "treino", ["seg","ter","qua","qui","sex","sab"]); }
-    if(a.indexOf("trabalho")>-1 && p.workIni && p.workFim){ add(p.workIni, p.workFim, "Trabalho", "profissional", UTEIS); }
-    if(a.indexOf("estudos")>-1){ var eh = p.estudoHora || "20:00"; add(eh, lnAddMin(eh,60), "Bloco de estudo", "academico", UTEIS); }
-    if(a.indexOf("leitura")>-1) add(lnAddMin(sl,-60), lnAddMin(sl,-40), "Leitura", "leitura");
-    add(lnAddMin(sl,-30), sl, "Rotina do sono — desacelerar", "rotina");
-    add("19:00","19:30","Revisão da semana", "projecoes", ["dom"]);
-    return b;
-  }
-  function lnHabits(p){
-    var a = p.areas, h = [{id:"h_agua", nome:"Beber 2 L de água", em:"💧", periodo:"manha", tipo:"agua"}];
-    if(a.indexOf("fe")>-1) h.unshift({id:"h_oracao", nome:"Oração", em:"🙏", periodo:"manha"});
-    if(a.indexOf("treino")>-1) h.push({id:"h_treino", nome:"Treino do dia", em:"🏋️", periodo:"manha", tipo:"treino"});
-    if(a.indexOf("dieta")>-1) h.push({id:"h_cardapio", nome:"Seguir o cardápio", em:"🥗", periodo:"tarde"});
-    if(a.indexOf("estudos")>-1) h.push({id:"h_estudo", nome:"Bloco de estudo", em:"📚", periodo:"noite"});
-    if(a.indexOf("financas")>-1) h.push({id:"h_gastos", nome:"Anotar os gastos do dia", em:"💰", periodo:"noite"});
-    if(a.indexOf("leitura")>-1) h.push({id:"h_leitura", nome:"Ler 20 minutos", em:"📖", periodo:"noite"});
-    h.push({id:"h_sono", nome:"Rotina do sono", em:"🌙", periodo:"noite"});
-    return h;
-  }
-  function lnOnboard(){
-    var p = lnProfile() || {}, areas = Array.isArray(p.areas) ? p.areas : ["treino","dieta","estudos","financas"];
-    openSheet("Bem-vinda à Lunora 🌙",
-      '<p class="ju-muted" style="margin:-4px 0 14px;font-size:13px">Responda rapidinho e a Lunora monta sua rotina, seus hábitos e o seu painel. Dá para mudar tudo depois.</p>'+
-      '<label class="ju-field">Como você quer ser chamada?<input name="nome" autocomplete="given-name" placeholder="Seu nome" value="'+esc(p.name||"")+'"></label>'+
-      '<div class="ju-field">O que você quer organizar?<div class="ln-areas">'+LN_AREAS.map(function(x){
-        return '<label class="ln-area"><input type="checkbox" name="area" value="'+x[0]+'"'+(areas.indexOf(x[0])>-1?" checked":"")+'><span>'+x[2]+' '+esc(x[1])+'</span></label>'; }).join("")+'</div></div>'+
-      '<div class="ju-two"><label class="ju-field">Acordo às<input name="wake" type="time" value="'+esc(p.wake||"06:30")+'"></label><label class="ju-field">Durmo às<input name="sleep" type="time" value="'+esc(p.sleep||"22:30")+'"></label></div>'+
-      '<div class="ju-two" data-if="trabalho"><label class="ju-field">Trabalho das<input name="workIni" type="time" value="'+esc(p.workIni||"08:00")+'"></label><label class="ju-field">até<input name="workFim" type="time" value="'+esc(p.workFim||"18:00")+'"></label></div>'+
-      '<div class="ju-field" data-if="treino">Prefiro treinar'+seg("treinoTurno", [["manha","De manhã"],["tarde","À tarde"],["noite","À noite"]], p.treinoTurno||"manha")+'</div>'+
-      '<label class="ju-field" data-if="estudos">Horário de estudo<input name="estudoHora" type="time" value="'+esc(p.estudoHora||"20:00")+'"></label>'+
-      '<label class="ju-field">Meta de sono (horas)<input name="sleepGoal" type="number" min="5" max="10" step="0.5" value="'+(+J().sleepGoal||8)+'"></label>',
-      function(f){
-        var nome = f.nome.value.trim(); if(!nome) return "Conte como você quer ser chamada.";
-        var ar = [].slice.call(f.querySelectorAll('input[name="area"]:checked')).map(function(i){ return i.value; });
-        if(!ar.length) return "Escolha pelo menos uma área para organizar.";
-        var np = { name: nome.split(/\s+/)[0], areas: ar, wake: f.wake.value||"06:30", sleep: f.sleep.value||"22:30",
-          workIni: f.workIni.value, workFim: f.workFim.value, treinoTurno: segVal(f,"treinoTurno")||"manha", estudoHora: f.estudoHora.value||"20:00", done: true, since: todayKey() };
-        var first = !p.done, j = J();
-        j.profile = np;
-        var sg = +f.sleepGoal.value; if(sg>=5 && sg<=10) j.sleepGoal = sg;
-        state.dayPlan = state.dayPlan || {}; state.dayPlan.blocks = lnBuildBlocks(np);
-        if(first || !j.habits || !j.habits.length) j.habits = lnHabits(np);
-        save(); renderAll(); lnRefreshTop(); go("inicio");
-        toast(first ? "Prontinho, "+np.name+"! Seu dia já está montado." : "Cadastro atualizado");
-      },
-      { ok: p.done ? "Salvar" : "Começar", noFocus: true, onOpen: function(f, dlg){
-          function sync(){ var on = [].slice.call(f.querySelectorAll('input[name="area"]:checked')).map(function(i){ return i.value; });
-            f.querySelectorAll("[data-if]").forEach(function(el){ el.hidden = on.indexOf(el.dataset.if) < 0; }); }
-          f.addEventListener("change", sync); sync();
-          if(!p.done){ var c = f.querySelector("[data-close]"); if(c) c.textContent = "Agora não"; }
-        } });
-  }
-  function lnDemoBar(){
-    if(!window.LUNORA_DEMO || document.getElementById("lnDemo")) return;
-    var b = document.createElement("div"); b.id = "lnDemo"; b.className = "ln-demo";
-    b.innerHTML = '<span>✨ Demonstração com dados de exemplo</span><button type="button" id="lnDemoReset">Recomeçar do zero</button>';
-    document.body.appendChild(b);
-    document.getElementById("lnDemoReset").addEventListener("click", function(){ try{ localStorage.clear(); sessionStorage.setItem("lnDemoEmpty","1"); }catch(e){} location.reload(); });
-  }
-
-  // =====================================================================
   // Lunora inteligente: captura em linguagem natural, Tríade do Tempo,
   // modo foco com a lua, relatório de foco, janelas livres e gasto diário.
   // =====================================================================
@@ -4731,6 +4668,114 @@ body:has(.ln-demo) .ju{padding-top:38px;}
       '<div class="ju-mid" style="color:'+(ok?"var(--j-green)":"var(--j-red)")+'">'+money(Math.max(0,perDay))+'</div>'+
       '<p class="ju-muted" style="margin:4px 0 0;font-size:12.5px">'+(ok ? 'Saldo do mês '+money(s.saldo)+' menos '+money(owed)+' em contas que ainda vencem, dividido pelos '+days+' dias que faltam.'
         : 'As contas que ainda vencem ('+money(owed)+') passam do saldo do mês. Segure os gastos extras até entrar dinheiro.')+'</p></section>';
+  }
+
+  // =====================================================================
+  // Lunora: perfil da pessoa, criar conta e cadastro inicial (onboarding)
+  // =====================================================================
+  var lnSignup = false;
+  var LN_AREAS = [
+    ["treino","Treino","🏋️"], ["dieta","Alimentação","🥗"], ["estudos","Estudos","📚"], ["financas","Finanças","💰"],
+    ["trabalho","Trabalho","💼"], ["leitura","Leitura","📖"], ["fe","Fé e espiritualidade","🙏"], ["ciclo","Ciclo menstrual","🌸"]
+  ];
+  function lnProfile(){ return (state && state.ju && state.ju.profile) || null; }
+  function lnName(){ var p = lnProfile(); return p && p.name ? p.name : ""; }
+  // Áreas que a pessoa escolheu. Antes do cadastro, tudo aparece.
+  function lnArea(key){
+    var p = lnProfile(); if(!p || !Array.isArray(p.areas)) return true;
+    var map = {dieta:"dieta", treino:"treino", leitura:"leitura", fe:"fe", financas:"financas", ciclo:"ciclo", metas:true, rotina:true, compras:true, progresso:true};
+    var k = map[key]; if(k===true) return true; if(!k) k = key;
+    return p.areas.indexOf(k) > -1;
+  }
+  function lnAvatar(big){
+    var n = lnName(), ini = n ? n.trim().charAt(0).toUpperCase() : "";
+    return '<span class="ln-avatar'+(big?" big":"")+'" aria-hidden="true">'+(ini ? esc(ini) : '<span class="ln-moon sm"></span>')+'</span>';
+  }
+  function lnRefreshTop(){ var a = document.querySelector(".ju-avatar"); if(a) a.innerHTML = lnAvatar(); }
+  function lnSetMode(signup){
+    lnSignup = !!signup;
+    var b = document.getElementById("accountMode"), t = document.getElementById("accountTitle"), go = document.getElementById("accountLogin"), pw = document.getElementById("sbPassword");
+    if(b) b.textContent = lnSignup ? "Já tem conta? Entrar" : "Ainda não tem conta? Criar conta";
+    if(t) t.textContent = lnSignup ? "Criar conta na Lunora" : "Entrar na Lunora";
+    if(go) go.textContent = lnSignup ? "Criar conta" : "Entrar";
+    if(pw) pw.setAttribute("autocomplete", lnSignup ? "new-password" : "current-password");
+    var f = document.getElementById("accountForgot"); if(f) f.hidden = lnSignup;
+  }
+  function lnMaybeOnboard(){
+    if(!state) return;
+    var p = lnProfile();
+    if(!p || !p.done){ lnOnboard(); }
+    lnRefreshTop();
+  }
+  function lnAddMin(hhmm, min){
+    var p = String(hhmm||"07:00").split(":"), t = (+p[0])*60 + (+p[1]||0) + min; t = ((t % 1440) + 1440) % 1440;
+    return String(Math.floor(t/60)).padStart(2,"0")+":"+String(t%60).padStart(2,"0");
+  }
+  // Monta a rotina-base do dia a partir das respostas (a pessoa ajusta depois em Horários).
+  function lnBuildBlocks(p){
+    var ALL = ["seg","ter","qua","qui","sex","sab","dom"], UTEIS = ["seg","ter","qua","qui","sex"], b = [], n = 0;
+    function add(ini, fim, txt, area, dias){ b.push({id:"ln"+(++n), ini:ini, fim:fim, txt:txt, area:area, dias:dias||ALL}); }
+    var a = p.areas, w = p.wake || "06:30", sl = p.sleep || "22:30";
+    if(a.indexOf("fe")>-1) add(w, lnAddMin(w,20), "Oração da manhã", "fe");
+    if(a.indexOf("dieta")>-1){ add(lnAddMin(w,30), lnAddMin(w,60), "Café da manhã", "diet"); add("12:00","13:00","Almoço","diet", ALL); add(lnAddMin(sl,-180), lnAddMin(sl,-150), "Jantar", "diet"); }
+    if(a.indexOf("treino")>-1){ var th = {manha:lnAddMin(w,70), tarde:"17:30", noite:"19:00"}[p.treinoTurno||"manha"]; add(th, lnAddMin(th,60), "Treino do dia", "treino", ["seg","ter","qua","qui","sex","sab"]); }
+    if(a.indexOf("trabalho")>-1 && p.workIni && p.workFim){ add(p.workIni, p.workFim, "Trabalho", "profissional", UTEIS); }
+    if(a.indexOf("estudos")>-1){ var eh = p.estudoHora || "20:00"; add(eh, lnAddMin(eh,60), "Bloco de estudo", "academico", UTEIS); }
+    if(a.indexOf("leitura")>-1) add(lnAddMin(sl,-60), lnAddMin(sl,-40), "Leitura", "leitura");
+    add(lnAddMin(sl,-30), sl, "Rotina do sono — desacelerar", "rotina");
+    add("19:00","19:30","Revisão da semana", "projecoes", ["dom"]);
+    return b;
+  }
+  function lnHabits(p){
+    var a = p.areas, h = [{id:"h_agua", nome:"Beber 2 L de água", em:"💧", periodo:"manha", tipo:"agua"}];
+    if(a.indexOf("fe")>-1) h.unshift({id:"h_oracao", nome:"Oração", em:"🙏", periodo:"manha"});
+    if(a.indexOf("treino")>-1) h.push({id:"h_treino", nome:"Treino do dia", em:"🏋️", periodo:"manha", tipo:"treino"});
+    if(a.indexOf("dieta")>-1) h.push({id:"h_cardapio", nome:"Seguir o cardápio", em:"🥗", periodo:"tarde"});
+    if(a.indexOf("estudos")>-1) h.push({id:"h_estudo", nome:"Bloco de estudo", em:"📚", periodo:"noite"});
+    if(a.indexOf("financas")>-1) h.push({id:"h_gastos", nome:"Anotar os gastos do dia", em:"💰", periodo:"noite"});
+    if(a.indexOf("leitura")>-1) h.push({id:"h_leitura", nome:"Ler 20 minutos", em:"📖", periodo:"noite"});
+    h.push({id:"h_sono", nome:"Rotina do sono", em:"🌙", periodo:"noite"});
+    return h;
+  }
+  function lnOnboard(){
+    var p = lnProfile() || {}, areas = Array.isArray(p.areas) ? p.areas : ["treino","dieta","estudos","financas"];
+    openSheet("Bem-vinda à Lunora 🌙",
+      '<p class="ju-muted" style="margin:-4px 0 14px;font-size:13px">Responda rapidinho e a Lunora monta sua rotina, seus hábitos e o seu painel. Dá para mudar tudo depois.</p>'+
+      '<label class="ju-field">Como você quer ser chamada?<input name="nome" autocomplete="given-name" placeholder="Seu nome" value="'+esc(p.name||"")+'"></label>'+
+      '<div class="ju-field">O que você quer organizar?<div class="ln-areas">'+LN_AREAS.map(function(x){
+        return '<label class="ln-area"><input type="checkbox" name="area" value="'+x[0]+'"'+(areas.indexOf(x[0])>-1?" checked":"")+'><span>'+x[2]+' '+esc(x[1])+'</span></label>'; }).join("")+'</div></div>'+
+      '<div class="ju-two"><label class="ju-field">Acordo às<input name="wake" type="time" value="'+esc(p.wake||"06:30")+'"></label><label class="ju-field">Durmo às<input name="sleep" type="time" value="'+esc(p.sleep||"22:30")+'"></label></div>'+
+      '<div class="ju-two" data-if="trabalho"><label class="ju-field">Trabalho das<input name="workIni" type="time" value="'+esc(p.workIni||"08:00")+'"></label><label class="ju-field">até<input name="workFim" type="time" value="'+esc(p.workFim||"18:00")+'"></label></div>'+
+      '<div class="ju-field" data-if="treino">Prefiro treinar'+seg("treinoTurno", [["manha","De manhã"],["tarde","À tarde"],["noite","À noite"]], p.treinoTurno||"manha")+'</div>'+
+      '<label class="ju-field" data-if="estudos">Horário de estudo<input name="estudoHora" type="time" value="'+esc(p.estudoHora||"20:00")+'"></label>'+
+      '<label class="ju-field">Meta de sono (horas)<input name="sleepGoal" type="number" min="5" max="10" step="0.5" value="'+(+J().sleepGoal||8)+'"></label>',
+      function(f){
+        var nome = f.nome.value.trim(); if(!nome) return "Conte como você quer ser chamada.";
+        var ar = [].slice.call(f.querySelectorAll('input[name="area"]:checked')).map(function(i){ return i.value; });
+        if(!ar.length) return "Escolha pelo menos uma área para organizar.";
+        var np = { name: nome.split(/\s+/)[0], areas: ar, wake: f.wake.value||"06:30", sleep: f.sleep.value||"22:30",
+          workIni: f.workIni.value, workFim: f.workFim.value, treinoTurno: segVal(f,"treinoTurno")||"manha", estudoHora: f.estudoHora.value||"20:00", done: true, since: todayKey() };
+        var first = !p.done, j = J();
+        j.profile = np;
+        var sg = +f.sleepGoal.value; if(sg>=5 && sg<=10) j.sleepGoal = sg;
+        state.dayPlan = state.dayPlan || {}; state.dayPlan.blocks = lnBuildBlocks(np);
+        if(first || !j.habits || !j.habits.length) j.habits = lnHabits(np);
+        save(); renderAll(); lnRefreshTop(); go("inicio");
+        toast(first ? "Prontinho, "+np.name+"! Seu dia já está montado." : "Cadastro atualizado");
+      },
+      { ok: p.done ? "Salvar" : "Começar", noFocus: true, onOpen: function(f, dlg){
+          function sync(){ var on = [].slice.call(f.querySelectorAll('input[name="area"]:checked')).map(function(i){ return i.value; });
+            f.querySelectorAll("[data-if]").forEach(function(el){ el.hidden = on.indexOf(el.dataset.if) < 0; }); }
+          f.addEventListener("change", sync); sync();
+          if(!p.done){ var c = f.querySelector("[data-close]"); if(c) c.textContent = "Agora não"; }
+        } });
+  }
+  function lnDemoBar(){
+    if(!window.LUNORA_DEMO || document.getElementById("lnDemo")) return;
+    var b = document.createElement("div"); b.id = "lnDemo"; b.className = "ln-demo";
+    b.innerHTML = '<span>✨ Demonstração com dados de exemplo</span><button type="button" id="lnDemoReset">Recomeçar do zero</button>';
+    document.body.appendChild(b);
+    document.getElementById("lnDemoReset").addEventListener("click", function(){ try{ localStorage.clear(); sessionStorage.setItem("lnDemoEmpty","1"); }catch(e){} location.reload(); });
   }
 
   function shellStart(){ go(juView); setTimeout(lnMaybeOnboard, 400); lnDemoBar(); }

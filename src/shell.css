@@ -410,3 +410,4 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
 .ln-fbars i{display:block;width:100%;max-width:26px;border-radius:8px;background:#7D6BB8;}
 .ln-fbars i.off{background:var(--j-line,#E8DCD6);}
 .ln-fbars small{font-size:10.5px;color:var(--j-soft,#7A6A74);}
+.linkbtn{background:none;border:0;padding:0;font:inherit;color:#0E5552;text-decoration:underline;cursor:pointer;}

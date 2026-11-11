@@ -1,1 +1,1 @@
-window.LUNORA_CONFIG = { url: "", key: "" }; // preencher com a Project URL e a anon key do Supabase da Lunora
+window.LUNORA_CONFIG = { url: "https://jualytusqwobztvvpkgw.supabase.co", key: "sb_publishable_pYP55gm1rnclDtBQczfMHA_gYFaaDgC" };
