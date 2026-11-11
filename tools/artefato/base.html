@@ -2161,7 +2161,7 @@
     direcaoKey = k; direcaoData = null;
     direcaoDoc = direcaoDb.collection("direcao").doc(k);
     direcaoUnsub = direcaoDoc.onSnapshot(function(snap){
-      direcaoData = snap.exists ? snap.data() : null;
+      direcaoData = snap.exists ? JSON.parse(JSON.stringify(snap.data())) : null;
       renderAgora();
     }, function(e){ console.warn("painel: direção indisponível", e); });
   }
@@ -3138,7 +3138,7 @@
     if(!db){ espelhoState = "sem-acesso"; renderEspelho(); return; }
     try{
       db.doc("financas/espelho").onSnapshot(function(snap){
-        espelhoData = snap.exists ? snap.data() : null;
+        espelhoData = snap.exists ? JSON.parse(JSON.stringify(snap.data())) : null;
         espelhoState = espelhoData ? "ok" : "vazio";
         renderEspelho();
       }, function(e){ console.warn("painel: espelho financeiro indisponível", e); espelhoState = "sem-acesso"; renderEspelho(); });
@@ -3277,7 +3277,7 @@
         direcaoDb = db;
         var snap = await stateDoc.get();
         if(snap.exists){
-          state = mergeDefaults(snap.data());
+          state = mergeDefaults(JSON.parse(JSON.stringify(snap.data())));
         } else {
           state = cloneDefaults();
           await stateDoc.set(state);
