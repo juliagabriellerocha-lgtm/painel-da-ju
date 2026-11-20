@@ -1122,8 +1122,33 @@
       detalhes:["Tailândia — primeira viagem internacional (fim de 2027)","Itália — o destino dos sonhos","Passeios de um dia (Maria Fumaça e afins)"],
       passos:[{t:"Tirar/renovar o passaporte",f:false},{t:"Definir valor-alvo da Tailândia",f:false},{t:"Poupança mensal para viagens",f:false}]}
   ];
+  var JU_DREAM_ADD = [
+    {id:"m_creta", titulo:"Hyundai Creta (meu primeiro SUV)", em:"🚙", cor:["#E3EAF0","#0E5552"], horizonte:"curto",
+      frase:"Para viajar, acampar e levar o Otto com conforto, sem travar a quitação das dívidas.",
+      detalhes:["Modelo-alvo: Creta 1.6 aspirado automático, usado 2022–2023, com revisões em concessionária"],
+      secoes:[
+        {t:"💰 Custo de compra", itens:["~R$ 80 mil (2022 usado)","Ideal: à vista ou com entrada grande"]},
+        {t:"🔧 Custo de manutenção", itens:["Revisões até 60 mil km: na média do segmento, perto de R$ 5 mil no total","Motor aspirado, mais simples e barato de manter que turbo","Seguro e IPVA: cotar para o seu perfil em Rio Preto"]},
+        {t:"👍 Prós", itens:["Conforto de estrada e bom espaço","Líder de vendas: fácil de revender depois","Manutenção previsível e rede Hyundai ampla"]},
+        {t:"👎 Contras", itens:["Revisões mais caras que as do Yaris Cross","Consumo na cidade não é o menor do segmento"]}],
+      passos:[{t:"Nov/26 · Definir o teto: até R$ 80 mil e parcela que não atrase a quitação",f:false},{t:"Dez/26 · Abrir a caixinha \u201cCarro\u201d e guardar a entrada todo mês",f:false},{t:"Todo mês · Direcionar a renda extra (Cotação que Fecha, Lunora, Gaia Glam) para a entrada",f:false},{t:"Jan/27 · Simular à vista x financiamento x consórcio",f:false},{t:"Jan/27 · Cotar o seguro do Creta 2022 para o meu perfil",f:false},{t:"Com a entrada pronta · Garimpar Creta 2022–2023 com histórico de revisões",f:false},{t:"Antes de assinar · Vistoria cautelar e laudo",f:false}]},
+    {id:"m_yaris", titulo:"Toyota Yaris Cross Híbrido", em:"🌿", cor:["#E2EFE7","#55708A"], horizonte:"medio",
+      frase:"O carro de longo prazo: o mais econômico do Brasil e quase não desvaloriza.",
+      detalhes:["Fase 2 do plano (renda de ~R$ 10–12 mil), usando o Creta como entrada"],
+      secoes:[
+        {t:"💰 Custo de compra", itens:["XRE Hybrid: R$ 172.390 · XRX Hybrid: R$ 189.990","Versão flex de entrada (XR): R$ 149.990"]},
+        {t:"🔧 Custo de manutenção", itens:["Revisões: ~R$ 2.633 (entre as mais baratas do segmento)","Seguro perfil feminino: ~R$ 3.698/ano","Cesta de peças: ~R$ 10.558"]},
+        {t:"👍 Prós", itens:["Carro nacional mais econômico nos testes do Inmetro","Desvalorização praticamente nula: ótima revenda","Confiabilidade Toyota e manutenção barata"]},
+        {t:"👎 Contras", itens:["Preço de compra alto para o momento atual","Só 2 estrelas no Latin NCAP","Desempenho modesto"]}],
+      passos:[{t:"Quitar as dívidas atuais",f:false},{t:"Chegar na renda da Fase 2 (~R$ 10–12 mil)",f:false},{t:"Manter o Creta revisado para valorizar na troca",f:false},{t:"Test drive do Yaris Cross Hybrid",f:false},{t:"Simular a troca com o Creta como entrada",f:false}]}
+  ];
   var JU_HORIZ = {curto:"até 1 ano", medio:"1 a 3 anos", longo:"3+ anos"};
-  function dreams(){ var j = J(); if(!Array.isArray(j.mural)){ j.mural = JSON.parse(JSON.stringify(JU_DREAM_SEED)); setTimeout(function(){ persist(); }, 0); } return j.mural; }
+  function dreams(){ var j = J(); if(!Array.isArray(j.mural)){ j.mural = JSON.parse(JSON.stringify(JU_DREAM_SEED)); setTimeout(function(){ persist(); }, 0); }
+    j.muralAdd = j.muralAdd || {}; var ch = false;
+    JU_DREAM_ADD.forEach(function(d){ if(j.muralAdd[d.id]) return; j.muralAdd[d.id] = 1; ch = true;
+      if(!j.mural.some(function(x){ return x.id===d.id; })){ var ic = -1; j.mural.forEach(function(x,i){ if(x.id==="m_carro") ic = i; }); var c = JSON.parse(JSON.stringify(d)); if(ic>-1) j.mural.splice(ic+1+JU_DREAM_ADD.indexOf(d),0,c); else j.mural.push(c); } });
+    if(ch) setTimeout(function(){ persist(); }, 0);
+    return j.mural; }
   function viewSonhos(){
     var ds = dreams();
     var total = 0, feitos = 0; ds.forEach(function(d){ (d.passos||[]).forEach(function(p){ total++; if(p.f) feitos++; }); });
@@ -1139,6 +1164,7 @@
           '<div class="ju-progress" style="--c:'+c[1]+';margin:8px 0 4px"><i style="width:'+pct+'%"></i></div><small class="ju-muted">'+ok+'/'+ps.length+' passos</small>'+
           '<details><summary>Detalhes e próximos passos</summary>'+
             ((d.detalhes||[]).length?'<ul class="dt">'+d.detalhes.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join("")+'</ul>':'')+
+            (d.secoes||[]).map(function(sc){ return '<p class="ju-label" style="margin:10px 0 2px">'+esc(sc.t)+'</p><ul class="dt">'+(sc.itens||[]).map(function(x){ return '<li>'+esc(x)+'</li>'; }).join("")+'</ul>'; }).join("")+
             '<ul class="ju-list" style="gap:8px;margin-top:8px">'+ps.map(function(p,pi){ return '<li class="ju-check'+(p.f?" done":"")+'"><button data-dreamstep="'+esc(d.id)+':'+pi+'" aria-label="Marcar passo">'+ico("check")+'</button><span style="white-space:normal">'+esc(p.t)+'</span></li>'; }).join("")+'</ul>'+
             '<div class="ju-grid" style="margin-top:10px"><button class="ju-btn soft" data-dreamadd="'+esc(d.id)+'">'+ico("plus")+' Passo</button><button class="ju-btn ghost" data-dreamdel="'+esc(d.id)+'">Remover sonho</button></div>'+
           '</details></div></article>';
