@@ -56,6 +56,8 @@ rep('pare e peça ajuste à Bruna.', 'pare e peça ajuste ao seu professor.')
 rep("""if(typeof WORKOUT_DETAIL==="undefined" || !WORKOUT_DETAIL.length) return '<section class="ju-card"><p class="ju-empty">Ficha não encontrada.</p></section>';""",
     """if(typeof WORKOUT_DETAIL==="undefined" || !WORKOUT_DETAIL.length) return '<section class="ju-card"><p class="ju-empty">Sua ficha ainda está vazia. Anote seus treinos da semana em Treino e registre as cargas por aqui.</p><button class="ju-btn soft block" data-legacy="treino">Abrir Treino</button></section>';""")
 rep('ração do Otto…', 'ração do pet…')
+rep("Séries e repetições de cada treino, direto da ficha da EF Academia. Explicação de cada exercício na <a href=\"https://claude.ai/code/artifact/3644a56c-3245-4fb6-8c38-b7e2785aaff6\" target=\"_blank\" style=\"color:var(--treino)\">ficha completa</a>.",
+    "Séries e repetições de cada treino, com a carga de cada série.")
 rep('<p class="label">Sebrae — disciplinas</p>', '<p class="label">Faculdade — disciplinas</p>')
 rep('if(h < 18) return "Tarde de foco: cliente, cotação, retorno. Você sabe fazer isso.";', 'if(h < 18) return "Tarde de foco: uma coisa de cada vez. Você sabe fazer isso.";')
 rep('if(h < 5) return "Hora do silêncio e da oração. O dia começa com você inteira.";', 'if(h < 5) return "Hora do silêncio. O dia começa com você inteira.";')
