@@ -3637,6 +3637,7 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
     book:'<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20v3H6.5"/>',
     cross:'<path d="M12 3v18M6 8.5h12"/>',
     dumb:'<path d="M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11"/>',
+    paw:'<circle cx="6" cy="10" r="1.8"/><circle cx="9.5" cy="6" r="1.8"/><circle cx="14.5" cy="6" r="1.8"/><circle cx="18" cy="10" r="1.8"/><path d="M12 11.5c-2.6 0-5 3.4-5 5.6 0 1.6 1.3 2.4 2.8 2.4.9 0 1.5-.5 2.2-.5s1.3.5 2.2.5c1.5 0 2.8-.8 2.8-2.4 0-2.2-2.4-5.6-5-5.6z"/>',
     bag:'<path d="M5 8h14l-1 12H6z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/>',
     target:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/>',
     briefcase:'<rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M3 12.5h18"/>',
@@ -3931,10 +3932,10 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
     document.body.classList.remove("ju-legacy");
     document.querySelectorAll(".ju-view").forEach(function(s){ s.hidden = s.dataset.view !== view; });
     document.querySelectorAll(".ju-nav button").forEach(function(b){
-      var main = JU_MAIN.indexOf(view)>-1 ? view : ({financas:"inicio", sono:"tracker", tarefas:"plano", compras:"inicio", estudos:"plano", sonhos:"eu", ficha:"bemestar"})[view];
+      var main = JU_MAIN.indexOf(view)>-1 ? view : ({financas:"inicio", sono:"tracker", tarefas:"plano", compras:"inicio", estudos:"plano", sonhos:"eu", ficha:"bemestar", otto:"eu"})[view];
       if(b.dataset.go===main) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current");
     });
-    var titles = {inicio:"Hoje", plano:"Meu plano", tracker:"Tracker", bemestar:"Bem-estar", eu:"Você", financas:"Finanças", sono:"Sono", tarefas:"Tarefas", compras:"Compras do mês", estudos:"Estudos", sonhos:"Mural dos sonhos", ficha:"Ficha de treino"};
+    var titles = {inicio:"Hoje", plano:"Meu plano", tracker:"Tracker", bemestar:"Bem-estar", eu:"Você", financas:"Finanças", sono:"Sono", tarefas:"Tarefas", compras:"Compras do mês", estudos:"Estudos", sonhos:"Mural dos sonhos", ficha:"Ficha de treino", otto:JU_PET.nome};
     document.getElementById("juTitle").textContent = titles[view] || "Painel da Ju";
     try{ localStorage.setItem("painelJuView", view); }catch(e){}
     renderView(view);
@@ -3964,7 +3965,7 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
     return ''+
     '<div class="ju-chipbar"><button type="button" class="ju-chip-arrow prev" data-chipscroll="-1" aria-label="Ver atalhos anteriores" hidden>'+ico("back")+'</button>'+
     '<div class="ju-chips" role="navigation" aria-label="Atalhos">'+
-      '<button class="ju-chip" data-lnfocus style="'+tone("sono")+'"><i>'+ico("moon")+'</i><span>Foco</span></button>'+chip("plano","Agenda","cal","agenda")+chip("estudos","Estudos","cap","sono")+chip("sonhos","Sonhos","star","financas")+chip("tarefas","Tarefas","tasks","tarefas")+chip("compras","Compras","bag","habitos")+chip("financas","Finanças","coin","financas")+'<button class="ju-chip" data-legacy="progresso" style="'+tone("habitos")+'"><i>'+ico("trend")+'</i><span>Evolução</span></button>'+
+      '<button class="ju-chip" data-lnfocus style="'+tone("sono")+'"><i>'+ico("moon")+'</i><span>Foco</span></button>'+chip("plano","Agenda","cal","agenda")+chip("estudos","Estudos","cap","sono")+chip("sonhos","Sonhos","star","financas")+chip("tarefas","Tarefas","tasks","tarefas")+chip("compras","Compras","bag","habitos")+chip("otto",JU_PET.nome,"paw","treino")+chip("financas","Finanças","coin","financas")+'<button class="ju-chip" data-legacy="progresso" style="'+tone("habitos")+'"><i>'+ico("trend")+'</i><span>Evolução</span></button>'+
       chip("sono","Sono","moon","sono")+chip("bemestar","Bem-estar","heart","bemestar")+chip("tracker","Hábitos","leaf","habitos")+
     '</div><button type="button" class="ju-chip-arrow next" data-chipscroll="1" aria-label="Ver mais atalhos" hidden>'+ico("chev")+'</button></div>'+
     '<div class="ju-hello"><div><h2>'+greet+', Ju!</h2><p>'+esc(helloLine())+'</p></div>'+
@@ -4003,7 +4004,7 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
   }
   function chip(go, label, icon, t){ return '<button class="ju-chip" data-go="'+go+'" style="'+tone(t)+'"><i>'+ico(icon)+'</i><span>'+label+'</span></button>'; }
   function taskRow(t){ return '<li class="ju-check'+(t.feita?" done":"")+'"><button data-task="'+esc(t.id)+'" aria-label="'+(t.feita?"Desmarcar":"Concluir")+' tarefa">'+ico("check")+'</button><span>'+esc(t.texto)+petTag(t.texto)+lnTaskMeta(t)+'</span></li>'; }
-  var JU_PET = {nome:"Otto", re:/\b(otto|ottinho)\b|ra[cç][aã]o|veterin|cachorr|banho e tosa|\bpet\b/i};
+  var JU_PET = {nome:"Otto", raca:"Maltês", nasc:"2018-08-18", foto:"fotos/otto.jpg", re:/\b(otto|ottinho)\b|ra[cç][aã]o|veterin|cachorr|banho e tosa|\bpet\b/i};
   function petTag(txt){ return JU_PET.re.test(String(txt||"")) ? '<span class="ju-pet">🐶 '+esc(JU_PET.nome)+'</span>' : ''; }
   function lnTaskMeta(t){ if(t.feita) return ""; var tr = LN_TRI[lnTriOf(t)]; return ' <small class="ln-tm" style="color:'+tr.c+'">● '+tr.l+(t.hora?' · '+esc(t.hora):'')+(t.tag==="trabalho"?' · 💼':'')+'</small>'; }
 
@@ -4887,6 +4888,175 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
       (tab==="mercado" ? '<button class="ju-btn ghost block" data-legacy="dieta">Ver cardápio da dieta</button>' : '');
   }
 
+  // ---------- Aba do pet: saúde, exames, petshop, ração, gastos e contatos ----------
+  var JU_PET_CARE = [
+    {id:"c_v10", cat:"vacina", em:"💉", nome:"Vacina V10 (múltipla)", dias:365},
+    {id:"c_raiva", cat:"vacina", em:"💉", nome:"Vacina antirrábica", dias:365},
+    {id:"c_gripe", cat:"vacina", em:"💉", nome:"Vacina da gripe canina (tosse dos canis)", dias:365},
+    {id:"c_verm", cat:"vermifugo", em:"💊", nome:"Vermífugo", dias:90},
+    {id:"c_pulga", cat:"antipulgas", em:"🛡️", nome:"Antipulgas e carrapatos", dias:30},
+    {id:"c_checkup", cat:"exame", em:"🩺", nome:"Check-up no veterinário", dias:180},
+    {id:"c_sangue", cat:"exame", em:"🧪", nome:"Exames de sangue e urina", dias:180},
+    {id:"c_dente", cat:"exame", em:"🦷", nome:"Avaliação dos dentes", dias:180},
+    {id:"c_banho", cat:"banho", em:"🛁", nome:"Banho", dias:15},
+    {id:"c_tosa", cat:"tosa", em:"✂️", nome:"Tosa", dias:60}
+  ];
+  var JU_PET_SEC = [["saude","Saúde preventiva","💉",["vacina","vermifugo","antipulgas"]],["exames","Exames e consultas","🩺",["exame"]],["petshop","Petshop","🛁",["banho","tosa"]]];
+  var JU_PET_GCAT = [["racao","Ração"],["petshop","Petshop"],["vet","Veterinário"],["remedio","Remédios"],["outros","Outros"]];
+  function pet(){
+    var j = J();
+    if(!j.pet || typeof j.pet!=="object") j.pet = {nome:JU_PET.nome, raca:JU_PET.raca||"", nasc:JU_PET.nasc||"", peso:"", cuidados:JSON.parse(JSON.stringify(JU_PET_CARE)).map(function(c){ c.ultima = ""; c.obs = ""; return c; }), racao:{marca:"", kg:0, g:0, compra:""}, gastos:[], contatos:[]};
+    ["cuidados","gastos","contatos"].forEach(function(k){ if(!Array.isArray(j.pet[k])) j.pet[k] = []; });
+    j.pet.racao = j.pet.racao || {marca:"", kg:0, g:0, compra:""};
+    return j.pet;
+  }
+  function kDate(k){ return k ? new Date(k+"T12:00:00") : null; }
+  function dBR(k){ return k ? k.slice(8,10)+"/"+k.slice(5,7)+"/"+k.slice(2,4) : "—"; }
+  function careNext(c){ if(!c.ultima) return null; return dKey(addDays(kDate(c.ultima), +c.dias||0)); }
+  function careLeft(c){ var n = careNext(c); if(!n) return null; return Math.round((kDate(n) - kDate(todayKey()))/86400000); }
+  function careStatus(c){
+    var l = careLeft(c);
+    if(l===null) return {t:"sem data", c:"var(--j-soft)", b:"var(--j-surface-2)", o:3};
+    if(l<0) return {t:"atrasado "+(-l)+"d", c:"#B3261E", b:"#FBE3E0", o:0};
+    if(l===0) return {t:"é hoje", c:"#B4561E", b:"#FCE6D6", o:1};
+    if(l<=7) return {t:"em "+l+" dia"+(l>1?"s":""), c:"#B4561E", b:"#FCE6D6", o:1};
+    return {t:"em dia", c:"var(--j-green)", b:"var(--j-green-soft)", o:2};
+  }
+  function petPill(st){ return '<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap;color:'+st.c+';background:'+st.b+'">'+esc(st.t)+'</span>'; }
+  function careRow(c){
+    var st = careStatus(c);
+    return '<li style="display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 0">'+
+      '<span style="font-size:20px;text-align:center">'+esc(c.em||"🐾")+'</span>'+
+      '<button data-otto="edit:'+esc(c.id)+'" style="all:unset;cursor:pointer;min-width:0"><b style="display:block;font-size:14px">'+esc(c.nome)+'</b>'+
+        '<small class="ju-muted" style="font-size:11.5px">'+(c.ultima ? 'última: '+dBR(c.ultima)+' · próxima: '+dBR(careNext(c)) : 'toque para registrar a última data')+' · a cada '+c.dias+' dias'+(c.obs?' · '+esc(c.obs):'')+'</small></button>'+
+      '<span style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">'+petPill(st)+'<button class="ju-btn soft" style="padding:4px 10px;font-size:12px" data-otto="feito:'+esc(c.id)+'">Feito hoje</button></span></li>';
+  }
+  function racaoInfo(){
+    var R = pet().racao; if(!R.kg || !R.g || !R.compra) return null;
+    var dur = Math.floor(R.kg*1000/R.g), fim = dKey(addDays(kDate(R.compra), dur)), left = Math.round((kDate(fim)-kDate(todayKey()))/86400000);
+    return {dur:dur, fim:fim, left:left, pct:Math.max(0, Math.min(1, left/dur))};
+  }
+  function viewPet(){
+    var P = pet(), k = todayKey(), mes = k.slice(0,7);
+    var cs = P.cuidados.slice().sort(function(a,b){ var sa = careStatus(a), sb = careStatus(b); if(sa.o!==sb.o) return sa.o-sb.o; var la = careLeft(a), lb = careLeft(b); return (la===null?9999:la)-(lb===null?9999:lb); });
+    var urg = cs.filter(function(c){ var l = careLeft(c); return l!==null && l<=7; });
+    var semData = P.cuidados.filter(function(c){ return !c.ultima; }).length;
+    var ri = racaoInfo();
+    var idade = ""; if(P.nasc){ var nb = kDate(P.nasc), hj = new Date(), an = hj.getFullYear()-nb.getFullYear(), ms = hj.getMonth()-nb.getMonth(); if(hj.getDate()<nb.getDate()) ms--; if(ms<0){ an--; ms += 12; } idade = an+" ano"+(an===1?"":"s")+(ms?" e "+ms+" "+(ms===1?"mês":"meses"):""); }
+    var html = '<section class="ju-card ju-me" style="'+tone("treino")+'">'+(JU_PET.foto ? '<img src="'+esc(JU_PET.foto)+'" alt="'+esc(P.nome||"Pet")+'" style="border-radius:50%">' : '<div style="width:64px;height:64px;border-radius:50%;background:#FCE6D6;display:grid;place-items:center;font-size:34px;flex:0 0 64px">🐶</div>')+'<div style="min-width:0;flex:1"><h2>'+esc(P.nome||"Meu pet")+'</h2><p class="ju-muted" style="margin:2px 0 0">'+esc([P.raca, idade, P.peso?P.peso+" kg":"", P.nasc?"nasceu em "+P.nasc.slice(8,10)+"/"+P.nasc.slice(5,7)+"/"+P.nasc.slice(0,4):""].filter(Boolean).join(" · ")||"Toque em editar para completar o perfil")+'</p></div><button class="ju-btn ghost" style="padding:6px 12px;font-size:12px" data-otto="perfil">Editar</button></section>';
+    // Próximos cuidados
+    html += '<section class="ju-card"><div class="ju-head"><span class="ic" style="'+tone("treino")+'">'+ico("paw")+'</span><h3>Próximos cuidados</h3></div>'+
+      (urg.length ? '<ul class="ju-list" style="margin-top:4px">'+urg.slice(0,4).map(careRow).join("")+'</ul>' : '<p class="ju-muted" style="margin:4px 0 0;font-size:13px">'+(semData===P.cuidados.length ? 'Comece registrando a última vacina, vermífugo, banho e tosa: o app calcula a próxima data e avisa aqui.' : 'Tudo em dia nos próximos 7 dias. 🐾')+'</p>')+
+      (ri && ri.left<=5 ? '<p style="margin:10px 0 0;font-size:13px;font-weight:600;color:#B4561E">🥣 A ração acaba '+(ri.left<=0?'hoje ou já acabou':'em '+ri.left+' dia'+(ri.left>1?'s':''))+'. Hora de comprar.</p>' : '')+'</section>';
+    // Cirurgia (liga com o Mural dos sonhos)
+    var dr = dreams().filter(function(d){ return d.id==="m_otto"; })[0];
+    if(dr){ var fp = (dr.passos||[]).filter(function(s){ return s.f; }).length, tp = (dr.passos||[]).length, nx = (dr.passos||[]).filter(function(s){ return !s.f; })[0];
+      html += '<section class="ju-card" style="'+tone("agenda")+'"><div class="ju-head"><span class="ic">'+ico("heart")+'</span><h3>Cirurgia do joelho</h3><span class="ju-muted">'+fp+'/'+tp+'</span></div>'+
+        '<div class="ju-progress" style="--c:var(--j-rose-ink)"><i style="width:'+(tp?Math.round(fp/tp*100):0)+'%"></i></div>'+
+        '<p style="margin:10px 0 4px;font-size:13px"><b>Joelho esquerdo</b> · custo estimado <b>~R$ 5 mil</b> (confirmar com o orçamento da clínica)</p>'+
+        '<ul class="ju-list" style="margin-top:6px">'+(dr.passos||[]).map(function(s2,i){ return '<li class="ju-check'+(s2.f?" done":"")+'"><button data-dreamstep="m_otto:'+i+'" aria-label="'+(s2.f?"Desmarcar":"Concluir")+'">'+ico("check")+'</button><span>'+esc(s2.t)+'</span></li>'; }).join("")+'</ul>'+
+        (nx ? '' : '<p style="margin:10px 0 0;font-size:13px">Todos os passos concluídos. 💗</p>')+
+        '<button class="ju-more" data-go="sonhos">Ver o plano no Mural '+ico("chev")+'</button></section>'; }
+    // Seções de cuidados
+    JU_PET_SEC.forEach(function(s){
+      var L = P.cuidados.filter(function(c){ return s[3].indexOf(c.cat)>-1; });
+      html += '<section class="ju-card"><div class="ju-head"><span class="ic" style="'+tone(s[0]==="petshop"?"agua":s[0]==="exames"?"sono":"habitos")+';font-size:16px">'+s[2]+'</span><h3>'+s[1]+'</h3></div>'+
+        (L.length ? '<ul class="ju-list" style="margin-top:4px">'+L.map(careRow).join("")+'</ul>' : '<p class="ju-empty">Nada cadastrado ainda.</p>')+
+        '<button class="ju-btn ghost block" style="margin-top:8px" data-otto="add:'+s[0]+'">+ Adicionar em '+s[1].toLowerCase()+'</button></section>';
+    });
+    // Ração
+    var R = P.racao;
+    html += '<section class="ju-card" style="'+tone("financas")+'"><div class="ju-head"><span class="ic" style="font-size:16px">🥣</span><h3>Ração</h3></div>'+
+      (ri ? '<div class="ju-mid" style="font-size:20px">'+(ri.left>0 ? 'Dura mais '+ri.left+' dia'+(ri.left>1?'s':'') : 'Acabou ou acaba hoje')+'</div>'+
+        '<div class="ju-progress" style="--c:'+(ri.left<=5?"#B4561E":"var(--j-gold)")+';margin:8px 0"><i style="width:'+Math.round(ri.pct*100)+'%"></i></div>'+
+        '<small class="ju-muted">'+esc(R.marca||"Ração")+' · saco de '+String(R.kg).replace(".",",")+' kg · '+R.g+' g por dia · comprada em '+dBR(R.compra)+' · acaba por volta de '+dBR(ri.fim)+'</small>'
+       : '<p class="ju-muted" style="margin:0;font-size:13px">Informe a marca, o tamanho do saco e quanto ele come por dia: o app avisa quando estiver acabando.</p>')+
+      '<div class="ju-grid" style="margin-top:12px"><button class="ju-btn soft" data-otto="comprei">Comprei ração hoje</button><button class="ju-btn ghost" data-otto="racao">Configurar ração</button></div></section>';
+    // Gastos do mês
+    var gm = P.gastos.filter(function(g){ return (g.data||"").slice(0,7)===mes; }), tot = gm.reduce(function(a,g){ return a+(+g.valor||0); },0);
+    var porCat = JU_PET_GCAT.map(function(c){ return [c[1], gm.filter(function(g){ return g.cat===c[0]; }).reduce(function(a,g){ return a+(+g.valor||0); },0)]; }).filter(function(x){ return x[1]>0; });
+    html += '<section class="ju-card"><div class="ju-head"><span class="ic">'+ico("coin")+'</span><h3>Gastos do mês</h3></div>'+
+      '<div class="ju-mid num" style="font-size:22px">'+money(tot)+'</div>'+
+      (porCat.length ? '<small class="ju-muted">'+porCat.map(function(x){ return esc(x[0])+': '+money(x[1]); }).join(" · ")+'</small>' : '<small class="ju-muted">Nenhum gasto registrado neste mês.</small>')+
+      (gm.length ? '<ul class="ju-list" style="margin-top:10px">'+gm.slice(0,6).map(function(g){ return '<li style="display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:center"><span><b style="font-size:13.5px">'+esc(g.desc||"Gasto")+'</b><small class="ju-muted" style="display:block;font-size:11.5px">'+dBR(g.data)+' · '+esc((JU_PET_GCAT.filter(function(c){ return c[0]===g.cat; })[0]||["","Outros"])[1])+'</small></span><b class="num">'+money(g.valor)+'</b><button class="ju-del" data-otto="delgasto:'+esc(g.id)+'" aria-label="Remover">'+ico("trash")+'</button></li>'; }).join("")+'</ul>' : '')+
+      '<button class="ju-btn ghost block" style="margin-top:10px" data-otto="gasto">+ Registrar gasto</button></section>';
+    // Tarefas do pet
+    var ts = J().tasks.filter(function(t){ return !t.feita && JU_PET.re.test(t.texto||""); });
+    html += '<section class="ju-card" style="'+tone("tarefas")+'"><div class="ju-head"><span class="ic">'+ico("tasks")+'</span><h3>Tarefas do '+esc(P.nome||"pet")+'</h3></div>'+
+      (ts.length ? '<ul class="ju-list">'+ts.map(taskRow).join("")+'</ul>' : '<p class="ju-muted" style="margin:0;font-size:13px">Nenhuma tarefa pendente.</p>')+
+      '<button class="ju-btn ghost block" style="margin-top:10px" data-otto="tarefa">+ Nova tarefa do '+esc(P.nome||"pet")+'</button></section>';
+    // Contatos
+    html += '<section class="ju-card"><div class="ju-head"><span class="ic">'+ico("user")+'</span><h3>Contatos</h3></div>'+
+      (P.contatos.length ? '<ul class="ju-list">'+P.contatos.map(function(c){ var tel = String(c.tel||"").replace(/\D/g,""); var wa = tel ? (tel.length<=11 ? "55"+tel : tel) : "";
+        return '<li style="display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:6px;align-items:center"><span><b style="font-size:13.5px">'+esc(c.nome)+'</b><small class="ju-muted" style="display:block;font-size:11.5px">'+esc(c.tipo||"")+(c.tel?' · '+esc(c.tel):'')+'</small></span>'+
+          (tel ? '<a class="ju-btn soft" style="padding:4px 10px;font-size:12px;text-decoration:none" href="https://wa.me/'+wa+'" target="_blank" rel="noopener">WhatsApp</a>' : '<span></span>')+
+          '<button class="ju-del" data-otto="delcontato:'+esc(c.id)+'" aria-label="Remover">'+ico("trash")+'</button></li>'; }).join("")+'</ul>' : '<p class="ju-muted" style="margin:0;font-size:13px">Cadastre o veterinário e o petshop para chamar no WhatsApp com um toque.</p>')+
+      '<button class="ju-btn ghost block" style="margin-top:10px" data-otto="contato">+ Adicionar contato</button></section>';
+    html += '<p class="ju-muted" style="font-size:11.5px;margin:4px 4px 0">Os intervalos (vacinas a cada 12 meses, vermífugo a cada 3, antipulgas mensal, check-up e exames a cada 6 meses por ele já ter 8 anos, banho a cada 15 dias, tosa a cada 60) são sugestões: ajuste cada um com o que o veterinário do '+esc(P.nome||"pet")+' indicar.</p>';
+    return html;
+  }
+  function sheetCare(c, sec){
+    var novo = !c; c = c || {id:uid("c"), cat:(JU_PET_SEC.filter(function(s){ return s[0]===sec; })[0]||JU_PET_SEC[0])[3][0], em:"🐾", nome:"", dias:30, ultima:"", obs:""};
+    var cats = [["vacina","Vacina"],["vermifugo","Vermífugo"],["antipulgas","Antipulgas"],["exame","Exame/consulta"],["banho","Banho"],["tosa","Tosa"]];
+    openSheet(novo ? "Novo cuidado" : c.nome,
+      '<div class="ju-two"><label class="ju-field">Emoji<input name="em" maxlength="4" value="'+esc(c.em||"🐾")+'"></label><label class="ju-field">Nome<input name="nome" value="'+esc(c.nome)+'" placeholder="Ex.: Vacina V10"></label></div>'+
+      '<div class="ju-field">Tipo'+seg("cat", cats, c.cat)+'</div>'+
+      '<div class="ju-two"><label class="ju-field">Última vez<input name="ultima" type="date" value="'+esc(c.ultima||"")+'"></label><label class="ju-field">Repetir a cada (dias)<input name="dias" type="number" inputmode="numeric" min="1" value="'+(c.dias||30)+'"></label></div>'+
+      '<label class="ju-field">Observação (opcional)<input name="obs" value="'+esc(c.obs||"")+'" placeholder="Ex.: marca, dose, clínica"></label>',
+      function(f){ var n = f.nome.value.trim(); if(!n) return "Dê um nome ao cuidado.";
+        c.em = f.em.value.trim()||"🐾"; c.nome = n; c.cat = segVal(f,"cat")||c.cat; c.ultima = f.ultima.value; c.dias = Math.max(1, +f.dias.value||30); c.obs = f.obs.value.trim();
+        if(novo) pet().cuidados.push(c); save(); toast("Cuidado salvo"); },
+      {extra: novo ? '' : '<button class="ju-btn ghost" type="button" data-otto-del="'+esc(c.id)+'" style="margin-right:auto;color:#B3261E">Apagar</button>',
+       onOpen: function(f, dlg){ var b = f.querySelector("[data-otto-del]"); if(b) b.addEventListener("click", function(){ var P = pet(); P.cuidados = P.cuidados.filter(function(x){ return x.id!==c.id; }); dlg.close(); save(); toast("Cuidado apagado"); }); }});
+  }
+  function sheetPetPerfil(){
+    var P = pet();
+    openSheet("Perfil do pet", '<div class="ju-two"><label class="ju-field">Nome<input name="nome" value="'+esc(P.nome||"")+'"></label><label class="ju-field">Raça<input name="raca" value="'+esc(P.raca||"")+'"></label></div>'+
+      '<div class="ju-two"><label class="ju-field">Nascimento<input name="nasc" type="date" value="'+esc(P.nasc||"")+'"></label><label class="ju-field">Peso (kg)<input name="peso" type="number" inputmode="decimal" step="0.1" value="'+esc(P.peso||"")+'"></label></div>',
+      function(f){ P.nome = f.nome.value.trim()||P.nome; P.raca = f.raca.value.trim(); P.nasc = f.nasc.value; P.peso = f.peso.value; save(); toast("Perfil salvo"); });
+  }
+  function sheetRacao(){
+    var R = pet().racao;
+    openSheet("Ração", '<label class="ju-field">Marca e linha<input name="marca" value="'+esc(R.marca||"")+'" placeholder="Ex.: marca, raças pequenas"></label>'+
+      '<div class="ju-two"><label class="ju-field">Tamanho do saco (kg)<input name="kg" type="number" inputmode="decimal" step="0.1" value="'+(R.kg||"")+'"></label><label class="ju-field">Quanto come por dia (g)<input name="g" type="number" inputmode="numeric" value="'+(R.g||"")+'"></label></div>'+
+      '<label class="ju-field">Data da última compra<input name="compra" type="date" value="'+esc(R.compra||todayKey())+'"></label>'+
+      '<p class="ju-muted" style="font-size:12px;margin:0">A quantidade por dia está na tabela do saco, pelo peso dele, ou com o veterinário.</p>',
+      function(f){ R.marca = f.marca.value.trim(); R.kg = +String(f.kg.value).replace(",",".")||0; R.g = +f.g.value||0; R.compra = f.compra.value; save(); toast("Ração salva"); });
+  }
+  function sheetPetGasto(pre){
+    pre = pre || {};
+    openSheet("Gasto do pet", '<div class="ju-field">Categoria'+seg("cat", JU_PET_GCAT, pre.cat||"racao")+'</div>'+
+      '<label class="ju-field">Descrição<input name="desc" value="'+esc(pre.desc||"")+'" placeholder="Ex.: saco de ração, banho e tosa"></label>'+
+      '<div class="ju-two"><label class="ju-field">Valor (R$)<input name="valor" type="number" inputmode="decimal" step="0.01"></label><label class="ju-field">Data<input name="data" type="date" value="'+todayKey()+'"></label></div>',
+      function(f){ var v = +String(f.valor.value).replace(",",".")||0; if(!v) return "Informe o valor.";
+        pet().gastos.unshift({id:uid("g"), cat:segVal(f,"cat")||"outros", desc:f.desc.value.trim(), valor:v, data:f.data.value||todayKey()}); save(); toast("Gasto registrado"); });
+  }
+  function sheetPetContato(){
+    openSheet("Novo contato", '<div class="ju-field">Tipo'+seg("tipo", [["Veterinário","Veterinário"],["Petshop","Petshop"],["Outro","Outro"]], "Veterinário")+'</div>'+
+      '<label class="ju-field">Nome<input name="nome" placeholder="Ex.: Clínica, Dra. …"></label><label class="ju-field">Telefone / WhatsApp<input name="tel" type="tel" inputmode="tel" placeholder="(17) 99999-9999"></label>',
+      function(f){ var n = f.nome.value.trim(); if(!n) return "Informe o nome."; pet().contatos.push({id:uid("ct"), tipo:segVal(f,"tipo"), nome:n, tel:f.tel.value.trim()}); save(); toast("Contato salvo"); });
+  }
+  function sheetPetTarefa(){
+    var nome = pet().nome || JU_PET.nome;
+    openSheet("Tarefa do "+nome, '<label class="ju-field">O que fazer<input name="texto" placeholder="Ex.: marcar banho e tosa" autocomplete="off"></label><label class="ju-field">Para quando<input name="data" type="date" value="'+todayKey()+'"></label>',
+      function(f){ var t = f.texto.value.trim(); if(!t) return "Escreva a tarefa."; if(!JU_PET.re.test(t)) t += " ("+nome+")";
+        J().tasks.unshift({id:uid("t"), texto:t, data:f.data.value||todayKey(), feita:false, triade:"importante", tag:"pessoal"}); save(); toast("Tarefa adicionada"); });
+  }
+  function ottoAct(a){
+    var p = a.split(":"), act = p[0], id = p[1], P = pet();
+    if(act==="edit"){ sheetCare(P.cuidados.filter(function(c){ return c.id===id; })[0]); return; }
+    if(act==="feito"){ var c = P.cuidados.filter(function(x){ return x.id===id; })[0]; if(c){ c.ultima = todayKey(); save(); toast(c.nome+" registrado · próximo em "+dBR(careNext(c))); } return; }
+    if(act==="add"){ sheetCare(null, id); return; }
+    if(act==="perfil"){ sheetPetPerfil(); return; }
+    if(act==="racao"){ sheetRacao(); return; }
+    if(act==="comprei"){ if(!P.racao.kg || !P.racao.g){ sheetRacao(); return; } P.racao.compra = todayKey(); save(); sheetPetGasto({cat:"racao", desc:"Ração"+(P.racao.marca?" "+P.racao.marca:"")}); return; }
+    if(act==="gasto"){ sheetPetGasto(); return; }
+    if(act==="delgasto"){ P.gastos = P.gastos.filter(function(g){ return g.id!==id; }); save(); return; }
+    if(act==="contato"){ sheetPetContato(); return; }
+    if(act==="delcontato"){ P.contatos = P.contatos.filter(function(c){ return c.id!==id; }); save(); return; }
+    if(act==="tarefa"){ sheetPetTarefa(); return; }
+  }
+
   function viewEu(){
     var ht = habitsToday(), allHabits = J().habits, best = 0;
     allHabits.forEach(function(h){ best = Math.max(best, habitStreak(h)); });
@@ -4902,6 +5072,7 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
     '<div class="ju-grid">'+stat("🔥","Maior sequência", best+(best===1?" dia":" dias"))+stat("🌿","Hábitos hoje", ht.done+"/"+ht.total)+
       stat("📝","Dias no diário", String(moods))+stat("🌙","Noites registradas", String(nights))+'</div>'+
     '<section class="ju-card"><div class="ju-head"><span class="ic">'+ico("grid")+'</span><h3>Seu painel completo</h3></div><div class="ju-tiles">'+
+      '<button class="ju-tile" data-go="otto" style="'+tone("treino")+'"><i>'+ico("paw")+'</i>'+esc(JU_PET.nome)+'</button>'+
       tiles.map(function(t){ return '<button class="ju-tile" data-legacy="'+t[0]+'" style="'+tone(t[3])+'"><i>'+ico(t[2])+'</i>'+t[1]+'</button>'; }).join("")+'</div></section>'+
     '<section class="ju-card"><div class="ju-head"><span class="ic">'+ico("user")+'</span><h3>Ajustes</h3></div>'+
       '<div class="ju-row"><span>Meta de sono (horas)</span><input id="juGoal" type="number" min="4" max="12" step="0.5" value="'+(+J().sleepGoal||7)+'"></div>'+
@@ -4913,8 +5084,8 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
 
   function renderView(view){
     var el = document.querySelector('.ju-view[data-view="'+view+'"]'); if(!el) return;
-    var fn = {inicio:viewInicio, plano:viewPlano, tracker:viewTracker, financas:viewFinancas, sono:viewSono, bemestar:viewBemestar, tarefas:viewTarefas, compras:viewCompras, estudos:viewEstudos, sonhos:viewSonhos, ficha:viewFicha, eu:viewEu}[view];
-    var sub = ["financas","sono","tarefas","compras","estudos","sonhos","ficha"].indexOf(view)>-1;
+    var fn = {inicio:viewInicio, plano:viewPlano, tracker:viewTracker, financas:viewFinancas, sono:viewSono, bemestar:viewBemestar, tarefas:viewTarefas, compras:viewCompras, estudos:viewEstudos, sonhos:viewSonhos, ficha:viewFicha, otto:viewPet, eu:viewEu}[view];
+    var sub = ["financas","sono","tarefas","compras","estudos","sonhos","ficha","otto"].indexOf(view)>-1;
     el.innerHTML = (sub ? '<div class="ju-sub"><button class="ju-back" data-go="inicio" aria-label="Voltar">'+ico("back")+'</button></div>' : '') + fn();
     if(view==="inicio"){ renderAgora(); requestAnimationFrame(updateChipbars); }
     if(view==="eu"){ var ib = document.getElementById("installApp"); var ji = document.getElementById("juInstall"); if(ji && ib && ib.hidden) ji.hidden = true; }
@@ -4946,7 +5117,7 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
         '<header class="ju-top"><button class="ju-avatar" data-go="eu" aria-label="Seu perfil"><img src="fotos/avatar.jpg" alt=""></button>'+
         '<h1 id="juTitle">Hoje</h1><span class="ju-date" id="juDate">'+ico("cal")+'<span></span></span></header>'+
         '<div class="ju-sync" id="juSync" aria-live="polite"></div>'+
-        ["inicio","plano","tracker","financas","sono","bemestar","tarefas","compras","estudos","sonhos","ficha","eu"].map(function(v){ return '<section class="ju-view" data-view="'+v+'" hidden></section>'; }).join("")+
+        ["inicio","plano","tracker","financas","sono","bemestar","tarefas","compras","estudos","sonhos","ficha","otto","eu"].map(function(v){ return '<section class="ju-view" data-view="'+v+'" hidden></section>'; }).join("")+
       '</div>'+
       '<nav class="ju-nav" aria-label="Navegação principal"><div>'+
         [["inicio","Início","home"],["plano","Meu plano","cal"],["tracker","Tracker","tasks"],["bemestar","Bem-estar","heart"],["eu","Você","user"]]
@@ -4964,7 +5135,7 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
     if(st && window.MutationObserver) new MutationObserver(function(){ var s = document.getElementById("juSync"); if(s) s.textContent = st.textContent; }).observe(st, {childList:true, characterData:true, subtree:true});
 
     document.addEventListener("click", function(e){
-      var t = e.target.closest("[data-go],[data-act],[data-legacy],[data-task],[data-habit],[data-water],[data-pay],[data-deltx],[data-deltask],[data-delhabit],[data-day],[data-month],[data-mood],[data-proxy],[data-shop],[data-shoptab],[data-shopadd],[data-shopreset],[data-delshop],[data-treino],[data-study],[data-delstudy],[data-sfilter],[data-chipscroll],[data-dreamstep],[data-dreamadd],[data-dreamdel],[data-gymset],[data-gymact],[data-meal],[data-mealedit],[data-ficha],#juPhoto");
+      var t = e.target.closest("[data-go],[data-act],[data-legacy],[data-task],[data-habit],[data-water],[data-pay],[data-deltx],[data-deltask],[data-delhabit],[data-day],[data-month],[data-mood],[data-proxy],[data-shop],[data-shoptab],[data-shopadd],[data-shopreset],[data-delshop],[data-treino],[data-study],[data-delstudy],[data-sfilter],[data-chipscroll],[data-dreamstep],[data-otto],[data-dreamadd],[data-dreamdel],[data-gymset],[data-gymact],[data-meal],[data-mealedit],[data-ficha],#juPhoto");
       if(!t || !t.closest(".ju, .ju-nav, .ju-legacy-bar")) return;
       if(t.id==="juPhoto"){ photoOffset++; var img = document.getElementById("juPhotoImg"); if(img) img.src = photoOfDay(photoOffset); return; }
       if(t.dataset.go){ go(t.dataset.go); return; }
@@ -4980,6 +5151,7 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
         save(); return; }
       if(t.dataset.meal){ var mk2 = todayKey(), ML = nutri().log[mk2] || (nutri().log[mk2] = {}); if(ML[t.dataset.meal]) delete ML[t.dataset.meal]; else { ML[t.dataset.meal] = JSON.parse(JSON.stringify(JU_MEAL_EST[t.dataset.meal]||{kcal:0,p:0,c:0,g:0})); toast("Refeição registrada"); } save(); return; }
       if(t.dataset.mealedit){ sheetMeal(t.dataset.mealedit); return; }
+      if(t.dataset.otto){ ottoAct(t.dataset.otto); return; }
       if(t.dataset.dreamstep){ var dr = t.dataset.dreamstep.split(":"), dd = dreams().filter(function(x){ return x.id===dr[0]; })[0]; if(dd && dd.passos[+dr[1]]){ var st = dd.passos[+dr[1]]; st.f = !st.f; save(); if(st.f) toast("Mais um passo rumo ao sonho ✨"); } return; }
       if(t.dataset.dreamadd){ sheetDreamStep(t.dataset.dreamadd); return; }
       if(t.dataset.dreamdel){ armDelete(t, function(){ var a4 = dreams(), ix4 = a4.map(function(x){ return x.id; }).indexOf(t.dataset.dreamdel); if(ix4>-1){ a4.splice(ix4,1); save(); } }); return; }
@@ -5049,7 +5221,7 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
       if(id==="juCycleDur" && v>=2 && v<=10){ J().cycle.dur = Math.round(v); persist(); }
     });
     var saved = "inicio"; try{ saved = localStorage.getItem("painelJuView") || "inicio"; }catch(e){}
-    juView = ["inicio","plano","tracker","financas","sono","bemestar","tarefas","compras","estudos","sonhos","ficha","eu"].indexOf(saved)>-1 ? saved : "inicio";
+    juView = ["inicio","plano","tracker","financas","sono","bemestar","tarefas","compras","estudos","sonhos","ficha","otto","eu"].indexOf(saved)>-1 ? saved : "inicio";
   }
   // Perfil da Ju para os recursos inteligentes (no app de venda isso vem do cadastro inicial)
   function lnProfile(){ return { name:"Ju", wake:"04:00", sleep:"21:20" }; }
