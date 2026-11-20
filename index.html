@@ -4826,15 +4826,22 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
 
   // ---------- Compras do mês: mercado (vem da dieta) + necessidades extras ----------
   var juShopTab = "mercado";
+  var JU_SHOP_ADD = [
+    {id:"x_iphone17", text:"iPhone 17 · 256 GB", note:"Cores: lavanda, sálvia, azul-névoa, branco ou preto", category:"⭐ Prioridade", checked:false, url:"https://www.apple.com/br/iphone-17/"}
+  ];
   function shopData(){
     if(!state.shopping || typeof state.shopping!=="object") state.shopping = {items:[]};
     if(!Array.isArray(state.shopping.items)) state.shopping.items = [];
     if(!Array.isArray(state.shopping.extras)) state.shopping.extras = [];
+    var S = state.shopping; S.added = S.added || {}; var ch = false;
+    JU_SHOP_ADD.forEach(function(it){ if(S.added[it.id]) return; S.added[it.id] = 1; ch = true;
+      if(!S.extras.some(function(x){ return x.id===it.id; })) S.extras.unshift(JSON.parse(JSON.stringify(it))); });
+    if(ch) setTimeout(function(){ persist(); }, 0);
     return state.shopping;
   }
   function shopRow(i, kind){
     return '<li style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center"><div class="ju-check'+(i.checked?" done":"")+'">'+
-      '<button data-shop="'+esc(kind+":"+i.id)+'" aria-label="'+(i.checked?"Desmarcar":"Marcar")+'">'+ico("check")+'</button><span>'+esc(i.text)+'</span></div>'+
+      '<button data-shop="'+esc(kind+":"+i.id)+'" aria-label="'+(i.checked?"Desmarcar":"Marcar")+'">'+ico("check")+'</button><span>'+esc(i.text)+(i.note||i.url?'<small style="display:block;color:var(--j-soft);font-size:12px;margin-top:2px">'+(i.note?esc(i.note):'')+(i.url?(i.note?' · ':'')+'<a href="'+esc(i.url)+'" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">ver na Apple</a>':'')+'</small>':'')+'</span></div>'+
       '<button class="ju-del" data-delshop="'+esc(kind+":"+i.id)+'" aria-label="Remover">'+ico("trash")+'</button></li>';
   }
   function viewCompras(){

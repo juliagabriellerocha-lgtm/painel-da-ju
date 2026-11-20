@@ -49,6 +49,7 @@ resub(r"      '<span class=\"ju-label\">2 · Pareto da prova de Escrevente.*?\n(
       r"      '<p class=\"ju-muted\" style=\"font-size:12px;margin:0\">Proteja primeiro o quadrante <b>Fazer agora</b>. O que é importante e não urgente vai para um horário fixo da semana — é ali que o futuro se constrói.</p>'+\n\1")
 resub(r'  var JU_DREAM_SEED = \[\n.*?\n  \];\n', '  var JU_DREAM_SEED = [];\n')
 resub(r'  var JU_DREAM_ADD = \[\n.*?\n  \];\n', '  var JU_DREAM_ADD = [];\n')
+resub(r'  var JU_SHOP_ADD = \[\n.*?\n  \];\n', '  var JU_SHOP_ADD = [];\n')
 rep('Deixe a garrafa de 950 ml na mesa da HDL e encha duas vezes até o almoço.', 'Deixe uma garrafa sempre à vista e encha duas vezes até o almoço.')
 rep('// Dicas de execução da ficha da EF Academia (Prof. Bruna).', '// Dicas de execução por exercício.')
 rep('<span class="ju-label">EF Academia · Prof. Bruna</span>', '<span class="ju-label">Minha academia</span>')
