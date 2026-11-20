@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE_NAME = "painel-da-ju-v20";
+const CACHE_NAME = "painel-da-ju-v21";
 const APP_SHELL = [
   "./",
   "./index.html",

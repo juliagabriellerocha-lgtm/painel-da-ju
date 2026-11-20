@@ -769,14 +769,24 @@
       [/tr[ií]ceps/i,"tricepsCross"],[/scott/i,"scott"],[/rosca/i,"rosca"],[/remada/i,"remada"],[/high row/i,"highRow"],[/puxador/i,"puxador"],
       [/tra[cç][aã]o|pull ?down/i,"pullDown"],[/gl[uú]teo|eleva[cç][aã]o p[eé]lvica/i,"gluteo"],[/flexora em p[eé]/i,"flexoraPe"],[/flexora sentada/i,"flexoraSent"],[/flexora/i,"flexoraDeit"]
     ];
-    var BODY="#c9c1d1", HI="#e0457b", EQ="#9aa3ad", DUR="2.4s";
+    var BODY="#cfd4da", HI="url(#juGlow)", EQ="#5d6670", DUR="2.4s", SH="#20252c";
     function anim(attr,a,b){ return a===b ? "" : '<animate attributeName="'+attr+'" values="'+a+';'+b+';'+a+'" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" dur="'+DUR+'" repeatCount="indefinite"/>'; }
     function seg(p1A,p2A,p1B,p2B,w,c){
-      return '<line x1="'+p1A[0]+'" y1="'+p1A[1]+'" x2="'+p2A[0]+'" y2="'+p2A[1]+'" stroke="'+c+'" stroke-width="'+w+'" stroke-linecap="round">'+
+      if(c===BODY) return seg1(p1A,p2A,p1B,p2B,w+3,SH,"")+seg1(p1A,p2A,p1B,p2B,w,"url(#juSkin)","");
+      if(c===HI) return seg1(p1A,p2A,p1B,p2B,w+3,SH,"")+seg1(p1A,p2A,p1B,p2B,w+5,HI,' filter="url(#juBlur)" class="ju-pulse"')+seg1(p1A,p2A,p1B,p2B,w,HI,"");
+      return seg1(p1A,p2A,p1B,p2B,w,c,"");
+    }
+    function seg1(p1A,p2A,p1B,p2B,w,c,extra){
+      return '<line x1="'+p1A[0]+'" y1="'+p1A[1]+'" x2="'+p2A[0]+'" y2="'+p2A[1]+'" stroke="'+c+'" stroke-width="'+w+'" stroke-linecap="round"'+extra+'>'+
         anim("x1",p1A[0],p1B[0])+anim("y1",p1A[1],p1B[1])+anim("x2",p2A[0],p2B[0])+anim("y2",p2A[1],p2B[1])+'</line>';
     }
-    function dot(pA,pB,r,c){ return '<circle cx="'+pA[0]+'" cy="'+pA[1]+'" r="'+r+'" fill="'+c+'">'+anim("cx",pA[0],pB[0])+anim("cy",pA[1],pB[1])+'</circle>'; }
-    function eqLines(list){ return (list||[]).map(function(l){ return '<line x1="'+l[0][0]+'" y1="'+l[0][1]+'" x2="'+l[1][0]+'" y2="'+l[1][1]+'" stroke="'+EQ+'" stroke-width="4" stroke-linecap="round" opacity=".55"/>'; }).join(""); }
+    function dot(pA,pB,r,c){
+      if(c===BODY) return dot1(pA,pB,r+1.5,SH,"")+dot1(pA,pB,r,"url(#juSkin)","");
+      if(c===HI) return dot1(pA,pB,r+3,HI,' filter="url(#juBlur)" class="ju-pulse"')+dot1(pA,pB,r,HI,"");
+      return dot1(pA,pB,r,c,"");
+    }
+    function dot1(pA,pB,r,c,extra){ return '<circle'+extra+' cx="'+pA[0]+'" cy="'+pA[1]+'" r="'+r+'" fill="'+c+'">'+anim("cx",pA[0],pB[0])+anim("cy",pA[1],pB[1])+'</circle>'; }
+    function eqLines(list){ return (list||[]).map(function(l){ return '<line x1="'+l[0][0]+'" y1="'+l[0][1]+'" x2="'+l[1][0]+'" y2="'+l[1][1]+'" stroke="'+EQ+'" stroke-width="4" stroke-linecap="round"/>'; }).join(""); }
     function side(f){
       var A=f.A,B=f.B,h=f.hi, c=function(k){ return h.indexOf(k)>-1?HI:BODY; }, s="";
       s+=eqLines(f.eq);
@@ -788,9 +798,9 @@
       if(h.indexOf("gluteo")>-1) s+=dot(A.p,B.p,7,HI);
       s+=seg(A.p,A.k,B.p,B.k,9,c("coxa"))+seg(A.k,A.a,B.k,B.a,7,c("canela"))+seg(A.a,A.t,B.a,B.t,5,BODY);
       s+=seg(A.n,A.e,B.n,B.e,7,c("braco"))+seg(A.e,A.w,B.e,B.w,6,c("antebraco"));
-      if(f.db) s+=dot(A.w,B.w,4.5,"#5b6470");
-      if(f.bar) s+=seg([A.w[0]-6,A.w[1]],[A.w[0]+6,A.w[1]],[B.w[0]-6,B.w[1]],[B.w[0]+6,B.w[1]],4,"#5b6470");
-      if(f.eqMove==="bar") s+=seg([A.w[0]-18,A.w[1]],[A.w[0]+18,A.w[1]],[B.w[0]-18,B.w[1]],[B.w[0]+18,B.w[1]],4,"#5b6470");
+      if(f.db) s+=dot(A.w,B.w,4.5,"#8b95a1");
+      if(f.bar) s+=seg([A.w[0]-6,A.w[1]],[A.w[0]+6,A.w[1]],[B.w[0]-6,B.w[1]],[B.w[0]+6,B.w[1]],4,"#8b95a1");
+      if(f.eqMove==="bar") s+=seg([A.w[0]-18,A.w[1]],[A.w[0]+18,A.w[1]],[B.w[0]-18,B.w[1]],[B.w[0]+18,B.w[1]],4,"#8b95a1");
       s+=dot(A.h,B.h,8,BODY);
       return s;
     }
@@ -798,23 +808,23 @@
     function front(f){
       var h=f.hi, s="", aA=f.arms.A, aB=f.arms.B, armC=h.indexOf("braco")>-1?HI:BODY;
       // tronco
-      s+='<line x1="50" y1="34" x2="50" y2="68" stroke="'+((h.indexOf("costas")>-1||h.indexOf("peito")>-1)?HI:BODY)+'" stroke-width="16" stroke-linecap="round"/>';
+      s+=seg([50,34],[50,68],[50,34],[50,68],16,(h.indexOf("costas")>-1||h.indexOf("peito")>-1)?HI:BODY);
       [false,true].forEach(function(m){ var t=m?mirror:function(p){return p;};
         s+=seg(t(aA[0]),t(aA[1]),t(aB[0]),t(aB[1]),7,armC)+seg(t(aA[1]),t(aA[2]),t(aB[1]),t(aB[2]),6,armC);
-        if(f.db) s+=dot(t(aA[2]),t(aB[2]),4.5,"#5b6470");
+        if(f.db) s+=dot(t(aA[2]),t(aB[2]),4.5,"#8b95a1");
       });
       var legC = h.indexOf("coxa")>-1?HI:BODY;
-      if(f.legs==="pe"){ s+='<line x1="45" y1="68" x2="44" y2="108" stroke="'+BODY+'" stroke-width="9" stroke-linecap="round"/><line x1="55" y1="68" x2="56" y2="108" stroke="'+BODY+'" stroke-width="9" stroke-linecap="round"/>'; }
+      if(f.legs==="pe"){ s+=seg([45,68],[44,108],[45,68],[44,108],9,BODY)+seg([55,68],[56,108],[55,68],[56,108],9,BODY); }
       else {
-        s+='<rect x="26" y="70" width="48" height="6" rx="3" fill="'+EQ+'" opacity=".55"/>';
+        s+='<rect x="26" y="70" width="48" height="6" rx="3" fill="'+EQ+'"/>';
         var open = {sent:[[44,90],[44,90]], adut:[[28,92],[44,92]], abdut:[[44,92],[28,92]]}[f.legs];
         [false,true].forEach(function(m){ var t=m?mirror:function(p){return p;};
           s+=seg(t([46,68]),t(open[0]),t([46,68]),t(open[1]),10,legC);
           s+=seg(t(open[0]),t([open[0][0],108]),t(open[1]),t([open[1][0],108]),7,BODY);
         });
-        if(h.indexOf("gluteo")>-1) s+='<circle cx="36" cy="70" r="5" fill="'+HI+'"/><circle cx="64" cy="70" r="5" fill="'+HI+'"/>';
+        if(h.indexOf("gluteo")>-1) s+=dot([36,70],[36,70],5,HI)+dot([64,70],[64,70],5,HI);
       }
-      s+='<circle cx="50" cy="20" r="8" fill="'+BODY+'"/>';
+      s+=dot([50,20],[50,20],8,BODY);
       return s;
     }
     function find(name){ for(var i=0;i<MAP.length;i++){ if(MAP[i][0].test(name)) return MAP[i][1]; } return null; }
@@ -823,7 +833,13 @@
         var k=find(name); if(!k) return "";
         var isF = k.indexOf("F:")===0, f = isF ? F[k.slice(2)] : L[k];
         return '<svg viewBox="0 0 120 116" width="'+(size||84)+'" height="'+Math.round((size||84)*116/120)+'" role="img" aria-label="Como fazer: '+esc(name)+'" style="display:block">'+
-          '<rect x="0" y="0" width="120" height="116" rx="16" fill="var(--j-line, #eee)" opacity=".45"/>'+
+          '<style>.ju-pulse{animation:juP 1.2s ease-in-out infinite}@keyframes juP{50%{opacity:.3}}</style>'+
+          '<defs><linearGradient id="juGlow" gradientUnits="userSpaceOnUse" x1="20" y1="10" x2="100" y2="110"><stop offset="0" stop-color="#ff7a3d"/><stop offset=".5" stop-color="#ff3d8b"/><stop offset="1" stop-color="#6f7bff"/></linearGradient>'+
+          '<linearGradient id="juSkin" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="120" y2="116"><stop offset="0" stop-color="#f2f4f6"/><stop offset="1" stop-color="#aab2bb"/></linearGradient>'+
+          '<radialGradient id="juBg" cx=".5" cy=".35" r=".8"><stop offset="0" stop-color="#2c333c"/><stop offset="1" stop-color="#14181d"/></radialGradient>'+
+          '<filter id="juBlur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.6"/></filter></defs>'+
+          '<rect x="0" y="0" width="120" height="116" rx="16" fill="url(#juBg)"/>'+
+          '<ellipse cx="60" cy="110" rx="46" ry="5" fill="#000" opacity=".35"/>'+
           '<g transform="translate('+(isF?10:0)+',0)">'+(isF?front(f):side(f))+'</g></svg>';
       },
       info: function(name){ var k=find(name); if(!k) return null; var f = k.indexOf("F:")===0 ? F[k.slice(2)] : L[k]; return {d:f.d, m:f.m}; }
@@ -842,8 +858,8 @@
     var tabs = WORKOUT_DETAIL.map(function(w){ return '<button class="ju-btn '+(w.letter===W.letter?"primary":"soft")+'" style="padding:8px 0" data-ficha="'+w.letter+'">'+w.letter+'</button>'; }).join("");
     var blocos = W.blocks.map(function(b){
       return '<section class="ju-card"><span class="ju-label">'+esc(b.name)+'</span><ul class="ju-list" style="gap:16px;margin-top:12px">'+b.items.map(function(it,ix){ var tip = tipFor(it[0]), lk = lastKg(it[0], dKey(addDays(new Date(),1)));
-        var fig = JU_FIG.svg(it[0], 84), fi = JU_FIG.info(it[0]);
-        return '<li style="display:grid;grid-template-columns:'+(fig?'84px ':'')+'1fr;gap:12px;align-items:start">'+fig+'<div><div style="display:grid;grid-template-columns:22px 1fr auto;gap:6px;align-items:baseline"><b class="num ju-muted" style="font-size:12px">'+String(ix+1).padStart(2,"0")+'</b><span style="font-size:14px;font-weight:600">'+esc(it[0])+'</span><b class="num" style="white-space:nowrap;font-size:13px">'+esc(it[1])+'</b></div>'+
+        var fig = JU_FIG.svg(it[0], 96), fi = JU_FIG.info(it[0]);
+        return '<li style="display:grid;grid-template-columns:'+(fig?'96px ':'')+'1fr;gap:12px;align-items:start">'+fig+'<div><div style="display:grid;grid-template-columns:22px 1fr auto;gap:6px;align-items:baseline"><b class="num ju-muted" style="font-size:12px">'+String(ix+1).padStart(2,"0")+'</b><span style="font-size:14px;font-weight:600">'+esc(it[0])+'</span><b class="num" style="white-space:nowrap;font-size:13px">'+esc(it[1])+'</b></div>'+
           (fi ? '<div style="display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 0">'+fi.m.map(function(m){ return '<span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:#fde7ef;color:#b8325f">'+esc(m)+'</span>'; }).join("")+'</div><p style="margin:5px 0 0;font-size:12.5px;line-height:1.4"><b>Como fazer:</b> '+esc(fi.d)+'</p>' : '')+
           (lk ? '<small class="ju-muted" style="display:block;margin-top:4px;font-size:11.5px">última carga: '+lk.kg+' kg ('+fmtDay(parseKey(lk.d))+')</small>' : '')+
           (tip ? '<p class="ju-muted" style="margin:4px 0 0;font-size:12.5px;line-height:1.45"><b style="color:var(--j-ink)">Atenção:</b> '+esc(tip)+'</p>' : '')+'</div></li>'; }).join("")+'</ul></section>';
