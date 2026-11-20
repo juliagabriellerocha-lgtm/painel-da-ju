@@ -422,3 +422,4 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
 .ju-exfig img.pk{animation:juExPk 2.4s ease-in-out infinite}
 @keyframes juExPk{0%,35%{opacity:0}50%,85%{opacity:1}100%{opacity:0}}
 @media (prefers-reduced-motion:reduce){.ju-exfig img.pk{animation:none;opacity:0}}
+.ju-exfig.sm{width:56px;height:56px;border-radius:10px;flex:0 0 56px}
