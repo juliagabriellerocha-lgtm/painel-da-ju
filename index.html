@@ -4269,6 +4269,154 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
       '<div class="ju-grid" style="margin-top:12px"><button class="ju-btn '+(done?"soft":"primary")+'" data-treino="1">'+(done?"✓ Treino feito":"Marcar treino feito")+'</button><button class="ju-btn ghost" data-go="ficha">Ficha completa</button></div>'+
       (det ? '<p class="ju-muted" style="font-size:12px;margin:10px 0 0">Toque no exercício para ver a dica de execução. Descanso: 45–60s nas séries de 20; 60–90s nas de 15.</p>' : '')+'</section>';
   }
+  // ===== Bonequinhos explicativos da ficha (SVG animado, sem imagens externas) =====
+  // Vista lateral: h=cabeça n=ombro e=cotovelo w=mão p=quadril k=joelho a=tornozelo t=ponta do pé
+  // Cada movimento tem a pose A (início) e B (fim); o boneco vai de A para B e volta.
+  var JU_FIG = (function(){
+    function P(o){ return o; }
+    var L = {
+      agach: {d:"Desça como se fosse sentar, joelhos na linha dos pés", m:["Quadríceps","Glúteo"], hi:["coxa","gluteo"],
+        A:P({h:[60,20],n:[60,32],e:[50,40],w:[58,32],p:[60,62],k:[62,86],a:[60,108],t:[70,108]}),
+        B:P({h:[66,44],n:[62,54],e:[52,60],w:[60,54],p:[44,80],k:[68,82],a:[60,108],t:[70,108]}), eqMove:"bar"},
+      passada: {d:"Passo à frente, desça até o joelho de trás quase tocar o chão", m:["Quadríceps","Glúteo"], hi:["coxa","gluteo"],
+        A:P({h:[60,20],n:[60,32],e:[60,48],w:[60,62],p:[60,62],k:[64,86],a:[62,108],t:[72,108]}),
+        B:P({h:[60,40],n:[60,52],e:[60,68],w:[60,80],p:[60,80],k:[80,84],a:[80,108],t:[90,108]}), leg2:{A:[[60,62],[58,86],[56,108]],B:[[60,80],[46,100],[34,104]]}},
+      leg45: {d:"Empurre a plataforma sem travar os joelhos", m:["Quadríceps","Glúteo"], hi:["coxa","gluteo"], seat:true,
+        A:P({h:[18,60],n:[26,68],e:[34,80],w:[42,86],p:[44,90],k:[54,62],a:[76,66],t:[82,58]}),
+        B:P({h:[18,60],n:[26,68],e:[34,80],w:[42,86],p:[44,90],k:[66,66],a:[90,52],t:[96,44]}), eq:[[[14,64],[44,98]],[[44,98],[60,98]]], plate:true},
+      extensora: {d:"Estenda o joelho e segure 2\" lá em cima", m:["Quadríceps"], hi:["coxa"],
+        A:P({h:[44,22],n:[46,34],e:[44,52],w:[52,66],p:[48,72],k:[72,74],a:[72,98],t:[80,100]}),
+        B:P({h:[42,22],n:[44,34],e:[44,52],w:[52,66],p:[48,72],k:[72,74],a:[96,72],t:[98,64]}), eq:[[[36,78],[74,78]],[[40,78],[40,108]],[[36,40],[36,78]]]},
+      pantPe: {d:"Suba na ponta do pé e desça alongando bem", m:["Panturrilha"], hi:["canela"],
+        A:P({h:[60,20],n:[60,32],e:[52,44],w:[56,32],p:[60,62],k:[60,86],a:[58,106],t:[70,108]}),
+        B:P({h:[62,12],n:[62,24],e:[54,36],w:[58,24],p:[62,54],k:[62,78],a:[62,98],t:[72,106]}), eq:[[[66,108],[84,108]]]},
+      pantSent: {d:"Eleve os calcanhares com os joelhos presos", m:["Panturrilha"], hi:["canela"],
+        A:P({h:[44,22],n:[46,34],e:[56,44],w:[66,70],p:[46,72],k:[70,72],a:[72,98],t:[82,100]}),
+        B:P({h:[44,18],n:[46,30],e:[56,40],w:[66,66],p:[46,68],k:[70,68],a:[72,92],t:[82,98]}), eq:[[[36,78],[60,78]],[[62,66],[80,66]]]},
+      abd: {d:"Tire os ombros do chão levando o queixo ao peito", m:["Abdômen"], hi:["tronco"],
+        A:P({h:[22,92],n:[32,96],e:[28,84],w:[22,90],p:[60,100],k:[76,82],a:[92,100],t:[100,98]}),
+        B:P({h:[32,78],n:[40,86],e:[34,74],w:[30,80],p:[60,100],k:[76,82],a:[92,100],t:[100,98]}), eq:[[[10,104],[110,104]]]},
+      prancha: {d:"Corpo reto da cabeça ao calcanhar, abdômen firme", m:["Abdômen","Core"], hi:["tronco"],
+        A:P({h:[24,70],n:[32,74],e:[32,96],w:[44,96],p:[66,80],k:[84,86],a:[104,92],t:[106,98]}),
+        B:P({h:[24,69],n:[32,73],e:[32,96],w:[44,96],p:[66,79],k:[84,85],a:[104,92],t:[106,98]}), eq:[[[10,100],[114,100]]]},
+      desenv: {d:"Empurre os halteres para cima sem arquear a lombar", m:["Ombros","Tríceps"], hi:["braco","antebraco"],
+        A:P({h:[52,22],n:[52,34],e:[60,40],w:[60,26],p:[50,72],k:[74,72],a:[76,98],t:[86,100]}),
+        B:P({h:[52,22],n:[52,34],e:[56,20],w:[56,4],p:[50,72],k:[74,72],a:[76,98],t:[86,100]}), eq:[[[38,78],[64,78]],[[40,30],[40,78]]], db:true},
+      elevFront: {d:"Eleve o braço à frente até a altura do ombro", m:["Ombro (frente)"], hi:["braco"],
+        A:P({h:[60,20],n:[60,32],e:[62,48],w:[64,62],p:[60,62],k:[61,86],a:[60,108],t:[70,108]}),
+        B:P({h:[60,20],n:[60,32],e:[76,32],w:[92,32],p:[60,62],k:[61,86],a:[60,108],t:[70,108]}), db:true},
+      supino: {d:"Empurre à frente com as escápulas encostadas", m:["Peito","Tríceps"], hi:["braco","peito"],
+        A:P({h:[46,22],n:[48,34],e:[42,48],w:[58,44],p:[48,72],k:[72,72],a:[74,98],t:[84,100]}),
+        B:P({h:[46,22],n:[48,34],e:[66,40],w:[84,40],p:[48,72],k:[72,72],a:[74,98],t:[84,100]}), eq:[[[36,78],[62,78]],[[38,26],[38,78]]], db:true},
+      tricepsCross: {d:"Cotovelo colado no corpo, só o antebraço desce", m:["Tríceps"], hi:["antebraco","braco"],
+        A:P({h:[56,20],n:[58,32],e:[60,52],w:[72,40],p:[58,62],k:[60,86],a:[58,108],t:[68,108]}),
+        B:P({h:[56,20],n:[58,32],e:[60,52],w:[66,72],p:[58,62],k:[60,86],a:[58,108],t:[68,108]}), cable:[78,6]},
+      rosca: {d:"Cotovelo parado, sobe só o antebraço", m:["Bíceps"], hi:["braco"],
+        A:P({h:[56,20],n:[58,32],e:[60,52],w:[64,72],p:[58,62],k:[60,86],a:[58,108],t:[68,108]}),
+        B:P({h:[56,20],n:[58,32],e:[60,52],w:[62,34],p:[58,62],k:[60,86],a:[58,108],t:[68,108]}), db:true},
+      scott: {d:"Braço apoiado no banco, suba sem estender tudo", m:["Bíceps"], hi:["braco"],
+        A:P({h:[50,20],n:[52,32],e:[68,44],w:[86,58],p:[50,70],k:[72,72],a:[74,98],t:[84,100]}),
+        B:P({h:[50,20],n:[52,32],e:[68,44],w:[66,24],p:[50,70],k:[72,72],a:[74,98],t:[84,100]}), eq:[[[60,40],[80,56]],[[38,76],[62,76]]], db:true},
+      remada: {d:"Tronco inclinado, leve os cotovelos para trás", m:["Costas","Bíceps"], hi:["costas","braco"],
+        A:P({h:[84,46],n:[74,50],e:[74,68],w:[74,86],p:[48,64],k:[56,86],a:[50,108],t:[60,108]}),
+        B:P({h:[84,46],n:[74,50],e:[60,58],w:[66,72],p:[48,64],k:[56,86],a:[50,108],t:[60,108]}), bar:true},
+      highRow: {d:"Peito aberto, puxe o cotovelo para baixo e para trás", m:["Costas"], hi:["costas","braco"],
+        A:P({h:[48,22],n:[50,34],e:[64,22],w:[78,12],p:[48,72],k:[72,72],a:[74,98],t:[84,100]}),
+        B:P({h:[48,22],n:[50,34],e:[38,46],w:[56,40],p:[48,72],k:[72,72],a:[74,98],t:[84,100]}), eq:[[[36,78],[62,78]]], cable:[96,0]},
+      puxador: {d:"Puxe a barra até o peito levando os cotovelos para baixo", m:["Costas","Bíceps"], hi:["costas","braco"],
+        A:P({h:[48,26],n:[50,38],e:[54,20],w:[58,4],p:[48,76],k:[72,76],a:[74,100],t:[84,102]}),
+        B:P({h:[48,26],n:[50,38],e:[42,52],w:[56,36],p:[48,76],k:[72,76],a:[74,100],t:[84,102]}), eq:[[[36,82],[62,82]]], cable:[58,0], bar:true},
+      pullDown: {d:"Braços quase retos, leve a barra até a coxa", m:["Costas"], hi:["costas","braco"],
+        A:P({h:[54,20],n:[56,32],e:[70,20],w:[84,10],p:[58,62],k:[60,86],a:[58,108],t:[68,108]}),
+        B:P({h:[54,20],n:[56,32],e:[64,48],w:[70,62],p:[58,62],k:[60,86],a:[58,108],t:[68,108]}), cable:[96,0], bar:true},
+      gluteo: {d:"Suba o quadril e aperte o glúteo no topo", m:["Glúteo","Posterior"], hi:["gluteo","coxa"],
+        A:P({h:[14,62],n:[24,68],e:[34,78],w:[44,86],p:[48,96],k:[74,82],a:[80,106],t:[90,106]}),
+        B:P({h:[14,62],n:[24,68],e:[36,72],w:[48,72],p:[50,74],k:[74,74],a:[80,106],t:[90,106]}), eq:[[[8,72],[30,72]],[[20,72],[20,108]]], bar:true},
+      flexoraPe: {d:"Quadril parado, dobre o joelho levando o pé ao glúteo", m:["Posterior de coxa"], hi:["coxa"],
+        A:P({h:[56,20],n:[58,32],e:[66,44],w:[74,52],p:[58,62],k:[58,86],a:[58,108],t:[68,108]}),
+        B:P({h:[56,20],n:[58,32],e:[66,44],w:[74,52],p:[58,62],k:[58,86],a:[40,72],t:[34,80]}), leg2:{A:[[58,62],[62,86],[62,108]],B:[[58,62],[62,86],[62,108]]}, eq:[[[78,40],[78,108]]]},
+      flexoraSent: {d:"Leve o calcanhar para baixo e para trás", m:["Posterior de coxa"], hi:["coxa"],
+        A:P({h:[44,22],n:[46,34],e:[54,48],w:[64,62],p:[48,72],k:[72,72],a:[96,72],t:[100,64]}),
+        B:P({h:[44,22],n:[46,34],e:[54,48],w:[64,62],p:[48,72],k:[72,72],a:[66,96],t:[74,100]}), eq:[[[36,78],[74,78]],[[36,40],[36,78]]]},
+      flexoraDeit: {d:"Deitada de bruços, dobre o joelho sem tirar o quadril", m:["Posterior de coxa"], hi:["coxa"],
+        A:P({h:[14,70],n:[24,74],e:[24,88],w:[32,92],p:[58,78],k:[82,78],a:[106,78],t:[110,86]}),
+        B:P({h:[14,70],n:[24,74],e:[24,88],w:[32,92],p:[58,78],k:[82,78],a:[78,52],t:[86,48]}), eq:[[[10,84],[90,84]],[[30,84],[30,108]],[[80,84],[80,108]]]}
+    };
+    // Vista de frente (para movimentos laterais): braços e pernas abrem/fecham
+    var F = {
+      elevLat: {d:"Abra os braços até a altura do ombro, cotovelo levemente dobrado", m:["Ombro (lateral)"], hi:["braco"], arms:{A:[[42,36],[37,52],[36,66]],B:[[42,36],[28,34],[14,34]]}, legs:"pe", db:true},
+      peck: {d:"Feche os braços à frente, como num abraço", m:["Peito"], hi:["braco","peito"], arms:{A:[[42,36],[26,34],[14,30]],B:[[42,36],[42,44],[50,46]]}, legs:"sent"},
+      peckPost: {d:"Abra os braços para trás juntando as escápulas", m:["Costas (ombro posterior)"], hi:["braco","costas"], arms:{A:[[42,36],[42,44],[50,46]],B:[[42,36],[26,34],[14,30]]}, legs:"sent"},
+      adutor: {d:"Feche as pernas de forma controlada", m:["Adutores (parte interna)"], hi:["coxa"], arms:{A:[[42,36],[38,52],[38,64]],B:[[42,36],[38,52],[38,64]]}, legs:"adut"},
+      abdutor: {d:"Abra as pernas sem dar impulso", m:["Glúteo médio (lateral)"], hi:["coxa","gluteo"], arms:{A:[[42,36],[38,52],[38,64]],B:[[42,36],[38,52],[38,64]]}, legs:"abdut"}
+    };
+    var MAP = [
+      [/abdutor/i,"F:abdutor"],[/adutor/i,"F:adutor"],[/peck deck posterior/i,"F:peckPost"],[/peck deck/i,"F:peck"],[/eleva[cç][aã]o lateral/i,"F:elevLat"],
+      [/passada/i,"passada"],[/agachamento/i,"agach"],[/leg/i,"leg45"],[/extensora/i,"extensora"],[/panturrilha sentada/i,"pantSent"],[/panturrilha/i,"pantPe"],
+      [/reto sob|abdominal/i,"abd"],[/prancha/i,"prancha"],[/desenvolvimento/i,"desenv"],[/eleva[cç][aã]o frontal/i,"elevFront"],[/supino/i,"supino"],
+      [/tr[ií]ceps/i,"tricepsCross"],[/scott/i,"scott"],[/rosca/i,"rosca"],[/remada/i,"remada"],[/high row/i,"highRow"],[/puxador/i,"puxador"],
+      [/tra[cç][aã]o|pull ?down/i,"pullDown"],[/gl[uú]teo|eleva[cç][aã]o p[eé]lvica/i,"gluteo"],[/flexora em p[eé]/i,"flexoraPe"],[/flexora sentada/i,"flexoraSent"],[/flexora/i,"flexoraDeit"]
+    ];
+    var BODY="#c9c1d1", HI="#e0457b", EQ="#9aa3ad", DUR="2.4s";
+    function anim(attr,a,b){ return a===b ? "" : '<animate attributeName="'+attr+'" values="'+a+';'+b+';'+a+'" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" dur="'+DUR+'" repeatCount="indefinite"/>'; }
+    function seg(p1A,p2A,p1B,p2B,w,c){
+      return '<line x1="'+p1A[0]+'" y1="'+p1A[1]+'" x2="'+p2A[0]+'" y2="'+p2A[1]+'" stroke="'+c+'" stroke-width="'+w+'" stroke-linecap="round">'+
+        anim("x1",p1A[0],p1B[0])+anim("y1",p1A[1],p1B[1])+anim("x2",p2A[0],p2B[0])+anim("y2",p2A[1],p2B[1])+'</line>';
+    }
+    function dot(pA,pB,r,c){ return '<circle cx="'+pA[0]+'" cy="'+pA[1]+'" r="'+r+'" fill="'+c+'">'+anim("cx",pA[0],pB[0])+anim("cy",pA[1],pB[1])+'</circle>'; }
+    function eqLines(list){ return (list||[]).map(function(l){ return '<line x1="'+l[0][0]+'" y1="'+l[0][1]+'" x2="'+l[1][0]+'" y2="'+l[1][1]+'" stroke="'+EQ+'" stroke-width="4" stroke-linecap="round" opacity=".55"/>'; }).join(""); }
+    function side(f){
+      var A=f.A,B=f.B,h=f.hi, c=function(k){ return h.indexOf(k)>-1?HI:BODY; }, s="";
+      s+=eqLines(f.eq);
+      if(f.cable) s+=seg(f.cable,A.w,f.cable,B.w,1.5,EQ);
+      if(f.plate){ s+=seg([A.t[0]-4,A.t[1]-12],[A.t[0]+8,A.t[1]+12],[B.t[0]-4,B.t[1]-12],[B.t[0]+8,B.t[1]+12],5,EQ); }
+      if(f.leg2){ var l=f.leg2; s+=seg(l.A[0],l.A[1],l.B[0],l.B[1],8,BODY)+seg(l.A[1],l.A[2],l.B[1],l.B[2],7,BODY); }
+      s+=seg(A.n,A.p,B.n,B.p,12,(h.indexOf("tronco")>-1||h.indexOf("costas")>-1)?HI:BODY);
+      if(h.indexOf("peito")>-1) s+=seg(A.n,[A.n[0]+(A.p[0]-A.n[0])*.35,A.n[1]+(A.p[1]-A.n[1])*.35],B.n,[B.n[0]+(B.p[0]-B.n[0])*.35,B.n[1]+(B.p[1]-B.n[1])*.35],13,HI);
+      if(h.indexOf("gluteo")>-1) s+=dot(A.p,B.p,7,HI);
+      s+=seg(A.p,A.k,B.p,B.k,9,c("coxa"))+seg(A.k,A.a,B.k,B.a,7,c("canela"))+seg(A.a,A.t,B.a,B.t,5,BODY);
+      s+=seg(A.n,A.e,B.n,B.e,7,c("braco"))+seg(A.e,A.w,B.e,B.w,6,c("antebraco"));
+      if(f.db) s+=dot(A.w,B.w,4.5,"#5b6470");
+      if(f.bar) s+=seg([A.w[0]-6,A.w[1]],[A.w[0]+6,A.w[1]],[B.w[0]-6,B.w[1]],[B.w[0]+6,B.w[1]],4,"#5b6470");
+      if(f.eqMove==="bar") s+=seg([A.w[0]-18,A.w[1]],[A.w[0]+18,A.w[1]],[B.w[0]-18,B.w[1]],[B.w[0]+18,B.w[1]],4,"#5b6470");
+      s+=dot(A.h,B.h,8,BODY);
+      return s;
+    }
+    function mirror(p){ return [100-p[0],p[1]]; }
+    function front(f){
+      var h=f.hi, s="", aA=f.arms.A, aB=f.arms.B, armC=h.indexOf("braco")>-1?HI:BODY;
+      // tronco
+      s+='<line x1="50" y1="34" x2="50" y2="68" stroke="'+((h.indexOf("costas")>-1||h.indexOf("peito")>-1)?HI:BODY)+'" stroke-width="16" stroke-linecap="round"/>';
+      [false,true].forEach(function(m){ var t=m?mirror:function(p){return p;};
+        s+=seg(t(aA[0]),t(aA[1]),t(aB[0]),t(aB[1]),7,armC)+seg(t(aA[1]),t(aA[2]),t(aB[1]),t(aB[2]),6,armC);
+        if(f.db) s+=dot(t(aA[2]),t(aB[2]),4.5,"#5b6470");
+      });
+      var legC = h.indexOf("coxa")>-1?HI:BODY;
+      if(f.legs==="pe"){ s+='<line x1="45" y1="68" x2="44" y2="108" stroke="'+BODY+'" stroke-width="9" stroke-linecap="round"/><line x1="55" y1="68" x2="56" y2="108" stroke="'+BODY+'" stroke-width="9" stroke-linecap="round"/>'; }
+      else {
+        s+='<rect x="26" y="70" width="48" height="6" rx="3" fill="'+EQ+'" opacity=".55"/>';
+        var open = {sent:[[44,90],[44,90]], adut:[[28,92],[44,92]], abdut:[[44,92],[28,92]]}[f.legs];
+        [false,true].forEach(function(m){ var t=m?mirror:function(p){return p;};
+          s+=seg(t([46,68]),t(open[0]),t([46,68]),t(open[1]),10,legC);
+          s+=seg(t(open[0]),t([open[0][0],108]),t(open[1]),t([open[1][0],108]),7,BODY);
+        });
+        if(h.indexOf("gluteo")>-1) s+='<circle cx="36" cy="70" r="5" fill="'+HI+'"/><circle cx="64" cy="70" r="5" fill="'+HI+'"/>';
+      }
+      s+='<circle cx="50" cy="20" r="8" fill="'+BODY+'"/>';
+      return s;
+    }
+    function find(name){ for(var i=0;i<MAP.length;i++){ if(MAP[i][0].test(name)) return MAP[i][1]; } return null; }
+    return {
+      svg: function(name, size){
+        var k=find(name); if(!k) return "";
+        var isF = k.indexOf("F:")===0, f = isF ? F[k.slice(2)] : L[k];
+        return '<svg viewBox="0 0 120 116" width="'+(size||84)+'" height="'+Math.round((size||84)*116/120)+'" role="img" aria-label="Como fazer: '+esc(name)+'" style="display:block">'+
+          '<rect x="0" y="0" width="120" height="116" rx="16" fill="var(--j-line, #eee)" opacity=".45"/>'+
+          '<g transform="translate('+(isF?10:0)+',0)">'+(isF?front(f):side(f))+'</g></svg>';
+      },
+      info: function(name){ var k=find(name); if(!k) return null; var f = k.indexOf("F:")===0 ? F[k.slice(2)] : L[k]; return {d:f.d, m:f.m}; }
+    };
+  })();
   var juFichaSel = null;
   function viewFicha(){
     if(typeof WORKOUT_DETAIL==="undefined" || !WORKOUT_DETAIL.length) return '<section class="ju-card"><p class="ju-empty">Ficha não encontrada.</p></section>';
@@ -4281,10 +4429,12 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
       return '<div style="display:grid;grid-template-columns:40px 1fr;gap:8px;align-items:center;padding:6px 0;border-top:1px solid var(--j-line)'+(d===hoje?';font-weight:600':'')+'"><b class="num" style="color:'+(d===hoje?'var(--j-green)':'var(--j-soft)')+'">'+DN[d]+'</b><span style="font-size:13px">'+(L?'<b style="display:inline-grid;place-items:center;width:22px;height:22px;border-radius:7px;background:var(--j-green-soft);color:var(--j-green);margin-right:6px;font-size:12px">'+L+'</b>':'')+esc(t.split(":")[0])+'</span></div>'; }).join("");
     var tabs = WORKOUT_DETAIL.map(function(w){ return '<button class="ju-btn '+(w.letter===W.letter?"primary":"soft")+'" style="padding:8px 0" data-ficha="'+w.letter+'">'+w.letter+'</button>'; }).join("");
     var blocos = W.blocks.map(function(b){
-      return '<section class="ju-card"><span class="ju-label">'+esc(b.name)+'</span><ul class="ju-list" style="gap:10px;margin-top:10px">'+b.items.map(function(it,ix){ var tip = tipFor(it[0]), lk = lastKg(it[0], dKey(addDays(new Date(),1)));
-        return '<li style="display:block"><div style="display:grid;grid-template-columns:24px 1fr auto;gap:8px;align-items:baseline"><b class="num ju-muted" style="font-size:12px">'+String(ix+1).padStart(2,"0")+'</b><span style="font-size:14px">'+esc(it[0])+'</span><b class="num" style="white-space:nowrap;font-size:13px">'+esc(it[1])+'</b></div>'+
-          (lk ? '<small class="ju-muted" style="display:block;margin-left:32px;font-size:11.5px">última carga: '+lk.kg+' kg ('+fmtDay(parseKey(lk.d))+')</small>' : '')+
-          (tip ? '<p class="ju-muted" style="margin:4px 0 0 32px;font-size:12.5px;line-height:1.45"><b style="color:var(--j-ink)">Atenção:</b> '+esc(tip)+'</p>' : '')+'</li>'; }).join("")+'</ul></section>';
+      return '<section class="ju-card"><span class="ju-label">'+esc(b.name)+'</span><ul class="ju-list" style="gap:16px;margin-top:12px">'+b.items.map(function(it,ix){ var tip = tipFor(it[0]), lk = lastKg(it[0], dKey(addDays(new Date(),1)));
+        var fig = JU_FIG.svg(it[0], 84), fi = JU_FIG.info(it[0]);
+        return '<li style="display:grid;grid-template-columns:'+(fig?'84px ':'')+'1fr;gap:12px;align-items:start">'+fig+'<div><div style="display:grid;grid-template-columns:22px 1fr auto;gap:6px;align-items:baseline"><b class="num ju-muted" style="font-size:12px">'+String(ix+1).padStart(2,"0")+'</b><span style="font-size:14px;font-weight:600">'+esc(it[0])+'</span><b class="num" style="white-space:nowrap;font-size:13px">'+esc(it[1])+'</b></div>'+
+          (fi ? '<div style="display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 0">'+fi.m.map(function(m){ return '<span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:#fde7ef;color:#b8325f">'+esc(m)+'</span>'; }).join("")+'</div><p style="margin:5px 0 0;font-size:12.5px;line-height:1.4"><b>Como fazer:</b> '+esc(fi.d)+'</p>' : '')+
+          (lk ? '<small class="ju-muted" style="display:block;margin-top:4px;font-size:11.5px">última carga: '+lk.kg+' kg ('+fmtDay(parseKey(lk.d))+')</small>' : '')+
+          (tip ? '<p class="ju-muted" style="margin:4px 0 0;font-size:12.5px;line-height:1.45"><b style="color:var(--j-ink)">Atenção:</b> '+esc(tip)+'</p>' : '')+'</div></li>'; }).join("")+'</ul></section>';
     }).join("");
     return '<section class="ju-card" style="'+tone("treino")+'"><span class="ju-label">EF Academia · Prof. Bruna</span><h2 style="font-size:22px;margin:4px 0 2px">Ficha de treino</h2>'+
         '<p class="ju-muted" style="margin:0;font-size:12.5px">Objetivo: definição e fortalecimento · vigência até 21/11 — peça a ficha nova para a Bruna.</p></section>'+
