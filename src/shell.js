@@ -1123,6 +1123,13 @@
       passos:[{t:"Tirar/renovar o passaporte",f:false},{t:"Definir valor-alvo da Tailândia",f:false},{t:"Poupança mensal para viagens",f:false}]}
   ];
   var JU_DREAM_ADD = [
+    {id:"m_otto", titulo:"Cirurgia do Otto", em:"🐾", cor:["#F6E1E6","#D99AA0"], horizonte:"curto",
+      frase:"O joelho esquerdo do Ottinho tratado, com calma e sem dívida nova.",
+      detalhes:["Prioridade antes da entrada do carro"],
+      secoes:[
+        {t:"💰 Custo estimado", itens:["~R$ 5 mil (confirmar com o orçamento da clínica)","Incluir no orçamento: exames pré-operatórios, internação, remédios e fisioterapia"]},
+        {t:"🗓️ Como juntar", itens:["R$ 850/mês → pronto em 6 meses","R$ 1.250/mês → pronto em 4 meses","Toda renda extra vai primeiro para a caixinha do Otto"]}],
+      passos:[{t:"Pedir o orçamento detalhado da cirurgia",f:false},{t:"Segunda opinião com ortopedista veterinário",f:false},{t:"Abrir a caixinha \u201cOtto\u201d (meta R$ 5 mil)",f:false},{t:"Perguntar à clínica sobre parcelamento sem juros",f:false},{t:"Agendar a cirurgia",f:false},{t:"Preparar o pós-operatório: cantinho sem escadas e fisioterapia",f:false}]},
     {id:"m_creta", titulo:"Hyundai Creta (meu primeiro SUV)", em:"🚙", cor:["#E3EAF0","#0E5552"], horizonte:"curto",
       frase:"Para viajar, acampar e levar o Otto com conforto, sem travar a quitação das dívidas.",
       detalhes:["Modelo-alvo: Creta 1.6 aspirado automático, usado 2022–2023, com revisões em concessionária"],
@@ -1131,7 +1138,7 @@
         {t:"🔧 Custo de manutenção", itens:["Revisões até 60 mil km: na média do segmento, perto de R$ 5 mil no total","Motor aspirado, mais simples e barato de manter que turbo","Seguro e IPVA: cotar para o seu perfil em Rio Preto"]},
         {t:"👍 Prós", itens:["Conforto de estrada e bom espaço","Líder de vendas: fácil de revender depois","Manutenção previsível e rede Hyundai ampla"]},
         {t:"👎 Contras", itens:["Revisões mais caras que as do Yaris Cross","Consumo na cidade não é o menor do segmento"]}],
-      passos:[{t:"Nov/26 · Definir o teto: até R$ 80 mil e parcela que não atrase a quitação",f:false},{t:"Dez/26 · Abrir a caixinha \u201cCarro\u201d e guardar a entrada todo mês",f:false},{t:"Todo mês · Direcionar a renda extra (Cotação que Fecha, Lunora, Gaia Glam) para a entrada",f:false},{t:"Jan/27 · Simular à vista x financiamento x consórcio",f:false},{t:"Jan/27 · Cotar o seguro do Creta 2022 para o meu perfil",f:false},{t:"Com a entrada pronta · Garimpar Creta 2022–2023 com histórico de revisões",f:false},{t:"Antes de assinar · Vistoria cautelar e laudo",f:false}]},
+      passos:[{t:"Nov/26 · Definir o teto: até R$ 80 mil e parcela que não atrase a quitação",f:false},{t:"Dez/26 · Abrir a caixinha \u201cCarro\u201d e guardar a entrada todo mês",f:false},{t:"Depois do Otto · Direcionar a renda extra (Cotação que Fecha, Lunora, Gaia Glam) para a entrada",f:false},{t:"Jan/27 · Simular à vista x financiamento x consórcio",f:false},{t:"Jan/27 · Cotar o seguro do Creta 2022 para o meu perfil",f:false},{t:"Com a entrada pronta · Garimpar Creta 2022–2023 com histórico de revisões",f:false},{t:"Antes de assinar · Vistoria cautelar e laudo",f:false}]},
     {id:"m_yaris", titulo:"Toyota Yaris Cross Híbrido", em:"🌿", cor:["#E2EFE7","#55708A"], horizonte:"medio",
       frase:"O carro de longo prazo: o mais econômico do Brasil e quase não desvaloriza.",
       detalhes:["Fase 2 do plano (renda de ~R$ 10–12 mil), usando o Creta como entrada"],
