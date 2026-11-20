@@ -565,6 +565,25 @@
     var L = gym().log, ds = Object.keys(L).filter(function(d){ return d<before && L[d][name] && L[d][name].kg; }).sort();
     return ds.length ? {kg:L[ds[ds.length-1]][name].kg, d:ds[ds.length-1]} : null;
   }
+  function maxKg(name, before){
+    var L = gym().log, m = 0; Object.keys(L).forEach(function(d){ if(d<before && L[d][name] && L[d][name].kg > m) m = L[d][name].kg; }); return m;
+  }
+  // Descanso entre séries (estilo apps de treino): começa sozinho ao marcar a série
+  var juRest = null;
+  function restStart(reps, name){ var secs = reps >= 20 ? 60 : 90; juRest = {end: Date.now()+secs*1000, total: secs, name: name}; restPaint(); }
+  function restPaint(){
+    var el = document.getElementById("juRest");
+    if(!juRest){ if(el) el.remove(); return; }
+    if(!el){ el = document.createElement("div"); el.id = "juRest"; el.className = "ju-rest"; document.body.appendChild(el);
+      el.addEventListener("click", function(ev){ if(ev.target.closest("[data-restskip]")){ juRest = null; restPaint(); } else if(ev.target.closest("[data-restadd]")){ juRest.end += 15000; juRest.total += 15; restPaint(); } }); }
+    var left = Math.max(0, Math.ceil((juRest.end - Date.now())/1000)), pct = Math.min(100, 100 - left*100/juRest.total);
+    if(left === 0){
+      if(!juRest.done){ juRest.done = true; try{ if(navigator.vibrate) navigator.vibrate([200,100,200]); }catch(_){} setTimeout(function(){ if(juRest && juRest.done){ juRest = null; restPaint(); } }, 4000); }
+      el.innerHTML = '<b>Bora para a próxima série 💪</b><button data-restskip class="ju-btn soft">OK</button>'; return;
+    }
+    el.innerHTML = '<div style="flex:1;min-width:0"><small>Descanso · '+esc(juRest.name)+'</small><b class="num">'+Math.floor(left/60)+':'+String(left%60).padStart(2,"0")+'</b><i style="width:'+pct+'%"></i></div><button data-restadd class="ju-btn ghost">+15s</button><button data-restskip class="ju-btn soft">Pular</button>';
+  }
+  setInterval(function(){ if(juRest) restPaint(); }, 500);
   function dayVolume(d){
     var L = gym().log[d] || {}, v = 0;
     Object.keys(L).forEach(function(n){ var e = L[n], sc = e.reps||[]; (e.s||[]).forEach(function(on,i){ if(on && e.kg) v += (sc[i]||0)*e.kg; }); });
@@ -667,19 +686,20 @@
           var vol = 0; sets.forEach(function(on,si){ if(on && e.kg) vol += (sc.reps[si]||0)*e.kg; });
           var gymRow = sc.reps.length ? '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:4px 0 6px">'+dots+
             (sc.iso ? '' : '<label style="display:flex;align-items:center;gap:4px;margin-left:auto;font-size:12px" class="ju-muted"><input class="ju-kg num" type="number" inputmode="decimal" step="0.5" min="0" placeholder="kg" value="'+(e.kg||"")+'" data-gymkg="'+esc(it[0])+'" aria-label="Carga em kg">kg</label>')+
-            '<small class="ju-muted" style="width:100%;font-size:11px">'+(sets.filter(Boolean).length)+'/'+sc.reps.length+' séries'+(vol?' · '+vol.toLocaleString("pt-BR")+' kg':'')+(lk?' · última vez: '+lk.kg+' kg':'')+'</small></div>' : '';
+            '<small class="ju-muted" style="width:100%;font-size:11px">'+(sets.filter(Boolean).length)+'/'+sc.reps.length+' séries'+(vol?' · '+vol.toLocaleString("pt-BR")+' kg':'')+(lk?' · última vez: '+lk.kg+' kg':'')+(function(){ var mk = maxKg(it[0], k); return mk ? ' · recorde: '+mk+' kg' : ''; })()+'</small>'+
+            (e.kg && e.kg > maxKg(it[0], k) && maxKg(it[0], k) > 0 ? '<span class="ju-pr">🏆 Novo recorde: '+e.kg+' kg</span>' : '')+'</div>' : '';
           return '<details style="font-size:13.5px;padding:2px 0"><summary style="display:flex;align-items:center;gap:10px;cursor:pointer;list-style:none">'+exFig(it[0],true)+'<span style="min-width:0;flex:1">'+esc(it[0])+(tip?' <span class="ju-muted" style="font-size:11px">ⓘ</span>':'')+'</span><span class="ju-muted num" style="white-space:nowrap">'+esc(it[1])+'</span></summary>'+
             (function(){ var fi = JU_FIG.info(it[0]); return '<div style="display:grid;grid-template-columns:112px 1fr;gap:10px;margin:8px 0 6px">'+exFig(it[0])+'<div>'+(fi?'<p style="margin:0;font-size:12.5px;line-height:1.4"><b>Como fazer:</b> '+esc(fi.d)+'</p><p class="ju-muted" style="margin:4px 0 0;font-size:11.5px">'+esc(fi.m.join(" · "))+'</p>':'')+(tip ? '<p class="ju-muted" style="margin:4px 0 0;font-size:12.5px;line-height:1.45"><b>Atenção:</b> '+esc(tip)+'</p>' : '')+'</div></div>'; })()+'</details>'+gymRow; }).join("")+'</li>';
       }).join("")
       : (resumo ? '<li style="display:block">'+esc(resumo)+'</li>' : '');
     return '<section class="ju-card" style="'+tone("treino")+'"><div class="ju-head"><span class="ic">'+ico("dumb")+'</span><h3>Treino do dia</h3><span class="ju-muted">'+esc(det ? det.title : "")+'</span></div>'+
       '<div class="ju-mid" style="font-size:22px">'+esc(titulo)+'</div>'+
-      (det ? (function(){ var s = gym().sess[k]||{}, run = s.ini && !s.fim; return '<div style="display:flex;align-items:center;gap:10px;margin:10px 0 2px"><b id="juGymTimer" class="num" style="font-size:24px">'+gymTimerText()+'</b><span class="num" style="color:var(--j-green);font-weight:600">'+dayVolume(k).toLocaleString("pt-BR")+' kg</span>'+
+      (det ? (function(){ var s = gym().sess[k]||{}, run = s.ini && !s.fim; return '<div style="display:flex;align-items:center;gap:10px;margin:10px 0 2px"><b id="juGymTimer" class="num" style="font-size:24px">'+gymTimerText()+'</b><span class="num" style="color:var(--j-green);font-weight:600">'+dayVolume(k).toLocaleString("pt-BR")+' kg</span>'+(function(){ var st = gymWeek().streak; return st>1 ? '<span class="ju-pr" style="margin:0">🔥 '+st+' dias</span>' : ''; })()+
         (s.fim ? '<span class="ju-muted" style="margin-left:auto;font-size:12px">treino encerrado ✓</span>' : '<button class="ju-btn '+(run?"primary":"soft")+'" style="margin-left:auto" data-gymact="'+(run?"stop":"start")+'">'+(run?"Encerrar":"Iniciar treino")+'</button>')+'</div>'; })() : '')+
       (body ? '<ul class="ju-list" style="gap:10px;margin-top:10px">'+body+'</ul>' : '')+
       '<span class="ju-label" style="display:block;margin-top:14px">Últimos 7 dias</span><div style="display:flex;gap:6px;margin-top:6px">'+week+'</div>'+
       '<div class="ju-grid" style="margin-top:12px"><button class="ju-btn '+(done?"soft":"primary")+'" data-treino="1">'+(done?"✓ Treino feito":"Marcar treino feito")+'</button><button class="ju-btn ghost" data-go="ficha">Ficha completa</button></div>'+
-      (det ? '<p class="ju-muted" style="font-size:12px;margin:10px 0 0">Toque no exercício para ver a dica de execução. Descanso: 45–60s nas séries de 20; 60–90s nas de 15.</p>' : '')+'</section>';
+      (det ? '<p class="ju-muted" style="font-size:12px;margin:10px 0 0">Toque no exercício para ver a ilustração e a dica. Ao marcar uma série, o descanso começa sozinho (60s nas séries de 20, 90s nas de 15).</p>' : '')+'</section>';
   }
   // ===== Bonequinhos explicativos da ficha (SVG animado, sem imagens externas) =====
   // Vista lateral: h=cabeça n=ombro e=cotovelo w=mão p=quadril k=joelho a=tornozelo t=ponta do pé
@@ -1290,6 +1310,7 @@
       if(t.dataset.gymset){ var gs = t.dataset.gymset.split("|"), gk = todayKey(), GLk = gym().log[gk] || (gym().log[gk] = {}), ge = GLk[gs[0]] || (GLk[gs[0]] = {s:[]});
         ge.s = ge.s || []; ge.s[+gs[1]] = !ge.s[+gs[1]]; ge.reps = String(t.dataset.reps||"").split(",").map(Number);
         var sess = gym().sess[gk] || (gym().sess[gk] = {}); if(!sess.ini) sess.ini = Date.now();
+        if(ge.s[+gs[1]]) restStart(ge.reps[+gs[1]]||15, gs[0]); else { juRest = null; restPaint(); }
         save(); return; }
       if(t.dataset.gymact){ var sk = todayKey(), ss = gym().sess[sk] || (gym().sess[sk] = {});
         if(t.dataset.gymact==="start"){ ss.ini = ss.ini || Date.now(); delete ss.fim; toast("Bom treino! 💪"); }
