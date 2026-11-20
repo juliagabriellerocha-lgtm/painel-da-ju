@@ -994,6 +994,12 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
 .ju-rest .ju-btn{padding:8px 12px}
 .ju-pr{display:inline-block;margin-top:4px;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:999px;background:#fff3d6;color:#9a6200}
 .ju-rest .ju-btn.ghost{color:#fff;border-color:rgba(255,255,255,.4);background:transparent}
+
+.ju-pet{display:inline-flex;align-items:center;gap:3px;margin-left:6px;padding:1px 8px;border-radius:999px;background:#FCE6D6;color:#B4561E;font-size:11px;font-weight:600;vertical-align:middle;white-space:nowrap}
+.ju-water .wbar{position:relative;height:22px;border-radius:999px;background:var(--j-surface);margin-top:10px;overflow:hidden}
+.ju-water .wbar i{position:absolute;inset:0 auto 0 0;background:var(--j-sky);border-radius:999px;transition:width .3s}
+.ju-water .wbar span{position:relative;display:block;text-align:center;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;line-height:22px;color:var(--j-ink)}
+.ju-water .wbar.ok span{color:#fff}
 </style>
 
 <div class="app">
@@ -3987,7 +3993,9 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
     '</div>';
   }
   function chip(go, label, icon, t){ return '<button class="ju-chip" data-go="'+go+'" style="'+tone(t)+'"><i>'+ico(icon)+'</i><span>'+label+'</span></button>'; }
-  function taskRow(t){ return '<li class="ju-check'+(t.feita?" done":"")+'"><button data-task="'+esc(t.id)+'" aria-label="'+(t.feita?"Desmarcar":"Concluir")+' tarefa">'+ico("check")+'</button><span>'+esc(t.texto)+lnTaskMeta(t)+'</span></li>'; }
+  function taskRow(t){ return '<li class="ju-check'+(t.feita?" done":"")+'"><button data-task="'+esc(t.id)+'" aria-label="'+(t.feita?"Desmarcar":"Concluir")+' tarefa">'+ico("check")+'</button><span>'+esc(t.texto)+petTag(t.texto)+lnTaskMeta(t)+'</span></li>'; }
+  var JU_PET = {nome:"Otto", re:/\b(otto|ottinho)\b|ra[cç][aã]o|veterin|cachorr|banho e tosa|\bpet\b/i};
+  function petTag(txt){ return JU_PET.re.test(String(txt||"")) ? '<span class="ju-pet">🐶 '+esc(JU_PET.nome)+'</span>' : ''; }
   function lnTaskMeta(t){ if(t.feita) return ""; var tr = LN_TRI[lnTriOf(t)]; return ' <small class="ln-tm" style="color:'+tr.c+'">● '+tr.l+(t.hora?' · '+esc(t.hora):'')+(t.tag==="trabalho"?' · 💼':'')+'</small>'; }
 
   function sheetEvent(){
@@ -4049,11 +4057,12 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
           var w = water(k), g = "";
           for(var i=1;i<=8;i++) g += '<button class="g'+(i<=w?" on":"")+'" data-water="'+i+'" aria-label="'+i+' copo'+(i>1?"s":"")+'">'+ico("glass")+'</button>';
           wb = '<div class="ju-water"><div class="row"><b class="num" style="color:var(--j-sky)">'+(w*250)+' ml <span style="font-weight:400;color:var(--j-soft)">de 2.000 ml</span></b>'+
-            '<span><button class="pm" data-water="'+Math.max(0,w-1)+'" aria-label="Menos um copo">−</button> <button class="pm" data-water="'+Math.min(8,w+1)+'" aria-label="Mais um copo">+</button></span></div><div class="glasses">'+g+'</div></div>';
+            '<span><button class="pm" data-water="'+Math.max(0,w-1)+'" aria-label="Menos um copo">−</button> <button class="pm" data-water="'+Math.min(8,w+1)+'" aria-label="Mais um copo">+</button></span></div>'+
+            '<div class="wbar'+(w>=8?" ok":"")+'"><i style="width:'+Math.min(100,w/8*100).toFixed(0)+'%"></i><span>'+(w>=8?"Meta batida 🎉":"faltam "+((8-w)*250)+" ml")+'</span></div><div class="glasses">'+g+'</div></div>';
         }
         var sub = h.tipo==="treino" ? '<div class="ju-muted">'+esc(todaysWorkoutShort())+'</div>' : "";
         html += '<div class="ju-habit'+(done?" done":"")+'"><button class="tick" data-habit="'+esc(h.id)+'" aria-label="'+(done?"Desmarcar":"Concluir")+' '+esc(h.nome)+'">'+ico("check")+'</button>'+
-          '<div style="min-width:0"><div class="tags"><span class="ju-tag">Hábito</span><span class="ju-streak">'+(st?"🔥 "+st+(st>1?" dias":" dia"):"comece hoje")+'</span></div>'+
+          '<div style="min-width:0"><div class="tags"><span class="ju-tag">Hábito</span><span class="ju-streak">'+(st?"🔥 "+st+(st>1?" dias":" dia"):"comece hoje")+'</span>'+petTag(h.nome)+'</div>'+
           '<div class="nm">'+esc(h.em||"")+' '+esc(h.nome)+'</div>'+sub+habitDots(h)+'</div>'+
           '<button class="ju-del" data-delhabit="'+esc(h.id)+'" aria-label="Apagar">'+ico("trash")+'</button>'+wb+'</div>';
       });
