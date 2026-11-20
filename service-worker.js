@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE_NAME = "painel-da-ju-v24";
+const CACHE_NAME = "painel-da-ju-v25";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -40,6 +40,10 @@ const APP_SHELL = [
   "./img/exercicios/leg-extension-start.webp",
   "./img/exercicios/leg-press-peak.webp",
   "./img/exercicios/leg-press-start.webp",
+  "./img/exercicios/standing-leg-curl-start.webp",
+  "./img/exercicios/standing-leg-curl-peak.webp",
+  "./img/exercicios/single-leg-press-start.webp",
+  "./img/exercicios/single-leg-press-peak.webp",
   "./img/exercicios/machine-preacher-curl-peak.webp",
   "./img/exercicios/machine-preacher-curl-start.webp",
   "./img/exercicios/machine-reverse-fly-peak.webp",
