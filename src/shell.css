@@ -415,3 +415,10 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
 .ln-qmic svg{width:19px;height:19px;}
 .ln-qmic.on{background:#B4434F;border-color:#B4434F;color:#fff;animation:lnPulse 1.2s ease-in-out infinite;}
 @keyframes lnPulse{0%,100%{box-shadow:0 0 0 0 rgba(180,67,79,.45);}50%{box-shadow:0 0 0 8px rgba(180,67,79,0);}}
+
+/* Ilustrações animadas da ficha (início ↔ fim do movimento) */
+.ju-exfig{position:relative;width:112px;height:112px;border-radius:14px;overflow:hidden;background:#dcecf7}
+.ju-exfig img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ju-exfig img.pk{animation:juExPk 2.4s ease-in-out infinite}
+@keyframes juExPk{0%,35%{opacity:0}50%,85%{opacity:1}100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.ju-exfig img.pk{animation:none;opacity:0}}

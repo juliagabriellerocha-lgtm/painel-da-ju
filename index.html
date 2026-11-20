@@ -978,6 +978,13 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
 .ln-qmic svg{width:19px;height:19px;}
 .ln-qmic.on{background:#B4434F;border-color:#B4434F;color:#fff;animation:lnPulse 1.2s ease-in-out infinite;}
 @keyframes lnPulse{0%,100%{box-shadow:0 0 0 0 rgba(180,67,79,.45);}50%{box-shadow:0 0 0 8px rgba(180,67,79,0);}}
+
+/* Ilustrações animadas da ficha (início ↔ fim do movimento) */
+.ju-exfig{position:relative;width:112px;height:112px;border-radius:14px;overflow:hidden;background:#dcecf7}
+.ju-exfig img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ju-exfig img.pk{animation:juExPk 2.4s ease-in-out infinite}
+@keyframes juExPk{0%,35%{opacity:0}50%,85%{opacity:1}100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.ju-exfig img.pk{animation:none;opacity:0}}
 </style>
 
 <div class="app">
@@ -4433,6 +4440,14 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
       info: function(name){ var k=find(name); if(!k) return null; var f = k.indexOf("F:")===0 ? F[k.slice(2)] : L[k]; return {d:f.d, m:f.m}; }
     };
   })();
+  // Ilustrações dos exercícios: Exercise data by RepDB (repdb.co) — licença gratuita com atribuição, uso dentro do app
+  var JU_EXIMG = [["Agachamento Barra Guiada", ["img/exercicios/smith-machine-squat-start.webp", "img/exercicios/smith-machine-squat-peak.webp"]], ["Agachamento Pêndulo", ["img/exercicios/hack-squat-start.webp", "img/exercicios/hack-squat-peak.webp"]], ["Panturrilha Sentada", ["img/exercicios/seated-calf-raise-start.webp", "img/exercicios/seated-calf-raise-peak.webp"]], ["Peck Deck Posterior", ["img/exercicios/machine-reverse-fly-start.webp", "img/exercicios/machine-reverse-fly-peak.webp"]], ["Tríceps Cross Barra", ["img/exercicios/tricep-pushdown-start.webp", "img/exercicios/tricep-pushdown-peak.webp"]], ["Tríceps Cross Corda", ["img/exercicios/tricep-pushdown-start.webp", "img/exercicios/tricep-pushdown-peak.webp"]], ["Panturrilha em Pé", ["img/exercicios/standing-calf-raise-start.webp", "img/exercicios/standing-calf-raise-peak.webp"]], ["Agachamento Sumô", ["img/exercicios/sumo-squat-start.webp", "img/exercicios/sumo-squat-peak.webp"]], ["Elevação Lateral", ["img/exercicios/lateral-raise-start.webp", "img/exercicios/lateral-raise-peak.webp"]], ["Elevação Frontal", ["img/exercicios/cable-front-raise-start.webp", "img/exercicios/cable-front-raise-peak.webp"]], ["Puxador High Row", ["img/exercicios/chest-supported-machine-row-start.webp", "img/exercicios/chest-supported-machine-row-peak.webp"]], ["Desenvolvimento", ["img/exercicios/dumbbell-shoulder-press-start.webp", "img/exercicios/dumbbell-shoulder-press-peak.webp"]], ["Supino Vertical", ["img/exercicios/chest-press-machine-start.webp", "img/exercicios/chest-press-machine-peak.webp"]], ["Flexora Sentada", ["img/exercicios/seated-leg-curl-start.webp", "img/exercicios/seated-leg-curl-peak.webp"]], ["Flexora Deitada", ["img/exercicios/leg-curl-start.webp", "img/exercicios/leg-curl-peak.webp"]], ["Leg Horizontal", ["img/exercicios/horizontal-leg-press-start.webp", "img/exercicios/horizontal-leg-press-peak.webp"]], ["Glúteo Máquina", ["img/exercicios/hip-thrust-start.webp", "img/exercicios/hip-thrust-peak.webp"]], ["Puxador Frente", ["img/exercicios/reverse-grip-lat-pulldown-start.webp", "img/exercicios/reverse-grip-lat-pulldown-peak.webp"]], ["Remada Curvada", ["img/exercicios/smith-machine-bent-over-row-start.webp", "img/exercicios/smith-machine-bent-over-row-peak.webp"]], ["Rosca Martelo", ["img/exercicios/hammer-curl-start.webp", "img/exercicios/hammer-curl-peak.webp"]], ["Tração Cross", ["img/exercicios/straight-arm-pulldown-start.webp", "img/exercicios/straight-arm-pulldown-peak.webp"]], ["Rosca Scott", ["img/exercicios/machine-preacher-curl-start.webp", "img/exercicios/machine-preacher-curl-peak.webp"]], ["Extensora", ["img/exercicios/leg-extension-start.webp", "img/exercicios/leg-extension-peak.webp"]], ["Peck Deck", ["img/exercicios/pec-deck-start.webp", "img/exercicios/pec-deck-peak.webp"]], ["Reto Sob", ["img/exercicios/crunches-start.webp", "img/exercicios/crunches-peak.webp"]], ["Prancha", ["img/exercicios/plank-main.webp"]], ["Abdutor", ["img/exercicios/hip-abduction-start.webp", "img/exercicios/hip-abduction-peak.webp"]], ["Leg 45", ["img/exercicios/leg-press-start.webp", "img/exercicios/leg-press-peak.webp"]], ["Adutor", ["img/exercicios/hip-adduction-start.webp", "img/exercicios/hip-adduction-peak.webp"]]];
+  function exImgFor(name){ for(var i=0;i<JU_EXIMG.length;i++){ if(String(name).indexOf(JU_EXIMG[i][0])===0) return JU_EXIMG[i][1]; } return null; }
+  function exFig(name){
+    var im = exImgFor(name);
+    if(!im) return JU_FIG.svg(name, 112);
+    return '<div class="ju-exfig" role="img" aria-label="Como fazer: '+esc(name)+'"><img src="'+im[0]+'" alt="" loading="lazy">'+(im[1]?'<img class="pk" src="'+im[1]+'" alt="" loading="lazy">':'')+'</div>';
+  }
   var juFichaSel = null;
   function viewFicha(){
     if(typeof WORKOUT_DETAIL==="undefined" || !WORKOUT_DETAIL.length) return '<section class="ju-card"><p class="ju-empty">Ficha não encontrada.</p></section>';
@@ -4446,8 +4461,8 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
     var tabs = WORKOUT_DETAIL.map(function(w){ return '<button class="ju-btn '+(w.letter===W.letter?"primary":"soft")+'" style="padding:8px 0" data-ficha="'+w.letter+'">'+w.letter+'</button>'; }).join("");
     var blocos = W.blocks.map(function(b){
       return '<section class="ju-card"><span class="ju-label">'+esc(b.name)+'</span><ul class="ju-list" style="gap:16px;margin-top:12px">'+b.items.map(function(it,ix){ var tip = tipFor(it[0]), lk = lastKg(it[0], dKey(addDays(new Date(),1)));
-        var fig = JU_FIG.svg(it[0], 96), fi = JU_FIG.info(it[0]);
-        return '<li style="display:grid;grid-template-columns:'+(fig?'96px ':'')+'1fr;gap:12px;align-items:start">'+fig+'<div><div style="display:grid;grid-template-columns:22px 1fr auto;gap:6px;align-items:baseline"><b class="num ju-muted" style="font-size:12px">'+String(ix+1).padStart(2,"0")+'</b><span style="font-size:14px;font-weight:600">'+esc(it[0])+'</span><b class="num" style="white-space:nowrap;font-size:13px">'+esc(it[1])+'</b></div>'+
+        var fig = exFig(it[0]), fi = JU_FIG.info(it[0]);
+        return '<li style="display:grid;grid-template-columns:'+(fig?'112px ':'')+'1fr;gap:12px;align-items:start">'+fig+'<div><div style="display:grid;grid-template-columns:22px 1fr auto;gap:6px;align-items:baseline"><b class="num ju-muted" style="font-size:12px">'+String(ix+1).padStart(2,"0")+'</b><span style="font-size:14px;font-weight:600">'+esc(it[0])+'</span><b class="num" style="white-space:nowrap;font-size:13px">'+esc(it[1])+'</b></div>'+
           (fi ? '<div style="display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 0">'+fi.m.map(function(m){ return '<span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:#fde7ef;color:#b8325f">'+esc(m)+'</span>'; }).join("")+'</div><p style="margin:5px 0 0;font-size:12.5px;line-height:1.4"><b>Como fazer:</b> '+esc(fi.d)+'</p>' : '')+
           (lk ? '<small class="ju-muted" style="display:block;margin-top:4px;font-size:11.5px">última carga: '+lk.kg+' kg ('+fmtDay(parseKey(lk.d))+')</small>' : '')+
           (tip ? '<p class="ju-muted" style="margin:4px 0 0;font-size:12.5px;line-height:1.45"><b style="color:var(--j-ink)">Atenção:</b> '+esc(tip)+'</p>' : '')+'</div></li>'; }).join("")+'</ul></section>';
@@ -4466,7 +4481,8 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
         '<li><b style="color:var(--j-ink)">Pico de contração 2":</b> segure 2 segundos no topo antes de descer.</li>'+
         '<li><b style="color:var(--j-ink)">Descanso:</b> 45–60s nas séries de 20; 60–90s nas de 15.</li>'+
         '<li><b style="color:var(--j-ink)">Core todo dia:</b> a prancha e o abdominal vêm no fim de cada treino — não pule.</li>'+
-        '<li><b style="color:var(--j-ink)">Dor diferente do cansaço:</b> pare e peça ajuste à Bruna.</li></ul></section>';
+        '<li><b style="color:var(--j-ink)">Dor diferente do cansaço:</b> pare e peça ajuste à Bruna.</li></ul>'+
+        '<p class="ju-muted" style="margin:12px 0 0;font-size:11px">Ilustrações: Exercise data by <a href="https://repdb.co" target="_blank" rel="nofollow noopener">RepDB (repdb.co)</a></p></section>';
   }
   function dietaDoDia(){
     var dk = ["dom","seg","ter","qua","qui","sex","sab"][new Date().getDay()];
