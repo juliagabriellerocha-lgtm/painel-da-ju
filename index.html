@@ -3695,8 +3695,17 @@ body.ju-legacy .ju-legacy-bar{display:flex;}
     Object.keys(d).forEach(function(k){ if(state.ju[k]===undefined || state.ju[k]===null && k!=="money") state.ju[k] = d[k]; });
     Object.keys(d.money).forEach(function(k){ if(state.ju.money[k]===undefined) state.ju.money[k] = d.money[k]; });
     Object.keys(d.cycle).forEach(function(k){ if(state.ju.cycle[k]===undefined) state.ju.cycle[k] = d.cycle[k]; });
+    var A = state.ju.added || (state.ju.added = {}), ch = false;
+    JU_ROT_ADD.forEach(function(x){ if(A[x.item.id]) return; A[x.item.id] = 1; ch = true;
+      var L = state.ju[x.lista]; if(!Array.isArray(L)) return;
+      if(!L.some(function(y){ return y.id===x.item.id; })){ var it = JSON.parse(JSON.stringify(x.item)); if(x.lista==="tasks"){ it.data = todayKey(); L.unshift(it); } else L.push(it); } });
+    if(ch) setTimeout(function(){ persist(); }, 0);
     return state.ju;
   }
+  var JU_ROT_ADD = [
+    {lista:"habits", item:{id:"h_otto", nome:"Passear com o Otto", em:"🐶", periodo:"tarde"}},
+    {lista:"tasks", item:{id:"t_otto_orc", texto:"Pedir orçamento da cirurgia do Otto", feita:false, triade:"importante", tag:"pessoal"}}
+  ];
   function save(){ persist(); renderShell(); }
 
   // ---------- helpers ----------
